@@ -1,0 +1,33 @@
+@startuml
+title Incident Lifecycle State Machine (I-ITSM)
+skinparam state {
+    BackgroundColor LightSteelBlue
+    BorderColor DarkSlateBlue
+    ArrowColor Navy
+}
+
+[*] --> NEW : Incident Raised by Employee
+
+NEW --> CLASSIFIED : classify (System / NLP)
+
+CLASSIFIED --> ASSIGNED : assign (to Technician)
+
+ASSIGNED --> ACKNOWLEDGED : acknowledge
+ASSIGNED --> CLASSIFIED : flagWrongDomain (Reassignment)
+
+ACKNOWLEDGED --> IN_PROGRESS : startInvestigation
+ACKNOWLEDGED --> CLASSIFIED : flagWrongDomain (Reassignment)
+
+IN_PROGRESS --> PENDING_INFO : requestInfo (Pauses SLA Clock)
+PENDING_INFO --> IN_PROGRESS : provideInfo (Resumes SLA Clock)
+
+IN_PROGRESS --> RESOLVED : resolve (Structured Resolution)
+
+RESOLVED --> IN_PROGRESS : reject (reopenCount + 1)
+RESOLVED --> VERIFIED : verify (Confirmed by Employee)
+
+VERIFIED --> CLOSED : close (Attaches Feedback)
+
+CLOSED --> [*] : Terminal State (Transitions Prohibited)
+
+@enduml

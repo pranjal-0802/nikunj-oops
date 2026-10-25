@@ -152,3 +152,4 @@ com.iitsm
 - `Incident` delegates all actions to its current `IncidentState` instance.
 - Illegal actions throw `InvalidStateTransitionException`.
 - `PublicStatusMapper` projects internal states to Employee 5-step stepper: `NEW`, `ASSIGNED`, `IN PROGRESS`, `RESOLVED`, `CLOSED`.
+

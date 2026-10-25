@@ -46,3 +46,4 @@ This document records architectural, design, and technical decisions made during
   2. *Spring State Machine framework*. (Rejected: heavy dependency, leaks framework details into domain, overkill for defined linear/branching transitions).
   3. *State objects with stateful incident reference*. (Rejected: complicates JPA entity lifecycle and caching).
 - **Reason**: Zero-allocation per transition, completely thread-safe, encapsulates transition logic cleanly, and enables trivial exhaustive transition matrix testing.
+

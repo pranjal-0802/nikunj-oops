@@ -188,3 +188,4 @@ Incident holds `IncidentStatus` enum and delegates actions (`assign`, `acknowled
 - Classification, prioritization, assignment, duplicate detection, SLA risk and escalation work on simulated company.
 - `mvn verify` green in CI; docker compose up brings up working demo; seed and scenarios reproducible.
 - All docs, UML, ER diagram, technology report, >= 20 documented tests ready by 22 Nov 2026.
+

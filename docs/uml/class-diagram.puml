@@ -1,0 +1,236 @@
+@startuml
+title I-ITSM Core Domain Model (Phase 1)
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam roundcorner 8
+
+package "com.iitsm.domain.model" {
+
+    abstract class User {
+        - id: String
+        - name: String
+        - email: Email
+        - passwordHash: String
+        - role: UserRole
+        - active: boolean
+        - failedLoginAttempts: int
+        - locked: boolean
+        + recordFailedLogin(maxAllowed: int): void
+        + resetFailedLogins(): void
+    }
+
+    class Employee {
+        - designation: Designation
+        - department: String
+        - seniorityYears: int
+    }
+
+    class Technician {
+        - skills: Set<Skill>
+        - experienceYears: int
+        - maxCapacity: int
+        - availabilityStatus: AvailabilityStatus
+        - supportTeamId: String
+        - activeIncidentIds: Set<String>
+        + assignIncident(incidentId: String): void
+        + releaseIncident(incidentId: String): void
+        + isAvailableForAssignment(): boolean
+        + getLoadRatio(): double
+    }
+
+    class TeamLead {
+    }
+
+    class Administrator {
+        - adminLevel: AdminLevel
+        + isSystemAdmin(): boolean
+        + isItManager(): boolean
+    }
+
+    User <|-- Employee
+    User <|-- Technician
+    Technician <|-- TeamLead
+    User <|-- Administrator
+
+    class Incident <<Aggregate Root>> {
+        - id: String
+        - title: String
+        - description: String
+        - reporterId: String
+        - createdAt: Instant
+        - category: IncidentCategory
+        - serviceId: String
+        - priorityDecision: PriorityDecision
+        - status: IncidentStatus
+        - assigneeId: String
+        - reopenCount: int
+        - linkedIncidentIds: Set<String>
+        - version: Long
+        + classify(category, serviceId, priority, slaPolicy, now): void
+        + assign(technicianId, now): void
+        + acknowledge(technicianId, now): void
+        + startInvestigation(technicianId, now): void
+        + requestInfo(technicianId, message, now): void
+        + provideInfo(employeeId, responseText, now): void
+        + resolve(resolution, now): void
+        + verify(employeeId, now): void
+        + reject(employeeId, reason, now): void
+        + close(actorId, feedback, now): void
+        + flagWrongDomain(technicianId, reason, now): void
+        + getAllowedActions(): Set<String>
+    }
+
+    class SlaTracker {
+        - createdAt: Instant
+        - responseDueAt: Instant
+        - resolutionDueAt: Instant
+        - respondedAt: Instant
+        - resolvedAt: Instant
+        - pausedDuration: Duration
+        - pausedAt: Instant
+        - status: SlaStatus
+        + recordResponse(now: Instant): void
+        + recordResolution(now: Instant): void
+        + pauseClock(now: Instant): void
+        + resumeClock(now: Instant): void
+        + evaluateStatus(now: Instant): void
+    }
+
+    class SlaPolicy {
+        - id: String
+        - priority: Priority
+        - serviceIdOverride: String
+        - responseTarget: Duration
+        - resolutionTarget: Duration
+        - warningThresholdRatio: double
+    }
+
+    class InvestigationNote <<Value Object>> {
+        - id: String
+        - authorId: String
+        - authorName: String
+        - noteText: String
+        - createdAt: Instant
+        - internalOnly: boolean
+    }
+
+    class Resolution <<Value Object>> {
+        - rootCause: String
+        - stepsTaken: String
+        - preventiveAction: String
+        - confirmedCategory: String
+        - resolvedBy: String
+        - resolvedAt: Instant
+    }
+
+    class Feedback <<Value Object>> {
+        - rating: int
+        - comment: String
+        - submittedAt: Instant
+    }
+
+    class ItService {
+        - id: String
+        - name: String
+        - owningTeamId: String
+        - businessCriticality: BusinessCriticality
+        - userBase: int
+        - keywords: Set<String>
+        + matchesKeyword(text: String): boolean
+    }
+
+    class SupportTeam {
+        - id: String
+        - name: String
+        - handledCategories: Set<IncidentCategory>
+        - teamLeadId: String
+        - memberIds: Set<String>
+        + addMember(technicianId: String): void
+        + removeMember(technicianId: String): void
+    }
+
+    class ReassignmentRequest {
+        - id: String
+        - incidentId: String
+        - requestingTechnicianId: String
+        - reason: String
+        - status: Status
+        - requestedAt: Instant
+        - resolvedAt: Instant
+        + approve(adminId, now): void
+        + reject(adminId, now): void
+    }
+
+    Incident *-- SlaTracker : composition
+    Incident *-- "0..*" InvestigationNote : composition
+    Incident o-- "0..1" Resolution : structured resolution
+    Incident o-- "0..1" Feedback : closure feedback
+    Incident --> Employee : reporter
+    Incident --> Technician : assignee
+    Incident --> ItService : affected service
+    SupportTeam o-- "1..*" Technician : aggregation (members)
+    SupportTeam --> TeamLead : teamLead
+}
+
+package "com.iitsm.domain.state" {
+    interface IncidentState {
+        + getStatus(): IncidentStatus
+        + allowedActions(): Set<String>
+        + classify(...): void
+        + assign(...): void
+        + acknowledge(...): void
+        + startInvestigation(...): void
+        + requestInfo(...): void
+        + provideInfo(...): void
+        + resolve(...): void
+        + verify(...): void
+        + reject(...): void
+        + close(...): void
+        + flagWrongDomain(...): void
+    }
+
+    class IncidentStates {
+        - {static} REGISTRY: EnumMap<IncidentStatus, IncidentState>
+        + {static} of(status: IncidentStatus): IncidentState
+    }
+
+    class NewState implements IncidentState
+    class ClassifiedState implements IncidentState
+    class AssignedState implements IncidentState
+    class AcknowledgedState implements IncidentState
+    class InProgressState implements IncidentState
+    class PendingInfoState implements IncidentState
+    class ResolvedState implements IncidentState
+    class VerifiedState implements IncidentState
+    class ClosedState implements IncidentState
+
+    Incident ..> IncidentStates : delegates lifecycle
+    IncidentStates o-- IncidentState : resolves singleton
+}
+
+package "com.iitsm.domain.event" {
+    interface DomainEvent <<sealed>> {
+        + eventId(): String
+        + occurredAt(): Instant
+        + incidentId(): String
+        + actorId(): String
+    }
+
+    interface DomainEventPublisher {
+        + publish(event: DomainEvent): void
+        + registerListener(listener: DomainEventListener): void
+    }
+
+    interface DomainEventListener {
+        + onEvent(event: DomainEvent): void
+    }
+
+    class InMemoryDomainEventPublisher implements DomainEventPublisher {
+        - listeners: List<DomainEventListener>
+    }
+
+    InMemoryDomainEventPublisher o-- DomainEventListener
+    DomainEventListener ..> DomainEvent : receives
+}
+
+@enduml
