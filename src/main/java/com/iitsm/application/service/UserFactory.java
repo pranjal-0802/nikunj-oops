@@ -93,3 +93,4 @@ public class UserFactory {
                 adminLevel != null ? adminLevel : AdminLevel.SYSTEM_ADMIN);
     }
 }
+

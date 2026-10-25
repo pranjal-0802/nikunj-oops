@@ -20,3 +20,4 @@ public class TestSecurityEndpoints {
         return ResponseEntity.ok("Hello Admin");
     }
 }
+

@@ -90,3 +90,4 @@ public class UserRepositoryAdapter implements UserRepository {
         }
     }
 }
+

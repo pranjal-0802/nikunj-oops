@@ -1,5 +1,5 @@
 @startuml
-title I-ITSM Architecture & Class Diagram (Phases 1 & 2)
+title I-ITSM Architecture & Class Diagram (Phases 1, 2, & 3)
 skinparam classAttributeIconSize 0
 skinparam monochrome false
 skinparam roundcorner 8
@@ -125,6 +125,10 @@ package "com.iitsm.domain.model" {
         + removeMember(technicianId: String): void
     }
 
+    class IncidentUrgencyOrdering <<Comparator>> {
+        + compare(a: Incident, b: Incident): int
+    }
+
     Incident *-- SlaTracker : composition
     Incident --> Employee : reporter
     Incident --> Technician : assignee
@@ -137,7 +141,9 @@ package "com.iitsm.domain.repository" {
         + save(incident: Incident): Incident
         + findById(id: String): Optional<Incident>
         + findByReporterId(reporterId: String): List<Incident>
+        + findByAssigneeId(assigneeId: String): List<Incident>
         + findByStatus(status: IncidentStatus): List<Incident>
+        + countByStatus(status: IncidentStatus): long
     }
 
     interface UserRepository <<Port>> {
@@ -152,49 +158,165 @@ package "com.iitsm.domain.repository" {
     }
 }
 
-package "com.iitsm.infrastructure.persistence.adapter" {
-    class IncidentRepositoryAdapter implements IncidentRepository {
-        - springDataRepository: SpringDataIncidentRepository
-    }
-
-    class UserRepositoryAdapter implements UserRepository {
-        - springDataRepository: SpringDataUserRepository
-    }
-
-    class TechnicianRepositoryAdapter implements TechnicianRepository {
-        - springDataRepository: SpringDataUserRepository
-    }
-}
-
 package "com.iitsm.application.service" {
+    class IncidentService {
+        - incidentRepository: IncidentRepository
+        - userRepository: UserRepository
+        - technicianRepository: TechnicianRepository
+        - slaPolicyRepository: SlaPolicyRepository
+        - itServiceRepository: ItServiceRepository
+        - eventPublisher: DomainEventPublisher
+        - accessPolicy: AccessPolicy
+        + createIncident(reporter, title, desc): Incident
+        + acknowledge(incidentId, techId): Incident
+        + startInvestigation(incidentId, techId): Incident
+        + addNote(incidentId, authorId, note, internal): void
+        + requestInfo(incidentId, techId, question): Incident
+        + provideInfo(incidentId, reporterId, response): Incident
+        + resolve(incidentId, techId, resolution): Incident
+        + verify(incidentId, reporterId): Incident
+        + reject(incidentId, reporterId, reason): Incident
+        + close(incidentId, actorId, feedback): Incident
+        + assign(incidentId, adminId, techId): Incident
+        + overridePriority(incidentId, adminId, priority, reason): Incident
+    }
+
+    class SearchService {
+        - incidentJpaRepository: SpringDataIncidentRepository
+        - incidentMapper: IncidentMapper
+        + search(criteria, pageable): Page<Incident>
+    }
+
+    class IncidentFactory <<Factory>> {
+        + createIncident(title, description, reporterId): Incident
+    }
+
     class UserFactory <<Factory>> {
         + createEmployee(...): Employee
         + createTechnician(...): Technician
         + createTeamLead(...): TeamLead
         + createAdministrator(...): Administrator
     }
+}
 
-    class UserService {
-        - userRepository: UserRepository
-        - userFactory: UserFactory
-        - passwordEncoder: PasswordEncoder
-        - tokenProvider: JwtTokenProvider
-        + authenticate(email, password): AuthResult
-        + registerEmployee(...): Employee
+package "com.iitsm.web.controller" {
+    class EmployeeController {
+        - incidentService: IncidentService
+        - searchService: SearchService
+        + createTicket(...): ResponseEntity<EmployeeIncidentView>
+        + getMyTickets(...): ResponseEntity<Page<EmployeeIncidentView>>
+        + provideInfo(...): ResponseEntity<EmployeeIncidentView>
+        + verifyResolution(...): ResponseEntity<EmployeeIncidentView>
+        + rejectResolution(...): ResponseEntity<EmployeeIncidentView>
+    }
+
+    class TechnicianController {
+        - incidentService: IncidentService
+        + getQueue(): ResponseEntity<List<TechnicianIncidentView>>
+        + getDashboard(): ResponseEntity<TechnicianDashboardDto>
+        + acknowledge(...): ResponseEntity<TechnicianIncidentView>
+        + startInvestigation(...): ResponseEntity<TechnicianIncidentView>
+        + requestInfo(...): ResponseEntity<TechnicianIncidentView>
+        + resolve(...): ResponseEntity<TechnicianIncidentView>
+        + flagWrongDomain(...): ResponseEntity<Void>
+    }
+
+    class AdminController {
+        - incidentService: IncidentService
+        - searchService: SearchService
+        + getStats(): ResponseEntity<AdminStatsDto>
+        + searchIncidents(...): ResponseEntity<Page<AdminIncidentView>>
+        + assign(...): ResponseEntity<AdminIncidentView>
+        + overridePriority(...): ResponseEntity<AdminIncidentView>
+        + closeIncident(...): ResponseEntity<AdminIncidentView>
+    }
+
+    class NotificationController {
+        - sseEmitterRegistry: SseEmitterRegistry
+        - notificationRepository: SpringDataNotificationRepository
+        + streamNotifications(...): SseEmitter
+        + getMyNotifications(...): ResponseEntity<List<NotificationJpaEntity>>
+        + markAsRead(id): ResponseEntity<Void>
     }
 }
 
-package "com.iitsm.domain.policy" {
-    interface AccessPolicy <<Policy>> {
-        + enforceCanViewIncident(actor: User, incident: Incident): void
-        + enforceCanExecuteAction(actor: User, incident: Incident, action: String): void
-        + enforceAdmin(actor: User): void
+package "com.iitsm.web.dto" {
+    class EmployeeIncidentView <<DTO - Strict Privacy>> {
+        - id: String
+        - title: String
+        - description: String
+        - status: String
+        - publicStepperStep: int
+        - auditTrail: List<EmployeeAuditDto>
+    }
+
+    class TechnicianIncidentView <<DTO>> {
+        - id: String
+        - priority: String
+        - status: String
+        - urgencyScore: double
+        - slaDueAt: Instant
+        - notes: List<NoteDto>
+    }
+
+    class AdminIncidentView <<DTO>> {
+        - id: String
+        - priority: String
+        - priorityScore: double
+        - factorContributions: List<FactorDto>
+        - slaTracker: SlaTrackerDto
+        - fullAuditTrail: List<AuditRecordDto>
     }
 }
 
-UserService --> UserFactory
-UserService --> UserRepository
-IncidentRepositoryAdapter ..> Incident : maps to/from
-UserRepositoryAdapter ..> User : maps to/from
+package "com.iitsm.infrastructure.notification" {
+    interface NotificationChannel <<Adapter>> {
+        + getChannelName(): String
+        + send(recipient, subject, message): void
+    }
+
+    class InAppChannel implements NotificationChannel {
+        - notificationRepository: SpringDataNotificationRepository
+        - sseEmitterRegistry: SseEmitterRegistry
+    }
+
+    class EmailChannel implements NotificationChannel {
+        - mailSender: JavaMailSender
+    }
+
+    class SmsSimulatorChannel implements NotificationChannel {
+    }
+
+    class NotificationRouter <<Strategy>> {
+        - channels: List<NotificationChannel>
+        + route(payload: NotificationPayload): void
+    }
+
+    class NotificationFactory <<Factory>> {
+        + createNotification(event, recipient): Optional<NotificationPayload>
+    }
+}
+
+package "com.iitsm.infrastructure.observer" {
+    class AuditTrailObserver <<Observer>> {
+        - auditRepository: SpringDataAuditRecordRepository
+        + onEvent(event: DomainEvent): void
+    }
+
+    class NotificationObserver <<Observer>> {
+        - notificationFactory: NotificationFactory
+        - notificationRouter: NotificationRouter
+        + onEvent(event: DomainEvent): void
+    }
+}
+
+IncidentService --> IncidentFactory
+IncidentService --> IncidentRepository
+IncidentService --> IncidentUrgencyOrdering
+EmployeeController --> IncidentService
+TechnicianController --> IncidentService
+AdminController --> IncidentService
+NotificationObserver --> NotificationRouter
+NotificationRouter --> NotificationChannel
 
 @enduml

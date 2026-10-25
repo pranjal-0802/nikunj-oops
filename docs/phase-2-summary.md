@@ -73,3 +73,4 @@
 3. **Notification Subsystem**: Implement `NotificationChannel` interface with `InAppChannel` (SSE), `EmailChannel` (Mailpit JavaMail adapter), and `SmsSimulatorChannel`.
 4. **Observer Wiring**: Wire domain event publishing to transactional `AuditTrailObserver` and post-commit `NotificationObserver`.
 5. **Multi-Criteria Search**: Implement `SearchService` using composable JPA Specifications with $\ge 5$ search criteria.
+

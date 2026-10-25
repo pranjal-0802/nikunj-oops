@@ -66,3 +66,4 @@ public class ResolutionJpaEntity {
     public Instant getResolvedAt() { return resolvedAt; }
     public void setResolvedAt(Instant resolvedAt) { this.resolvedAt = resolvedAt; }
 }
+

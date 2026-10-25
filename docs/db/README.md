@@ -27,3 +27,4 @@ The database schema is managed via Flyway migrations (`src/main/resources/db/mig
 - `incidents(created_at)`: Temporal reporting, MTTR metrics, and SLA window audits.
 - `users(email)`: Rapid authentication lookup.
 - `audit_records(incident_id)` & `audit_records(timestamp)`: Fast audit trail reconstruction.
+

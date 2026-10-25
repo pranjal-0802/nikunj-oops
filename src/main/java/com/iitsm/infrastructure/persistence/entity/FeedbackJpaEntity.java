@@ -48,3 +48,4 @@ public class FeedbackJpaEntity {
     public Instant getSubmittedAt() { return submittedAt; }
     public void setSubmittedAt(Instant submittedAt) { this.submittedAt = submittedAt; }
 }
+

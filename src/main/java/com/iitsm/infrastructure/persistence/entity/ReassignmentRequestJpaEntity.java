@@ -65,3 +65,4 @@ public class ReassignmentRequestJpaEntity {
     public String getReviewedByAdminId() { return reviewedByAdminId; }
     public void setReviewedByAdminId(String reviewedByAdminId) { this.reviewedByAdminId = reviewedByAdminId; }
 }
+

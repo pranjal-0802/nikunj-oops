@@ -52,3 +52,4 @@ public class SlaPolicyJpaEntity {
     public double getWarningThresholdRatio() { return warningThresholdRatio; }
     public void setWarningThresholdRatio(double warningThresholdRatio) { this.warningThresholdRatio = warningThresholdRatio; }
 }
+

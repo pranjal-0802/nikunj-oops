@@ -43,3 +43,4 @@ public class TechnicianSkillEmbeddable {
         return Objects.hash(skillName, category);
     }
 }
+

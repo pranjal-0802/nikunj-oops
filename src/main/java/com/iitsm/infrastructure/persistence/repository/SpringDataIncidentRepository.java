@@ -27,3 +27,4 @@ public interface SpringDataIncidentRepository
             @Param("category") IncidentCategory category,
             @Param("since") Instant since);
 }
+

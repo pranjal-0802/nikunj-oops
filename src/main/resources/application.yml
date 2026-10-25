@@ -77,3 +77,4 @@ spring:
 iitsm:
   simulation:
     auto-seed: true
+

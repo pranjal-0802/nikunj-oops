@@ -18,3 +18,4 @@ public interface SpringDataSlaPolicyRepository extends JpaRepository<SlaPolicyJp
     @Query("SELECT p FROM SlaPolicyJpaEntity p WHERE p.priority = :priority AND p.serviceIdOverride IS NULL")
     Optional<SlaPolicyJpaEntity> findDefaultByPriority(@Param("priority") Priority priority);
 }
+

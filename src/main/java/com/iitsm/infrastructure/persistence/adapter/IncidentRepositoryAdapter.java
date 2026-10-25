@@ -116,3 +116,4 @@ public class IncidentRepositoryAdapter implements IncidentRepository {
         }
     }
 }
+

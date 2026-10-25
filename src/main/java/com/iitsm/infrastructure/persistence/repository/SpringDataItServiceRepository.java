@@ -13,3 +13,4 @@ public interface SpringDataItServiceRepository extends JpaRepository<ItServiceJp
 
     List<ItServiceJpaEntity> findByOwningTeamId(String owningTeamId);
 }
+

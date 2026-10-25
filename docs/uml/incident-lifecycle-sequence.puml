@@ -1,0 +1,132 @@
+@startuml
+title Incident Lifecycle Sequence Diagram (Phase 3 End-to-End)
+autonumber
+skinparam monochrome false
+skinparam roundcorner 8
+skinparam boxPadding 10
+skinparam ParticipantPadding 10
+
+actor "Employee\n(Reporter)" as Emp #LightGreen
+actor "Technician\n(Assignee)" as Tech #LightBlue
+actor "Administrator" as Admin #Orange
+
+box "Web Layer" #WhiteSmoke
+participant "EmployeeController" as EmpCtrl
+participant "TechnicianController" as TechCtrl
+participant "AdminController" as AdminCtrl
+participant "NotificationController" as NotifCtrl
+end box
+
+box "Application Layer" #LightYellow
+participant "IncidentService" as Svc
+participant "IncidentFactory" as Factory
+participant "AccessPolicy" as Policy
+participant "IncidentUrgencyOrdering" as Ordering
+end box
+
+box "Domain Core & Event Spine" #Lavender
+participant "Incident\n<<Aggregate Root>>" as Inc
+participant "IncidentState\n<<State Pattern>>" as State
+participant "DomainEventPublisher" as Bus
+end box
+
+box "Infrastructure & Observers" #MistyRose
+participant "AuditTrailObserver" as AuditObs
+participant "NotificationObserver" as NotifObs
+participant "NotificationRouter" as Router
+participant "SseEmitterRegistry" as SSE
+participant "IncidentRepository" as Repo
+end box
+
+== 1. Ticket Creation & Auto-Assignment ==
+Emp -> EmpCtrl: POST /api/employee/incidents\n{title, description}
+EmpCtrl -> Svc: createIncident(reporterId, title, description)
+Svc -> Factory: createIncident(title, description, reporterId)
+Factory --> Svc: incident [NEW]
+Svc -> Inc: classify(APPLICATION, serviceId, decision, sla, now)
+Inc -> State: classify() -> transitions to CLASSIFIED
+Svc -> Inc: assign(techId, now)
+Inc -> State: assign() -> transitions to ASSIGNED
+Svc -> Repo: save(incident)
+Svc -> Bus: publish(IncidentCreated, IncidentClassified, IncidentAssigned)
+Bus -> AuditObs: onEvent() [Synchronous Transactional Audit]
+AuditObs -> Repo: persist AuditRecord
+Bus -> NotifObs: onEvent() [Decoupled Notification Dispatch]
+NotifObs -> Router: route(payload)
+Router -> SSE: push to Employee & Technician
+Svc --> EmpCtrl: saved Incident
+EmpCtrl --> Emp: 201 Created (EmployeeIncidentView)\n[Strict Privacy: NO priority, NO SLA, NO notes]
+
+== 2. Technician Triage & Investigation ==
+Tech -> TechCtrl: GET /api/technician/queue
+TechCtrl -> Svc: getTechnicianQueue(techId)
+Svc -> Ordering: sort by Urgency (Priority > DueAt > CreatedAt)
+TechCtrl --> Tech: 200 OK [Urgency Ordered Queue]
+
+Tech -> TechCtrl: POST /api/technician/incidents/{id}/acknowledge
+TechCtrl -> Svc: acknowledge(id, techId)
+Svc -> Policy: enforceCanExecuteAction(tech, incident, "acknowledge")
+Svc -> Inc: acknowledge(techId, now)
+Inc -> State: acknowledge() -> transitions to ACKNOWLEDGED
+Svc -> Bus: publish(IncidentAcknowledged)
+TechCtrl --> Tech: 200 OK (TechnicianIncidentView)
+
+Tech -> TechCtrl: POST /api/technician/incidents/{id}/start-investigation
+TechCtrl -> Svc: startInvestigation(id, techId)
+Svc -> Inc: startInvestigation(techId, now)
+Inc -> State: startInvestigation() -> transitions to IN_PROGRESS
+Svc -> Bus: publish(InvestigationStarted)
+TechCtrl --> Tech: 200 OK (TechnicianIncidentView)
+
+== 3. Info Request Loop (SLA Clock Pause & Resume) ==
+Tech -> TechCtrl: POST /api/technician/incidents/{id}/request-info\n{question}
+TechCtrl -> Svc: requestInfo(id, techId, question)
+Svc -> Inc: requestInfo(techId, question, now)
+Inc -> State: requestInfo() -> transitions to PENDING_INFO
+Inc -> Inc: slaTracker.pause(now)
+Svc -> Bus: publish(MoreInfoRequested)
+TechCtrl --> Tech: 200 OK (TechnicianIncidentView)
+
+Emp -> EmpCtrl: POST /api/employee/incidents/{id}/provide-info\n{response}
+EmpCtrl -> Svc: provideInfo(id, reporterId, response)
+Svc -> Inc: provideInfo(reporterId, response, now)
+Inc -> State: provideInfo() -> transitions to IN_PROGRESS
+Inc -> Inc: slaTracker.resume(now)
+Svc -> Bus: publish(MoreInfoProvided)
+EmpCtrl --> Emp: 200 OK (EmployeeIncidentView)
+
+== 4. Structured Resolution & Quality Reopen Loop ==
+Tech -> TechCtrl: POST /api/technician/incidents/{id}/resolve\n{rootCause, steps, preventive, category}
+TechCtrl -> Svc: resolve(id, techId, resolution)
+Svc -> Inc: resolve(resolution, now)
+Inc -> State: resolve() -> transitions to RESOLVED
+Inc -> Inc: slaTracker.recordResolution(now)
+Svc -> Bus: publish(IncidentResolved)
+TechCtrl --> Tech: 200 OK (TechnicianIncidentView)
+
+alt Reporter Rejects Fix (Quality Reopen Loop)
+Emp -> EmpCtrl: POST /api/employee/incidents/{id}/reject\n{reason}
+EmpCtrl -> Svc: reject(id, reporterId, reason)
+Svc -> Inc: reject(reporterId, reason, now)
+Inc -> State: reject() -> transitions to IN_PROGRESS (reopenCount + 1)
+Svc -> Bus: publish(IncidentReopened)
+EmpCtrl --> Emp: 200 OK (EmployeeIncidentView)
+Tech -> TechCtrl: POST /api/technician/incidents/{id}/resolve [Resolves again]
+end
+
+== 5. Verification & Formal Closure ==
+Emp -> EmpCtrl: POST /api/employee/incidents/{id}/verify
+EmpCtrl -> Svc: verify(id, reporterId)
+Svc -> Inc: verify(reporterId, now)
+Inc -> State: verify() -> transitions to VERIFIED
+Svc -> Bus: publish(ResolutionVerified)
+EmpCtrl --> Emp: 200 OK (EmployeeIncidentView)
+
+Admin -> AdminCtrl: POST /api/admin/incidents/{id}/close\n{rating: 5, comment: "Excellent"}
+AdminCtrl -> Svc: close(id, adminId, feedback)
+Svc -> Inc: close(adminId, feedback, now)
+Inc -> State: close() -> transitions to CLOSED
+Svc -> Bus: publish(IncidentClosed)
+AdminCtrl --> Admin: 200 OK (AdminIncidentView)
+
+@enduml

@@ -26,3 +26,4 @@ public interface SpringDataUserRepository extends JpaRepository<UserJpaEntity, S
     @Query("SELECT u FROM UserJpaEntity u JOIN u.skills s WHERE u.role IN ('ROLE_TECHNICIAN', 'ROLE_TEAM_LEAD') AND s.category = :category")
     List<UserJpaEntity> findTechniciansBySkillCategory(@Param("category") IncidentCategory category);
 }
+

@@ -60,3 +60,4 @@ public class ItServiceJpaEntity {
     public Set<String> getKeywords() { return keywords; }
     public void setKeywords(Set<String> keywords) { this.keywords = keywords; }
 }
+

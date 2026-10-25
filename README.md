@@ -60,3 +60,4 @@ To run all unit and integration tests with JaCoCo verification:
 ```
 Test results and coverage reports are generated at:
 - `target/site/jacoco/index.html`
+

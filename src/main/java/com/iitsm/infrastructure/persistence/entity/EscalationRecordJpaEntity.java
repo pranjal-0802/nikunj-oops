@@ -55,3 +55,4 @@ public class EscalationRecordJpaEntity {
     public Instant getEscalatedAt() { return escalatedAt; }
     public void setEscalatedAt(Instant escalatedAt) { this.escalatedAt = escalatedAt; }
 }
+

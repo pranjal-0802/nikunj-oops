@@ -17,3 +17,4 @@ public interface SpringDataSupportTeamRepository extends JpaRepository<SupportTe
     @Query("SELECT t FROM SupportTeamJpaEntity t JOIN t.handledCategories c WHERE c = :category")
     List<SupportTeamJpaEntity> findByHandledCategory(@Param("category") IncidentCategory category);
 }
+

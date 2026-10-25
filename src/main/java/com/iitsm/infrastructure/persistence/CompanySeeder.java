@@ -291,3 +291,4 @@ public class CompanySeeder implements CommandLineRunner {
 
     private record TechSpec(String email, String name, int experience, int capacity, Set<String> skills) {}
 }
+

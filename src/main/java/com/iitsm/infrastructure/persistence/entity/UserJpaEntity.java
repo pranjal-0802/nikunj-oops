@@ -160,3 +160,4 @@ public class UserJpaEntity {
     public AdminLevel getAdminLevel() { return adminLevel; }
     public void setAdminLevel(AdminLevel adminLevel) { this.adminLevel = adminLevel; }
 }
+

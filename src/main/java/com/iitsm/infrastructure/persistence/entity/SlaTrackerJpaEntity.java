@@ -82,3 +82,4 @@ public class SlaTrackerJpaEntity {
     public SlaStatus getStatus() { return status; }
     public void setStatus(SlaStatus status) { this.status = status; }
 }
+

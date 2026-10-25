@@ -77,3 +77,4 @@ class UserRepositoryAdapterTest {
         assertThat(found.get().getFailedLoginAttempts()).isEqualTo(5);
     }
 }
+

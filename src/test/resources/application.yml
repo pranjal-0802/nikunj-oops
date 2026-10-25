@@ -26,3 +26,4 @@ iitsm:
   simulation:
     seed: 42
     auto-seed: false
+

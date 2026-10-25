@@ -16,3 +16,4 @@ This document provides a detailed breakdown of all object-oriented design patter
 | **Adapter / Mapper** | Structural | `PublicStatusMapper`, `IncidentMapper`, `UserMapper` | `com.iitsm.domain.state.PublicStatusMapper.java`<br>`com.iitsm.infrastructure.persistence.mapper.*` | Maps between internal domain models and external projections (5-step public stepper for employees; JPA entities for database storage). |
 | **Strategy / Policy** | Behavioral | `AccessPolicy` | `com.iitsm.domain.policy.AccessPolicy.java` | Decouples role-based access rules and data visibility invariants from HTTP controller layer annotations. |
 | **Open/Closed Principle** | Design Principle | `CategoryRegistry` | `com.iitsm.domain.model.CategoryRegistry.java` | Enables dynamic registration of new incident categories at runtime without modifying existing classes or enums. |
+

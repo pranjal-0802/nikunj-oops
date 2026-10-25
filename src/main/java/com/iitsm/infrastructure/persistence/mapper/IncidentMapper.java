@@ -197,3 +197,4 @@ public final class IncidentMapper {
         return entity;
     }
 }
+

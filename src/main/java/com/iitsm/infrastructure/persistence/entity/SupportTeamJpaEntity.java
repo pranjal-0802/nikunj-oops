@@ -56,3 +56,4 @@ public class SupportTeamJpaEntity {
     public Set<String> getMemberIds() { return memberIds; }
     public void setMemberIds(Set<String> memberIds) { this.memberIds = memberIds; }
 }
+
