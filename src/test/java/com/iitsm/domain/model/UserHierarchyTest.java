@@ -123,3 +123,4 @@ class UserHierarchyTest {
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 }
+

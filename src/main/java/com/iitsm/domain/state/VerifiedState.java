@@ -33,3 +33,4 @@ public class VerifiedState implements IncidentState {
         incident.transitionTo(IncidentStatus.CLOSED);
     }
 }
+

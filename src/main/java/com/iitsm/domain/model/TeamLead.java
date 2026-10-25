@@ -20,3 +20,4 @@ public class TeamLead extends Technician {
         super(id, name, email, passwordHash, UserRole.ROLE_TEAM_LEAD, skills, experienceYears, maxCapacity, supportTeamId);
     }
 }
+

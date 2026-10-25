@@ -24,3 +24,4 @@ jobs:
 
       - name: Run Maven Verify (Checkstyle, Tests, JaCoCo Coverage)
         run: mvn clean verify -B
+

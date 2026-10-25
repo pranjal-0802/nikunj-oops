@@ -165,3 +165,4 @@ public sealed interface DomainEvent {
             String toUserId,
             String escalationReason) implements DomainEvent {}
 }
+

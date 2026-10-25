@@ -144,3 +144,4 @@ public class Technician extends User {
         return skills.stream().anyMatch(s -> s.category() == category);
     }
 }
+

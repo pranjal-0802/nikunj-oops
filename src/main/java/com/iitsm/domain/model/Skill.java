@@ -18,3 +18,4 @@ public record Skill(String name, IncidentCategory category) {
         name = name.trim();
     }
 }
+

@@ -11,3 +11,4 @@ public class ServiceNotFoundException extends IitsmException {
                 String.format("IT Service '%s' was not found in the service catalogue", serviceIdentifier));
     }
 }
+

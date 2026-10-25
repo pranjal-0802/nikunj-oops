@@ -20,3 +20,4 @@ public interface ItServiceRepository {
 
     List<ItService> findAll();
 }
+

@@ -13,3 +13,4 @@ public class DuplicateIncidentException extends IitsmException {
                         reporterId, existingIncidentId));
     }
 }
+

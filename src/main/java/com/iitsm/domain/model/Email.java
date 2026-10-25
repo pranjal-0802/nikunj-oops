@@ -26,3 +26,4 @@ public record Email(String value) {
         return value;
     }
 }
+

@@ -33,3 +33,4 @@ public class PendingInfoState implements IncidentState {
         incident.transitionTo(IncidentStatus.IN_PROGRESS);
     }
 }
+

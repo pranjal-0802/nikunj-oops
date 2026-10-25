@@ -9,3 +9,4 @@ public class InvalidCredentialsException extends IitsmException {
         super("ERR_INVALID_CREDENTIALS", message);
     }
 }
+

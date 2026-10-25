@@ -94,3 +94,4 @@ public class ReassignmentRequest {
         this.resolvedAt = Objects.requireNonNull(now, "resolvedAt cannot be null");
     }
 }
+

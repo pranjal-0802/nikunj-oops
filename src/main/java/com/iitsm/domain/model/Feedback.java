@@ -22,3 +22,4 @@ public record Feedback(
         comment = (comment != null) ? comment.trim() : "";
     }
 }
+

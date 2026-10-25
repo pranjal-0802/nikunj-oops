@@ -40,3 +40,4 @@ public enum BusinessCriticality {
         throw new IllegalArgumentException("Unknown business criticality tier: " + tier);
     }
 }
+

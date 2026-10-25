@@ -146,3 +146,4 @@ class ValueObjectsAndExceptionsTest {
                 .isEqualTo("ERR_NOTIFICATION_FAILED");
     }
 }
+

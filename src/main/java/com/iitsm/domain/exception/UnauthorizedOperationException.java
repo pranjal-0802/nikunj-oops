@@ -9,3 +9,4 @@ public class UnauthorizedOperationException extends IitsmException {
         super("ERR_UNAUTHORIZED_OPERATION", message);
     }
 }
+

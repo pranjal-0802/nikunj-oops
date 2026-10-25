@@ -31,3 +31,4 @@ public class Administrator extends User {
         return adminLevel == AdminLevel.IT_MANAGER;
     }
 }
+

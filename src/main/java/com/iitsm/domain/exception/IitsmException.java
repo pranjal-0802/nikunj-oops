@@ -22,3 +22,4 @@ public abstract class IitsmException extends RuntimeException {
         return errorCode;
     }
 }
+

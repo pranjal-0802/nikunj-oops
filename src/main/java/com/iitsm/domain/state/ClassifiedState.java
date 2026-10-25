@@ -30,3 +30,4 @@ public class ClassifiedState implements IncidentState {
         incident.transitionTo(IncidentStatus.ASSIGNED);
     }
 }
+

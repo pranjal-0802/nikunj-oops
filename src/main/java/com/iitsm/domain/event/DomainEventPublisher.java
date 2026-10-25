@@ -16,3 +16,4 @@ public interface DomainEventPublisher {
      */
     void registerListener(DomainEventListener listener);
 }
+

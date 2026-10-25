@@ -155,6 +155,18 @@ public class Incident {
         this.reopenCount++;
     }
 
+    public void setReopenCount(int count) {
+        this.reopenCount = Math.max(0, count);
+    }
+
+    public void setSlaTracker(SlaTracker tracker) {
+        this.slaTracker = tracker;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public void addNote(InvestigationNote note) {
         Objects.requireNonNull(note, "note cannot be null");
         this.notes.add(note);
@@ -263,3 +275,4 @@ public class Incident {
         return IncidentStates.of(this.status).allowedActions();
     }
 }
+

@@ -21,3 +21,4 @@ public interface SlaPolicyRepository {
 
     List<SlaPolicy> findAll();
 }
+

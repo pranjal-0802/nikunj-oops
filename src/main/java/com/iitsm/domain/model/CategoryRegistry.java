@@ -54,3 +54,4 @@ public class CategoryRegistry {
         return Collections.unmodifiableMap(registeredCategories);
     }
 }
+

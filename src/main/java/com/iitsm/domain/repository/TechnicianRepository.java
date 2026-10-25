@@ -24,3 +24,4 @@ public interface TechnicianRepository {
 
     List<Technician> findAll();
 }
+

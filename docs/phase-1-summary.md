@@ -69,3 +69,4 @@
 2. **Flyway Migrations**: PostgreSQL schema definitions with indexes on status, priority, assignee, service, and timestamps.
 3. **Spring Security**: JWT authentication, BCrypt password hashing, and application-layer `AccessPolicy`.
 4. **Synthetic Company Seeder**: Deterministic generation of Nimbus FinServe (~300 employees, 6 teams, ~20 technicians, 14 IT services).
+

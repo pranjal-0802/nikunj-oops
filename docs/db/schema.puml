@@ -1,0 +1,162 @@
+@startuml
+title I-ITSM Relational Database Schema (ER Diagram)
+skinparam linetype ortho
+skinparam roundcorner 6
+
+entity "users" as users {
+    * id : VARCHAR(64) [PK]
+    --
+    * name : VARCHAR(255)
+    * email : VARCHAR(255) [UNIQUE]
+    * password_hash : VARCHAR(255)
+    * role : VARCHAR(32)
+    * active : BOOLEAN
+    * failed_login_attempts : INT
+    * locked : BOOLEAN
+    * user_type : VARCHAR(32)
+    * created_at : TIMESTAMP WITH TIME ZONE
+}
+
+entity "employees" as employees {
+    * user_id : VARCHAR(64) [PK, FK]
+    --
+    * designation : VARCHAR(32)
+    * department : VARCHAR(64)
+    * seniority_years : INT
+}
+
+entity "technicians" as technicians {
+    * user_id : VARCHAR(64) [PK, FK]
+    --
+    * experience_years : INT
+    * max_capacity : INT
+    * availability_status : VARCHAR(32)
+    support_team_id : VARCHAR(64) [FK]
+}
+
+entity "administrators" as administrators {
+    * user_id : VARCHAR(64) [PK, FK]
+    --
+    * admin_level : VARCHAR(32)
+}
+
+entity "support_teams" as support_teams {
+    * id : VARCHAR(64) [PK]
+    --
+    * name : VARCHAR(128) [UNIQUE]
+    team_lead_id : VARCHAR(64) [FK]
+}
+
+entity "it_services" as it_services {
+    * id : VARCHAR(64) [PK]
+    --
+    * name : VARCHAR(128) [UNIQUE]
+    owning_team_id : VARCHAR(64) [FK]
+    * business_criticality : VARCHAR(32)
+    * user_base : INT
+}
+
+entity "incidents" as incidents {
+    * id : VARCHAR(64) [PK]
+    --
+    * title : VARCHAR(255)
+    * description : TEXT
+    * reporter_id : VARCHAR(64) [FK]
+    category : VARCHAR(32)
+    service_id : VARCHAR(64) [FK]
+    priority : VARCHAR(16)
+    composite_score : DOUBLE PRECISION
+    rules_applied : TEXT
+    priority_calculated_at : TIMESTAMP WITH TIME ZONE
+    priority_overridden_by : VARCHAR(64)
+    priority_override_reason : TEXT
+    * status : VARCHAR(32)
+    assignee_id : VARCHAR(64) [FK]
+    * reopen_count : INT
+    * created_at : TIMESTAMP WITH TIME ZONE
+    * version : BIGINT
+}
+
+entity "sla_trackers" as sla_trackers {
+    * incident_id : VARCHAR(64) [PK, FK]
+    --
+    * created_at : TIMESTAMP WITH TIME ZONE
+    * response_due_at : TIMESTAMP WITH TIME ZONE
+    * resolution_due_at : TIMESTAMP WITH TIME ZONE
+    responded_at : TIMESTAMP WITH TIME ZONE
+    resolved_at : TIMESTAMP WITH TIME ZONE
+    * paused_duration_seconds : BIGINT
+    paused_at : TIMESTAMP WITH TIME ZONE
+    * status : VARCHAR(32)
+}
+
+entity "investigation_notes" as notes {
+    * id : VARCHAR(64) [PK]
+    --
+    * incident_id : VARCHAR(64) [FK]
+    * author_id : VARCHAR(64)
+    * author_name : VARCHAR(255)
+    * note_text : TEXT
+    * internal_only : BOOLEAN
+    * created_at : TIMESTAMP WITH TIME ZONE
+}
+
+entity "resolutions" as resolutions {
+    * incident_id : VARCHAR(64) [PK, FK]
+    --
+    * root_cause : TEXT
+    * steps_taken : TEXT
+    * preventive_action : TEXT
+    * confirmed_category : VARCHAR(32)
+    * resolved_by : VARCHAR(64)
+    * resolved_at : TIMESTAMP WITH TIME ZONE
+}
+
+entity "feedback" as feedback {
+    * incident_id : VARCHAR(64) [PK, FK]
+    --
+    * rating : INT
+    comment : TEXT
+    * submitted_at : TIMESTAMP WITH TIME ZONE
+}
+
+entity "reassignment_requests" as reassignments {
+    * id : VARCHAR(64) [PK]
+    --
+    * incident_id : VARCHAR(64) [FK]
+    * requesting_technician_id : VARCHAR(64) [FK]
+    * reason : TEXT
+    * status : VARCHAR(32)
+    * requested_at : TIMESTAMP WITH TIME ZONE
+    resolved_at : TIMESTAMP WITH TIME ZONE
+    reviewed_by_admin_id : VARCHAR(64) [FK]
+}
+
+entity "audit_records" as audits {
+    * id : VARCHAR(64) [PK]
+    --
+    * timestamp : TIMESTAMP WITH TIME ZONE
+    * actor_id : VARCHAR(64)
+    * action : VARCHAR(64)
+    * incident_id : VARCHAR(64)
+    previous_state : VARCHAR(32)
+    new_state : VARCHAR(32)
+    * description : TEXT
+}
+
+users ||--o| employees
+users ||--o| technicians
+users ||--o| administrators
+technicians }o--|| support_teams
+it_services }o--|| support_teams
+
+users ||--o{ incidents : reports
+technicians ||--o{ incidents : assigned_to
+it_services ||--o{ incidents : affects
+
+incidents ||--|| sla_trackers
+incidents ||--o{ notes
+incidents ||--o| resolutions
+incidents ||--o| feedback
+incidents ||--o{ reassignments
+@enduml

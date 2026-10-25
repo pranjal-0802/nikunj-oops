@@ -86,6 +86,14 @@ public abstract class User {
         this.locked = false;
     }
 
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public void setFailedLoginAttempts(int attempts) {
+        this.failedLoginAttempts = Math.max(0, attempts);
+    }
+
     public void deactivate() {
         this.active = false;
     }
@@ -94,3 +102,4 @@ public abstract class User {
         this.active = true;
     }
 }
+

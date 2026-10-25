@@ -70,3 +70,4 @@ public interface IncidentState {
         throw new InvalidStateTransitionException(getStatus(), "flagWrongDomain", allowedActions());
     }
 }
+

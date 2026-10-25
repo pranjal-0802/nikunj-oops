@@ -36,3 +36,4 @@ public class NotificationFailureException extends IitsmException {
         return recipient;
     }
 }
+

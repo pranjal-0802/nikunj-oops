@@ -39,3 +39,4 @@ public final class IncidentStates {
         return state;
     }
 }
+

@@ -47,3 +47,23 @@ This document records architectural, design, and technical decisions made during
   3. *State objects with stateful incident reference*. (Rejected: complicates JPA entity lifecycle and caching).
 - **Reason**: Zero-allocation per transition, completely thread-safe, encapsulates transition logic cleanly, and enables trivial exhaustive transition matrix testing.
 
+---
+
+## ADR-005: Hexagonal Repository Ports & Adapters with Optimistic Locking
+- **Status**: Accepted
+- **Context**: Pure domain repositories must remain free of Spring dependencies, but the persistence layer must leverage Spring Data JPA, handle transactions, and guard against race conditions.
+- **Decision**: Define pure Java repository ports in `com.iitsm.domain.repository` and implement them via Spring `@Component` adapters in `com.iitsm.infrastructure.persistence.adapter`. Catch all database errors and optimistic locking collisions (`@Version`) and translate them into domain `PersistenceFailureException`.
+- **Alternatives Considered**:
+  1. *Spring Data repositories extending domain interfaces directly*. (Rejected: couples domain to Spring Data types like `Pageable`, `Optional` Spring behaviors, and leaks framework infrastructure).
+- **Reason**: Maintains strict architectural layer separation (`domain` never imports Spring), enables effortless switching between H2 for tests and PostgreSQL for production, and provides centralized exception translation.
+
+---
+
+## ADR-006: Stateless JWT Authentication with BCrypt and 5-Strike Lockout
+- **Status**: Accepted
+- **Context**: The system must provide role-based security across 3 personas (Employee, Technician, Admin) and enforce security boundaries (account lockout after 5 consecutive failed logins).
+- **Decision**: Implement stateless JWT authentication via `jjwt` with BCrypt password hashing. Authentication failures track attempt counts and lock accounts on the 5th strike. Centralize 401 and 403 responses into consistent JSON objects.
+- **Alternatives Considered**:
+  1. *Stateful HTTP Sessions*. (Rejected: hard to scale, poor match for single-page applications and REST APIs).
+  2. *OAuth2 / Keycloak*. (Rejected: requires external identity provider server setup, complicating standalone viva and grading evaluation).
+- **Reason**: Lightweight, completely self-contained in pure Java, satisfies all security criteria, and returns clean, uniform JSON error contracts.

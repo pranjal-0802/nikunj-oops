@@ -30,3 +30,4 @@ public interface IncidentRepository {
 
     long count();
 }
+

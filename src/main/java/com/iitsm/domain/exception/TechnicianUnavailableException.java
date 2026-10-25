@@ -9,3 +9,4 @@ public class TechnicianUnavailableException extends IitsmException {
         super("ERR_TECHNICIAN_UNAVAILABLE", message);
     }
 }
+

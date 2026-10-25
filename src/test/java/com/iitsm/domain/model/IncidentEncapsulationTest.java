@@ -147,3 +147,4 @@ class IncidentEncapsulationTest {
         assertThat(incident.getPriorityDecision().overrideReason()).isEqualTo("Critical financial transaction blockage");
     }
 }
+

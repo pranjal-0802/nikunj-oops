@@ -41,3 +41,4 @@ public record Resolution(
         resolvedBy = resolvedBy.trim();
     }
 }
+

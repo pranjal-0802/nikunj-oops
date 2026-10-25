@@ -42,3 +42,4 @@ public class InMemoryDomainEventPublisher implements DomainEventPublisher {
         publishedHistory.clear();
     }
 }
+

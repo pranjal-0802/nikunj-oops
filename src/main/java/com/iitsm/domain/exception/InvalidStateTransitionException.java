@@ -37,3 +37,4 @@ public class InvalidStateTransitionException extends IitsmException {
         return allowedActions;
     }
 }
+

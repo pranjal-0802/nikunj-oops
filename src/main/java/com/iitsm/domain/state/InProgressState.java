@@ -44,3 +44,4 @@ public class InProgressState implements IncidentState {
         incident.transitionTo(IncidentStatus.RESOLVED);
     }
 }
+

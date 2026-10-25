@@ -86,3 +86,4 @@ public class SupportTeam {
         return handledCategories.contains(category);
     }
 }
+

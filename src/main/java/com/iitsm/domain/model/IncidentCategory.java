@@ -24,3 +24,4 @@ public enum IncidentCategory {
         return displayName;
     }
 }
+

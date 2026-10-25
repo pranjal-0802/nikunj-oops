@@ -40,6 +40,24 @@ public class SlaTracker {
         return new SlaTracker(createdAt, new DeadlinePair(responseDue, resolutionDue));
     }
 
+    public static SlaTracker reconstitute(
+            Instant createdAt,
+            Instant responseDueAt,
+            Instant resolutionDueAt,
+            Instant respondedAt,
+            Instant resolvedAt,
+            Duration pausedDuration,
+            Instant pausedAt,
+            SlaStatus status) {
+        SlaTracker tracker = new SlaTracker(createdAt, new DeadlinePair(responseDueAt, resolutionDueAt));
+        tracker.respondedAt = respondedAt;
+        tracker.resolvedAt = resolvedAt;
+        tracker.pausedDuration = (pausedDuration != null) ? pausedDuration : Duration.ZERO;
+        tracker.pausedAt = pausedAt;
+        tracker.status = (status != null) ? status : SlaStatus.ON_TRACK;
+        return tracker;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -167,3 +185,4 @@ public class SlaTracker {
         }
     }
 }
+

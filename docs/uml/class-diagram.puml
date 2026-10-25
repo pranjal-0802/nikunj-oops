@@ -1,5 +1,5 @@
 @startuml
-title I-ITSM Core Domain Model (Phase 1)
+title I-ITSM Architecture & Class Diagram (Phases 1 & 2)
 skinparam classAttributeIconSize 0
 skinparam monochrome false
 skinparam roundcorner 8
@@ -66,17 +66,17 @@ package "com.iitsm.domain.model" {
         - reopenCount: int
         - linkedIncidentIds: Set<String>
         - version: Long
-        + classify(category, serviceId, priority, slaPolicy, now): void
-        + assign(technicianId, now): void
-        + acknowledge(technicianId, now): void
-        + startInvestigation(technicianId, now): void
-        + requestInfo(technicianId, message, now): void
-        + provideInfo(employeeId, responseText, now): void
-        + resolve(resolution, now): void
-        + verify(employeeId, now): void
-        + reject(employeeId, reason, now): void
-        + close(actorId, feedback, now): void
-        + flagWrongDomain(technicianId, reason, now): void
+        + classify(...): void
+        + assign(...): void
+        + acknowledge(...): void
+        + startInvestigation(...): void
+        + requestInfo(...): void
+        + provideInfo(...): void
+        + resolve(...): void
+        + verify(...): void
+        + reject(...): void
+        + close(...): void
+        + flagWrongDomain(...): void
         + getAllowedActions(): Set<String>
     }
 
@@ -105,30 +105,6 @@ package "com.iitsm.domain.model" {
         - warningThresholdRatio: double
     }
 
-    class InvestigationNote <<Value Object>> {
-        - id: String
-        - authorId: String
-        - authorName: String
-        - noteText: String
-        - createdAt: Instant
-        - internalOnly: boolean
-    }
-
-    class Resolution <<Value Object>> {
-        - rootCause: String
-        - stepsTaken: String
-        - preventiveAction: String
-        - confirmedCategory: String
-        - resolvedBy: String
-        - resolvedAt: Instant
-    }
-
-    class Feedback <<Value Object>> {
-        - rating: int
-        - comment: String
-        - submittedAt: Instant
-    }
-
     class ItService {
         - id: String
         - name: String
@@ -149,88 +125,76 @@ package "com.iitsm.domain.model" {
         + removeMember(technicianId: String): void
     }
 
-    class ReassignmentRequest {
-        - id: String
-        - incidentId: String
-        - requestingTechnicianId: String
-        - reason: String
-        - status: Status
-        - requestedAt: Instant
-        - resolvedAt: Instant
-        + approve(adminId, now): void
-        + reject(adminId, now): void
-    }
-
     Incident *-- SlaTracker : composition
-    Incident *-- "0..*" InvestigationNote : composition
-    Incident o-- "0..1" Resolution : structured resolution
-    Incident o-- "0..1" Feedback : closure feedback
     Incident --> Employee : reporter
     Incident --> Technician : assignee
-    Incident --> ItService : affected service
-    SupportTeam o-- "1..*" Technician : aggregation (members)
-    SupportTeam --> TeamLead : teamLead
+    Incident --> ItService : affects
+    SupportTeam o-- Technician : aggregation
 }
 
-package "com.iitsm.domain.state" {
-    interface IncidentState {
-        + getStatus(): IncidentStatus
-        + allowedActions(): Set<String>
-        + classify(...): void
-        + assign(...): void
-        + acknowledge(...): void
-        + startInvestigation(...): void
-        + requestInfo(...): void
-        + provideInfo(...): void
-        + resolve(...): void
-        + verify(...): void
-        + reject(...): void
-        + close(...): void
-        + flagWrongDomain(...): void
+package "com.iitsm.domain.repository" {
+    interface IncidentRepository <<Port>> {
+        + save(incident: Incident): Incident
+        + findById(id: String): Optional<Incident>
+        + findByReporterId(reporterId: String): List<Incident>
+        + findByStatus(status: IncidentStatus): List<Incident>
     }
 
-    class IncidentStates {
-        - {static} REGISTRY: EnumMap<IncidentStatus, IncidentState>
-        + {static} of(status: IncidentStatus): IncidentState
+    interface UserRepository <<Port>> {
+        + save(user: User): User
+        + findById(id: String): Optional<User>
+        + findByEmail(email: Email): Optional<User>
     }
 
-    class NewState implements IncidentState
-    class ClassifiedState implements IncidentState
-    class AssignedState implements IncidentState
-    class AcknowledgedState implements IncidentState
-    class InProgressState implements IncidentState
-    class PendingInfoState implements IncidentState
-    class ResolvedState implements IncidentState
-    class VerifiedState implements IncidentState
-    class ClosedState implements IncidentState
-
-    Incident ..> IncidentStates : delegates lifecycle
-    IncidentStates o-- IncidentState : resolves singleton
+    interface TechnicianRepository <<Port>> {
+        + findAvailableTechnicians(): List<Technician>
+        + findBySupportTeamId(teamId: String): List<Technician>
+    }
 }
 
-package "com.iitsm.domain.event" {
-    interface DomainEvent <<sealed>> {
-        + eventId(): String
-        + occurredAt(): Instant
-        + incidentId(): String
-        + actorId(): String
+package "com.iitsm.infrastructure.persistence.adapter" {
+    class IncidentRepositoryAdapter implements IncidentRepository {
+        - springDataRepository: SpringDataIncidentRepository
     }
 
-    interface DomainEventPublisher {
-        + publish(event: DomainEvent): void
-        + registerListener(listener: DomainEventListener): void
+    class UserRepositoryAdapter implements UserRepository {
+        - springDataRepository: SpringDataUserRepository
     }
 
-    interface DomainEventListener {
-        + onEvent(event: DomainEvent): void
+    class TechnicianRepositoryAdapter implements TechnicianRepository {
+        - springDataRepository: SpringDataUserRepository
     }
-
-    class InMemoryDomainEventPublisher implements DomainEventPublisher {
-        - listeners: List<DomainEventListener>
-    }
-
-    InMemoryDomainEventPublisher o-- DomainEventListener
-    DomainEventListener ..> DomainEvent : receives
 }
+
+package "com.iitsm.application.service" {
+    class UserFactory <<Factory>> {
+        + createEmployee(...): Employee
+        + createTechnician(...): Technician
+        + createTeamLead(...): TeamLead
+        + createAdministrator(...): Administrator
+    }
+
+    class UserService {
+        - userRepository: UserRepository
+        - userFactory: UserFactory
+        - passwordEncoder: PasswordEncoder
+        - tokenProvider: JwtTokenProvider
+        + authenticate(email, password): AuthResult
+        + registerEmployee(...): Employee
+    }
+}
+
+package "com.iitsm.domain.policy" {
+    interface AccessPolicy <<Policy>> {
+        + enforceCanViewIncident(actor: User, incident: Incident): void
+        + enforceCanExecuteAction(actor: User, incident: Incident, action: String): void
+        + enforceAdmin(actor: User): void
+    }
+}
+
+UserService --> UserFactory
+UserService --> UserRepository
+IncidentRepositoryAdapter ..> Incident : maps to/from
+UserRepositoryAdapter ..> User : maps to/from
 
 @enduml

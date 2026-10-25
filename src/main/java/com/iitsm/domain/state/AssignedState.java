@@ -38,3 +38,4 @@ public class AssignedState implements IncidentState {
         incident.transitionTo(IncidentStatus.CLASSIFIED);
     }
 }
+

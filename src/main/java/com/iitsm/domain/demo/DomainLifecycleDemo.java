@@ -229,3 +229,4 @@ public class DomainLifecycleDemo {
         System.out.printf("     Allowed Actions: %s%n", incident.getAllowedActions());
     }
 }
+

@@ -54,3 +54,4 @@ class CategoryRegistryTest {
                 .isInstanceOf(ValidationException.class);
     }
 }
+

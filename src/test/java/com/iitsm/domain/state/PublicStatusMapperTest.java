@@ -50,3 +50,4 @@ class PublicStatusMapperTest {
                 .isEqualTo(PublicStatusMapper.PublicStatus.CLOSED);
     }
 }
+

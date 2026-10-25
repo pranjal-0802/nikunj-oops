@@ -37,3 +37,4 @@ public class NewState implements IncidentState {
         incident.transitionTo(IncidentStatus.CLASSIFIED);
     }
 }
+

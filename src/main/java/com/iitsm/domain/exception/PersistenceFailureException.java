@@ -13,3 +13,4 @@ public class PersistenceFailureException extends IitsmException {
         super("ERR_PERSISTENCE_FAILURE", message);
     }
 }
+

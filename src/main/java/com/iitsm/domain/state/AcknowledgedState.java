@@ -35,3 +35,4 @@ public class AcknowledgedState implements IncidentState {
         incident.transitionTo(IncidentStatus.CLASSIFIED);
     }
 }
+

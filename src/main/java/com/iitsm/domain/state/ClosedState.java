@@ -23,3 +23,4 @@ public class ClosedState implements IncidentState {
         return ALLOWED;
     }
 }
+

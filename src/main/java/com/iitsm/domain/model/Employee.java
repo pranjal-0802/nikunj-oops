@@ -44,3 +44,4 @@ public class Employee extends User {
         return seniorityYears;
     }
 }
+
