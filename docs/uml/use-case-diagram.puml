@@ -1,0 +1,85 @@
+@startuml
+title I-ITSM Platform Use Case Diagram
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Employee" as emp
+actor "Technician" as tech
+actor "Team Lead" as lead
+actor "System Administrator" as admin
+actor "IT Operations Manager" as manager
+
+rectangle "Intelligent IT Service Management (I-ITSM)" {
+
+    package "Self-Service Intake" {
+        usecase "Report Incident (NLP Auto-Classify)" as UC_Create
+        usecase "View My Incidents (5-Stage Stepper)" as UC_ViewMy
+        usecase "Provide Requested Information" as UC_ProvideInfo
+        usecase "Verify Resolution & Rate (1-5 Stars)" as UC_Verify
+        usecase "Reject Fix & Reopen Incident" as UC_Reject
+    }
+
+    package "Technician Incident Operations" {
+        usecase "View Priority Queue (P1-P4)" as UC_ViewQueue
+        usecase "Acknowledge Incident" as UC_Ack
+        usecase "Start Technical Investigation" as UC_Investigate
+        usecase "Request Info (Pause SLA Clock)" as UC_ReqInfo
+        usecase "Record Internal Investigation Note" as UC_AddNote
+        usecase "Flag Wrong Domain (Triage Revert)" as UC_WrongDomain
+        usecase "Resolve Incident (Structured Root Cause)" as UC_Resolve
+    }
+
+    package "Administration & Governance" {
+        usecase "Triage Queue Reclassification" as UC_Triage
+        usecase "Manual Technician Assignment" as UC_ManualAssign
+        usecase "Hot-Swap Assignment Strategy" as UC_SwapStrategy
+        usecase "Execute Simulation Scenarios (S1-S5)" as UC_Simulate
+        usecase "Accelerate Virtual Clock (x1, x60, x600)" as UC_ClockControl
+        usecase "Inspect Priority Explainability Factors" as UC_InspectScore
+    }
+
+    package "Executive Reporting & Oversight" {
+        usecase "Monitor MTTR & MTTResp Metrics" as UC_Mttr
+        usecase "Analyze SLA Compliance & Breaches" as UC_SlaReport
+        usecase "Review Support Team Workload Balance" as UC_Workload
+        usecase "Receive Tier-4 P1 Escalation Alerts" as UC_Tier4
+    }
+}
+
+' Employee Connections
+emp --> UC_Create
+emp --> UC_ViewMy
+emp --> UC_ProvideInfo
+emp --> UC_Verify
+emp --> UC_Reject
+
+' Technician Connections
+tech --> UC_ViewQueue
+tech --> UC_Ack
+tech --> UC_Investigate
+tech --> UC_ReqInfo
+tech --> UC_AddNote
+tech --> UC_WrongDomain
+tech --> UC_Resolve
+
+' Team Lead inheritance & connections
+lead --|> tech
+lead --> UC_Workload
+
+' Administrator Connections
+admin --> UC_Triage
+admin --> UC_ManualAssign
+admin --> UC_SwapStrategy
+admin --> UC_Simulate
+admin --> UC_ClockControl
+admin --> UC_InspectScore
+admin --> UC_Mttr
+admin --> UC_SlaReport
+
+' IT Manager Connections
+manager --> UC_Tier4
+manager --> UC_Mttr
+manager --> UC_SlaReport
+
+@enduml
+

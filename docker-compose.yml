@@ -1,6 +1,25 @@
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iitsm-app
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/iitsm_prod
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   postgres:
     image: postgres:16-alpine
     container_name: iitsm-postgres
@@ -24,11 +43,10 @@ services:
     container_name: iitsm-mailpit
     restart: always
     ports:
-      - "1025:1025" # SMTP port
-      - "8025:8025" # Web UI port
+      - "1025:1025" # Mock SMTP
+      - "8025:8025" # Web Mail UI
     environment:
       MP_MAX_MESSAGES: 500
 
 volumes:
   pgdata:
-

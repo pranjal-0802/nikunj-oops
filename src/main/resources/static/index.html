@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nimbus FinServe - Intelligent IT Service Management (I-ITSM)</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white">
+
+  <!-- Top Navbar -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Nimbus FinServe</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold font-mono">I-ITSM 1.0</span>
+          </div>
+          <p class="text-xs text-slate-400">Intelligent IT Service Management & Automation</p>
+        </div>
+      </div>
+
+      <!-- Virtual Clock Status -->
+      <div id="clock-status-bar" class="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs">
+        <div class="flex items-center gap-1.5 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Virtual Clock:</span>
+        </div>
+        <span id="virtual-time-display" class="font-mono font-semibold text-cyan-300">--:--:--</span>
+        <span id="virtual-speed-badge" class="px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono text-[10px] font-bold">1x</span>
+      </div>
+
+      <!-- Persona Switcher & User Profile -->
+      <div class="flex items-center gap-4">
+        <!-- Notification Bell -->
+        <button id="notification-bell-btn" class="relative p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Notifications">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span id="unread-count-badge" class="hidden absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+        </button>
+
+        <!-- Persona Switcher Dropdown -->
+        <div class="relative">
+          <select id="persona-selector" class="bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer">
+            <option value="employee@nimbusfinserve.com">👤 Employee (Demo User)</option>
+            <option value="tech.network@nimbusfinserve.com">🛠️ Technician (David Kim - Network)</option>
+            <option value="lead.network@nimbusfinserve.com">👥 Team Lead (Sarah Jenkins - Network)</option>
+            <option value="admin@nimbusfinserve.com" selected>⚡ System Admin (IT Operations)</option>
+            <option value="manager@nimbusfinserve.com">💼 IT Manager (Operations Manager)</option>
+          </select>
+        </div>
+
+        <div id="active-user-badge" class="hidden lg:flex flex-col text-right">
+          <span id="active-user-name" class="text-xs font-semibold text-white">System Administrator</span>
+          <span id="active-user-role" class="text-[10px] font-mono text-indigo-400">ROLE_ADMIN</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="bg-slate-900 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-2 overflow-x-auto py-2">
+      <button class="nav-tab active" data-target="console-employee">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        Employee Portal
+      </button>
+      <button class="nav-tab" data-target="console-technician">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Technician Console
+      </button>
+      <button class="nav-tab" data-target="console-admin">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Admin Command Centre
+      </button>
+      <button class="nav-tab" data-target="console-simulation">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Simulation Engine
+      </button>
+      <button class="nav-tab" data-target="console-reports">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Executive Reports
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- ============================================================== -->
+    <!-- CONSOLE 1: EMPLOYEE PORTAL -->
+    <!-- ============================================================== -->
+    <section id="console-employee" class="tab-panel active space-y-6">
+      
+      <!-- Privacy Banner Notice -->
+      <div class="bg-indigo-950/40 border border-indigo-800/60 rounded-xl p-4 flex items-start gap-3">
+        <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 mt-0.5">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-white">Employee Data Privacy Guarantee</h4>
+          <p class="text-xs text-slate-300 mt-0.5">
+            Under company policy and Section 7.2 of the I-ITSM specification, internal incident priority ranks (P1–P4), SLA operational deadlines, and private engineering investigation notes are completely masked from this view.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Raise New Ticket Form -->
+        <div class="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Report an Incident
+              </h3>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Self-Service</span>
+            </div>
+
+            <form id="create-incident-form" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Incident Title</label>
+                <input type="text" id="inc-title" required minlength="5" maxlength="120"
+                  placeholder="e.g. VPN tunnel disconnects during wire transfer"
+                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                <p class="text-[11px] text-slate-500 mt-1">Brief summary (5–120 characters)</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Detailed Description</label>
+                <textarea id="inc-desc" rows="4" required minlength="20" maxlength="4000"
+                  placeholder="Describe what occurred, any error codes displayed, and affected systems..."
+                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"></textarea>
+                <div class="flex justify-between items-center text-[11px] text-slate-500 mt-1">
+                  <span>Minimum 20 characters</span>
+                  <span id="desc-char-count">0 / 4000</span>
+                </div>
+              </div>
+
+              <!-- AI Classification Preview -->
+              <div id="ai-preview-box" class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs space-y-1 hidden">
+                <div class="flex items-center gap-1.5 text-indigo-400 font-semibold">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  <span>AI Pre-Classification Preview</span>
+                </div>
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Detected Category:</span>
+                  <span id="preview-category" class="font-mono font-bold text-white">--</span>
+                </div>
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Service Match:</span>
+                  <span id="preview-service" class="font-mono text-cyan-400">--</span>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" id="btn-submit-incident" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+                  <span>Submit Ticket</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500">
+            Tickets are routed automatically to specialist technical teams based on natural language categorization.
+          </div>
+        </div>
+
+        <!-- My Raised Tickets Table -->
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-bold text-white">My Incident Tickets</h3>
+              <p class="text-xs text-slate-400">Track lifecycle progress from intake to verified closure</p>
+            </div>
+            <button id="btn-refresh-employee-tickets" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 text-xs flex items-center gap-1.5 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Refresh
+            </button>
+          </div>
+
+          <div id="employee-tickets-container" class="space-y-3 min-h-[350px]">
+            <!-- Rendered by app.js -->
+            <div class="text-center py-12 text-slate-500 text-sm">Loading your tickets...</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- CONSOLE 2: TECHNICIAN CONSOLE -->
+    <!-- ============================================================== -->
+    <section id="console-technician" class="tab-panel space-y-6">
+      
+      <!-- Metrics Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+          <span class="text-xs text-slate-400 font-medium">Assigned to Me</span>
+          <p id="tech-metric-assigned" class="text-2xl font-bold text-white mt-1">0</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+          <span class="text-xs text-amber-400 font-medium">Under Investigation</span>
+          <p id="tech-metric-investigating" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+          <span class="text-xs text-cyan-400 font-medium">Waiting on Info</span>
+          <p id="tech-metric-pending" class="text-2xl font-bold text-cyan-400 mt-1">0</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+          <span class="text-xs text-red-400 font-medium">At Risk / Warning</span>
+          <p id="tech-metric-atrisk" class="text-2xl font-bold text-red-400 mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Queue Header & Filter -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+              Technician Assigned Work Queue
+            </h3>
+            <p class="text-xs text-slate-400">Tickets prioritized by Urgency Ordering and SLA Target Risk</p>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <select id="tech-queue-filter" class="bg-slate-800 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-slate-300">
+              <option value="ALL">All Active Tickets</option>
+              <option value="ASSIGNED">Assigned (Unacknowledged)</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="PENDING_INFO">Waiting on User Info</option>
+            </select>
+            <button id="btn-refresh-tech-queue" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 text-xs">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="tech-queue-container" class="space-y-4 min-h-[400px]">
+          <!-- Rendered by app.js -->
+          <div class="text-center py-16 text-slate-500 text-sm">Loading technician queue...</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- CONSOLE 3: ADMIN COMMAND CENTRE -->
+    <!-- ============================================================== -->
+    <section id="console-admin" class="tab-panel space-y-6">
+      
+      <!-- Sub-tabs for Admin -->
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+        <button class="admin-subtab active" data-subtarget="admin-all-incidents">All Incidents Monitor</button>
+        <button class="admin-subtab" data-subtarget="admin-triage-queue">Triage & Reclassification Queue</button>
+        <button class="admin-subtab" data-subtarget="admin-strategy-manager">Assignment Strategies</button>
+      </div>
+
+      <!-- Sub-panel 1: All Incidents Monitor -->
+      <div id="admin-all-incidents" class="admin-panel active space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-base font-bold text-white">Enterprise Incident Catalog</h3>
+              <p class="text-xs text-slate-400">Global ITIL incident monitoring with full factor inspection</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="text" id="admin-search-input" placeholder="Search title or ID..." class="bg-slate-800 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-white placeholder-slate-500">
+              <select id="admin-category-filter" class="bg-slate-800 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-slate-300">
+                <option value="">All Categories</option>
+                <option value="HARDWARE">HARDWARE</option>
+                <option value="SOFTWARE">SOFTWARE</option>
+                <option value="NETWORK">NETWORK</option>
+                <option value="DATABASE">DATABASE</option>
+                <option value="SECURITY">SECURITY</option>
+                <option value="CLOUD">CLOUD</option>
+                <option value="EMAIL">EMAIL</option>
+                <option value="ACCESS">ACCESS</option>
+                <option value="APPLICATION">APPLICATION</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300 border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
+                  <th class="py-3 px-3">Ticket ID</th>
+                  <th class="py-3 px-3">Title</th>
+                  <th class="py-3 px-3">Category</th>
+                  <th class="py-3 px-3">Priority</th>
+                  <th class="py-3 px-3">Status</th>
+                  <th class="py-3 px-3">Assignee</th>
+                  <th class="py-3 px-3">SLA Risk</th>
+                  <th class="py-3 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-incidents-tbody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-panel 2: Triage Queue -->
+      <div id="admin-triage-queue" class="admin-panel space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              Admin Triage & Wrong-Domain Review Queue
+            </h3>
+            <p class="text-xs text-slate-400">Tickets in CLASSIFIED state awaiting assignment, or flagged as out-of-scope by technicians</p>
+          </div>
+
+          <div id="admin-triage-container" class="space-y-3 min-h-[300px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-panel 3: Assignment Strategies -->
+      <div id="admin-strategy-manager" class="admin-panel space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+          <div>
+            <h3 class="text-base font-bold text-white">Dynamic Technician Assignment Strategies</h3>
+            <p class="text-xs text-slate-400">Pattern: Strategy + Open/Closed Principle. Hot-swap technician routing algorithms at runtime without restarting the application.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="text-xs text-slate-400 font-medium">Currently Active Strategy:</span>
+              <p id="current-active-strategy-name" class="text-lg font-bold text-cyan-400 font-mono mt-0.5">WEIGHTED_COMPOSITE</p>
+              <p id="current-active-strategy-desc" class="text-xs text-slate-500 mt-1">Multi-factor routing balancing skills, real-time workload, and seniority.</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">Active in Engine</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="strategy-cards-container">
+            <!-- Cards rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- CONSOLE 4: SIMULATION ENGINE -->
+    <!-- ============================================================== -->
+    <section id="console-simulation" class="tab-panel space-y-6">
+      
+      <!-- Virtual Clock Control Hub -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Time-Accelerated Virtual Clock Control
+            </h3>
+            <p class="text-xs text-slate-400">Pattern: Decorator (`AdjustableClock`). Fast-forward hours in seconds without thread-blocking.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-clock-reset" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-semibold transition">
+              Reset to Real Time
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Current Virtual Time -->
+          <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+            <span class="text-xs text-slate-400 font-medium">Virtual Time Epoch</span>
+            <p id="sim-clock-display" class="text-xl font-bold font-mono text-cyan-300 mt-1">2026-10-26 14:00:00</p>
+            <span class="text-[11px] text-slate-500">Decorates java.time.Clock</span>
+          </div>
+
+          <!-- Speed Multiplier Controls -->
+          <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+            <span class="text-xs text-slate-400 font-medium">Time Multiplier</span>
+            <div class="flex items-center gap-2 mt-2">
+              <button class="sim-speed-btn px-2.5 py-1 rounded bg-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-700" data-speed="1">1x</button>
+              <button class="sim-speed-btn px-2.5 py-1 rounded bg-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-700" data-speed="60">60x (1m/s)</button>
+              <button class="sim-speed-btn px-2.5 py-1 rounded bg-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-700" data-speed="600">600x (10m/s)</button>
+            </div>
+          </div>
+
+          <!-- Discrete Fast Forward -->
+          <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+            <span class="text-xs text-slate-400 font-medium">Discrete Fast-Forward</span>
+            <div class="flex items-center gap-2 mt-2">
+              <button class="sim-ff-btn px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-bold hover:bg-indigo-900" data-minutes="15">+15m</button>
+              <button class="sim-ff-btn px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-bold hover:bg-indigo-900" data-minutes="60">+1h</button>
+              <button class="sim-ff-btn px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-bold hover:bg-indigo-900" data-minutes="1440">+24h</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canonical Demonstration Scenarios -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Scenarios List -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-base font-bold text-white">Evaluation Demonstration Scenarios (S1–S5)</h3>
+          <p class="text-xs text-slate-400">Click any scenario to execute the complete end-to-end operational flow.</p>
+
+          <div class="space-y-3">
+            
+            <!-- S1 Card -->
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold font-mono">SCENARIO S1</span>
+                  <span class="text-sm font-bold text-white">Happy Path Lifecycle</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Creation $\rightarrow$ Ack $\rightarrow$ Investigation $\rightarrow$ Fix $\rightarrow$ Verify $\rightarrow$ 5-Star Close.</p>
+              </div>
+              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/20" data-scenario="S1">
+                Run S1
+              </button>
+            </div>
+
+            <!-- S2 Card -->
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-red-950 text-red-400 border border-red-800 text-[10px] font-bold font-mono">SCENARIO S2</span>
+                  <span class="text-sm font-bold text-white">P1 Outage & Multi-Tier Escalations</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">75% warning, 93% warning, hard breach $\rightarrow$ Tier 1–4 escalations to IT Manager.</p>
+              </div>
+              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow-lg shadow-red-600/20" data-scenario="S2">
+                Run S2
+              </button>
+            </div>
+
+            <!-- S3 Card -->
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 text-[10px] font-bold font-mono">SCENARIO S3</span>
+                  <span class="text-sm font-bold text-white">Wrong-Domain Triage & Reassignment</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Network tech flags ticket $\rightarrow$ Admin reclassifies to DATABASE and reassigns.</p>
+              </div>
+              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-lg shadow-amber-600/20" data-scenario="S3">
+                Run S3
+              </button>
+            </div>
+
+            <!-- S4 Card -->
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 text-[10px] font-bold font-mono">SCENARIO S4</span>
+                  <span class="text-sm font-bold text-white">Duplicate Storm & Avalanche Escalation</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">5 concurrent duplicate VPN tickets correlate via TF-IDF; priority bumped.</p>
+              </div>
+              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-lg shadow-cyan-600/20" data-scenario="S4">
+                Run S4
+              </button>
+            </div>
+
+            <!-- S5 Card -->
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-400 border border-purple-800 text-[10px] font-bold font-mono">SCENARIO S5</span>
+                  <span class="text-sm font-bold text-white">Rejection Loop & SLA Clock Pausing</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">SLA clock pauses during PENDING_INFO, resumes with deadline extension.</p>
+              </div>
+              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/20" data-scenario="S5">
+                Run S5
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Real-time Scenario Execution Console -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                Execution Audit Terminal
+              </h3>
+              <button id="btn-clear-sim-logs" class="text-xs text-slate-500 hover:text-slate-300">Clear</button>
+            </div>
+            <p class="text-xs text-slate-400">Step-by-step state transitions, event spine dispatches, and SLA changes.</p>
+          </div>
+
+          <div id="sim-terminal-logs" class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-1.5 h-[340px] overflow-y-auto mt-4">
+            <div class="text-slate-600">// Ready. Select a scenario above to start simulation.</div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- CONSOLE 5: EXECUTIVE & OPERATIONAL REPORTS -->
+    <!-- ============================================================== -->
+    <section id="console-reports" class="tab-panel space-y-6">
+      
+      <!-- Key Executive KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-lg">
+          <span class="text-xs font-semibold text-slate-400">Mean Time to Resolution (MTTR)</span>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span id="kpi-mttr-val" class="text-3xl font-extrabold text-cyan-400 font-mono">--</span>
+            <span class="text-xs text-slate-500">minutes</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Average time from intake to successful resolution</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-lg">
+          <span class="text-xs font-semibold text-slate-400">Mean Time to Respond (MTTResp)</span>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span id="kpi-mttresp-val" class="text-3xl font-extrabold text-indigo-400 font-mono">--</span>
+            <span class="text-xs text-slate-500">minutes</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Average time until initial technician acknowledgment</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-lg">
+          <span class="text-xs font-semibold text-slate-400">Overall SLA Compliance Rate</span>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span id="kpi-sla-compliance-val" class="text-3xl font-extrabold text-emerald-400 font-mono">--%</span>
+            <span class="text-xs text-slate-500">met target</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Percentage of incidents resolved within SLA deadlines</p>
+        </div>
+      </div>
+
+      <!-- Report Tables & Visual Breakdowns -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Team Workload Distribution -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-base font-bold text-white">Support Team Capacity & Workload</h3>
+          <div id="workload-table-container" class="space-y-3">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Service Incident Analysis -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-base font-bold text-white">Service Volume & Criticality Breakdown</h3>
+          <div id="service-analysis-container" class="space-y-3">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- SLA Breach Breakdown by Priority -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-base font-bold text-white">SLA Performance by Priority Level</h3>
+          <div id="sla-breakdown-container" class="space-y-3">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Escalation History Log -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-base font-bold text-white">Multi-Tier Escalation History Log</h3>
+          <div id="escalation-log-container" class="space-y-2 max-h-[300px] overflow-y-auto">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Interactive Action Modals (Hidden by Default) -->
+  <div id="modal-container" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div id="modal-content" class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+      <!-- Modal dynamically populated by app.js -->
+    </div>
+  </div>
+
+  <!-- Notification Slide-over / Modal -->
+  <div id="notification-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          In-App Notifications
+        </h3>
+        <button id="btn-close-notifications" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+      <div id="notifications-list-container" class="max-h-80 overflow-y-auto space-y-2 text-xs">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-850 py-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>CS F213 Object-Oriented Programming — Project Assignment</span>
+      <span class="font-mono text-[11px] text-slate-400">Strict Pure Java Domain Core · 8 Design Patterns · Injected Clock</span>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
+

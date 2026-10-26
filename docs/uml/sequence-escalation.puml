@@ -1,0 +1,80 @@
+@startuml
+title SLA Monitoring & Multi-Tier Escalation Sequence Diagram (Chain of Responsibility)
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "System Daemon" as Scheduler
+participant "SlaService" as SlaSvc
+participant "Incident" as Inc
+participant "SlaTracker" as Tracker
+participant "AdjustableClock" as Clock
+participant "EscalationService" as EscSvc
+participant "EscalationHandler\n(Chain of Resp)" as Chain
+participant "DomainEventPublisher" as Publisher
+participant "NotificationObserver" as NotifObs
+actor "Technician" as Tech
+actor "Team Lead" as Lead
+actor "System Admin" as Admin
+actor "IT Operations Manager" as Manager
+
+Scheduler -> SlaSvc: evaluateActiveIncidents()
+activate SlaSvc
+
+SlaSvc -> Inc: updateSlaStatus(now)
+activate Inc
+Inc -> Tracker: evaluateStatus(now)
+activate Tracker
+Tracker -> Clock: instant()
+Clock --> Tracker: virtualNow
+Tracker --> Inc: newStatus (AT_RISK / WARNING / BREACHED)
+deactivate Tracker
+Inc --> SlaSvc: statusUpdated
+deactivate Inc
+
+opt SLA Threshold Exceeded (>= 75% or Breached)
+    SlaSvc -> Publisher: publish(SlaWarning / SlaViolated)
+    Publisher -> NotifObs: onEvent()
+    
+    SlaSvc -> EscSvc: evaluateAndEscalate(incident)
+    activate EscSvc
+    EscSvc -> Chain: handle(incident, context)
+    activate Chain
+    
+    alt Tier 4: P1 Breach on Mission-Critical Service
+        Chain -> Chain: Tier4ItManagerHandler.canHandle() == true
+        Chain --> EscSvc: EscalationAction(Tier 4, IT_MANAGER, ADMIN-MGR-01)
+    else Tier 3: P2 Breach or Triage Stagnation (>30m)
+        Chain -> Chain: Tier3SystemAdminHandler.canHandle() == true
+        Chain --> EscSvc: EscalationAction(Tier 3, ADMINISTRATOR, ADMIN-SYS-01)
+    else Tier 2: 90% SLA Warning Threshold Reached
+        Chain -> Chain: Tier2TeamLeadHandler.canHandle() == true
+        Chain --> EscSvc: EscalationAction(Tier 2, TEAM_LEAD, LEAD-NET-1)
+    else Tier 1: 75% SLA Reminder Threshold Reached
+        Chain -> Chain: Tier1TechnicianHandler.canHandle() == true
+        Chain --> EscSvc: EscalationAction(Tier 1, TECHNICIAN, TECH-NET-1)
+    end
+    deactivate Chain
+    
+    EscSvc -> EscSvc: Persist EscalationRecord to DB
+    EscSvc -> Publisher: publish(DomainEvent.IncidentEscalated)
+    Publisher -> NotifObs: dispatchNotifications()
+    
+    alt Tier 4
+        NotifObs -> Manager: Emergency SMS / Email Alert
+    else Tier 3
+        NotifObs -> Admin: System Triage Alert
+    else Tier 2
+        NotifObs -> Lead: Queue Intervention Alert
+    else Tier 1
+        NotifObs -> Tech: Urgent Ticket Reminder SMS
+    end
+    
+    EscSvc --> SlaSvc: EscalationAction Taken
+    deactivate EscSvc
+end
+
+SlaSvc --> Scheduler: List<SlaEvaluationResult>
+deactivate SlaSvc
+
+@enduml
+

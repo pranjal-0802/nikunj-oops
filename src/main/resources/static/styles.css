@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Nimbus FinServe :: Intelligent IT Service Management (I-ITSM) Styles
+   ========================================================================== */
+
+:root {
+  --bg-main: #020617;
+  --bg-card: #0f172a;
+  --bg-card-hover: #1e293b;
+  --border-color: #1e293b;
+  --primary: #4f46e5;
+  --primary-hover: #6366f1;
+  --cyan: #06b6d4;
+  --emerald: #10b981;
+  --amber: #f59e0b;
+  --rose: #f43f5e;
+}
+
+*, ::before, ::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: #1e293b;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #020617;
+  color: #f8fafc;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Typography & Links */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0;
+}
+
+/* Tab Navigation */
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  color: #94a3b8;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+}
+
+.nav-tab:hover {
+  color: #ffffff;
+  background-color: #1e293b;
+}
+
+.nav-tab.active {
+  color: #ffffff;
+  background-color: #4f46e5;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Admin Subtabs */
+.admin-subtab {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  color: #94a3b8;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.admin-subtab:hover {
+  color: #ffffff;
+  background: #1e293b;
+}
+
+.admin-subtab.active {
+  color: #38bdf8;
+  background: #0c4a6e;
+  border: 1px solid #0284c7;
+}
+
+.admin-panel {
+  display: none;
+}
+
+.admin-panel.active {
+  display: block;
+}
+
+/* Stepper Component */
+.stepper-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 1rem;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.step-node {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: #1e293b;
+  color: #64748b;
+  border: 2px solid #334155;
+  transition: all 0.2s;
+}
+
+.stepper-step.completed .step-node {
+  background-color: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.stepper-step.current .step-node {
+  background-color: #4f46e5;
+  border-color: #818cf8;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.6);
+}
+
+.step-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  margin-top: 0.375rem;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.stepper-step.completed .step-label,
+.stepper-step.current .step-label {
+  color: #f8fafc;
+}
+
+.stepper-bar {
+  position: absolute;
+  top: 0.875rem;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background-color: #334155;
+  z-index: 1;
+}
+
+/* Priority Badges */
+.badge-p1 {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-p2 {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.badge-p3 {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.badge-p4 {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* SLA Status Badges */
+.sla-on-track {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.sla-at-risk {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.sla-warning {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.sla-breached {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  animation: pulseBreach 1.5s infinite;
+}
+
+@keyframes pulseBreach {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Modals */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+

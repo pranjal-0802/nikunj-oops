@@ -144,6 +144,35 @@ entity "audit_records" as audits {
     * description : TEXT
 }
 
+entity "notifications" as notifications {
+    * id : VARCHAR(64) [PK]
+    --
+    * recipient_id : VARCHAR(64) [FK]
+    * channel : VARCHAR(32)
+    * subject : VARCHAR(255)
+    * content : TEXT
+    * created_at : TIMESTAMP WITH TIME ZONE
+    * read : BOOLEAN
+    read_at : TIMESTAMP WITH TIME ZONE
+}
+
+entity "escalation_records" as escalations {
+    * id : VARCHAR(64) [PK]
+    --
+    * incident_id : VARCHAR(64) [FK]
+    * tier : INT
+    * from_role : VARCHAR(32)
+    * to_role : VARCHAR(32)
+    * to_user_id : VARCHAR(64) [FK]
+    * reason : TEXT
+    * timestamp : TIMESTAMP WITH TIME ZONE
+}
+
+entity "incident_linked_ids" as linked_ids {
+    * incident_id : VARCHAR(64) [PK, FK]
+    * linked_id : VARCHAR(64) [PK]
+}
+
 users ||--o| employees
 users ||--o| technicians
 users ||--o| administrators
@@ -159,5 +188,8 @@ incidents ||--o{ notes
 incidents ||--o| resolutions
 incidents ||--o| feedback
 incidents ||--o{ reassignments
+incidents ||--o{ escalations
+incidents ||--o{ linked_ids
+users ||--o{ notifications : receives
 @enduml
 

@@ -59,15 +59,23 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/styles.css",
+                                "/app.js",
+                                "/favicon.ico",
+                                "/assets/**",
+                                "/error",
                                 "/api/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/actuator/health"
                         ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**", "/api/simulation/**").hasRole("ADMIN")
                         .requestMatchers("/api/technician/**").hasAnyRole("TECHNICIAN", "TEAM_LEAD")
                         .requestMatchers("/api/employee/**").hasRole("EMPLOYEE")
+                        .requestMatchers("/api/notifications/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
