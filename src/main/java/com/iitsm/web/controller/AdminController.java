@@ -27,6 +27,9 @@ import com.iitsm.web.dto.StrategyInfoDto;
 import com.iitsm.web.dto.SwitchStrategyRequest;
 import com.iitsm.web.mapper.IncidentDtoMapper;
 import jakarta.validation.Valid;
+import com.iitsm.application.service.UserService;
+import com.iitsm.domain.model.Designation;
+import com.iitsm.web.dto.TechnicianSummaryDto;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -55,6 +58,7 @@ public class AdminController {
 
     private final IncidentService incidentService;
     private final SearchService searchService;
+    private final UserService userService;
     private final UserRepository userRepository;
     private final TechnicianRepository technicianRepository;
     private final SpringDataAuditRecordRepository auditRecordRepository;
@@ -64,6 +68,7 @@ public class AdminController {
     public AdminController(
             IncidentService incidentService,
             SearchService searchService,
+            UserService userService,
             UserRepository userRepository,
             TechnicianRepository technicianRepository,
             SpringDataAuditRecordRepository auditRecordRepository,
@@ -71,6 +76,7 @@ public class AdminController {
             Clock clock) {
         this.incidentService = Objects.requireNonNull(incidentService, "incidentService cannot be null");
         this.searchService = Objects.requireNonNull(searchService, "searchService cannot be null");
+        this.userService = Objects.requireNonNull(userService, "userService cannot be null");
         this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
         this.technicianRepository = Objects.requireNonNull(technicianRepository, "technicianRepository cannot be null");
         this.auditRecordRepository = Objects.requireNonNull(auditRecordRepository, "auditRecordRepository cannot be null");
@@ -156,9 +162,30 @@ public class AdminController {
     }
 
     @GetMapping("/technicians")
-    public ResponseEntity<List<Technician>> getTechnicianRoster() {
-        List<Technician> roster = technicianRepository.findAll();
+    public ResponseEntity<List<TechnicianSummaryDto>> getTechnicianRoster() {
+        List<TechnicianSummaryDto> roster = technicianRepository.findAll().stream()
+                .map(TechnicianSummaryDto::fromDomain)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(roster);
+    }
+
+    @PostMapping("/users/{userId}/unlock")
+    public ResponseEntity<Void> unlockUser(@PathVariable String userId) {
+        userService.unlockUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    public record UpdateDesignationRequest(String designation) {}
+
+    @PutMapping("/users/{userId}/designation")
+    public ResponseEntity<Void> updateDesignation(
+            @PathVariable String userId,
+            @RequestBody UpdateDesignationRequest request) {
+        if (request != null && request.designation() != null) {
+            Designation des = Designation.valueOf(request.designation().trim().toUpperCase());
+            userService.updateEmployeeDesignation(userId, des);
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/assignment/strategies")

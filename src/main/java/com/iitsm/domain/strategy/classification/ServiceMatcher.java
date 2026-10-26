@@ -45,7 +45,8 @@ public class ServiceMatcher {
                     matches += 2;
                 } else {
                     for (String token : tokens) {
-                        if (token.equalsIgnoreCase(normalizedKw) || normalizedKw.contains(token)) {
+                        if (token.equalsIgnoreCase(normalizedKw)
+                                || TextNormalizer.stem(normalizedKw).equalsIgnoreCase(token)) {
                             matches += 1;
                         }
                     }
@@ -58,12 +59,12 @@ public class ServiceMatcher {
             }
         }
 
-        if (maxMatches > 0) {
+        if (maxMatches > 0 && bestService != null) {
             return Optional.of(bestService);
         }
 
-        // Fallback: Pick first available service or empty
-        return availableServices.stream().findFirst();
+        // Return empty when no keyword or service name matches
+        return Optional.empty();
     }
 }
 

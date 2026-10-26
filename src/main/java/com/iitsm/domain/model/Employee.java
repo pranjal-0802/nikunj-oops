@@ -8,7 +8,7 @@ import java.util.Objects;
  */
 public class Employee extends User {
 
-    private final Designation designation;
+    private Designation designation;
     private final String department;
     private final int seniorityYears;
 
@@ -34,6 +34,10 @@ public class Employee extends User {
 
     public Designation getDesignation() {
         return designation;
+    }
+
+    public void setDesignation(Designation designation) {
+        this.designation = Objects.requireNonNull(designation, "Designation cannot be null");
     }
 
     public String getDepartment() {

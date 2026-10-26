@@ -91,3 +91,4 @@ Upon receiving the user command `"proceed to Batch 1"`, we will implement fixes 
 - **F1**: Unassigned incident creation when no technician has capacity + `UnassignedIncidentDispatcher`.
 - **F2**: Fallback to "General IT / Unclassified" service instead of arbitrary first service.
 - **F9**: Docker compose configuration and smoke test script.
+

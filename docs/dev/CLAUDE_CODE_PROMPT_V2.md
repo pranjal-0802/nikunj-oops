@@ -105,3 +105,4 @@ Follow **Stages 3, 4, 5 of the Redesign Prompt** (frontend foundation, persona e
 - The new UI satisfies the Redesign Prompt's Definition of Done and the three demo workflows run from `docker compose up` in one take.
 
 **Begin with Batch 0 now: reproduce the findings as failing tests and report the failure list. Do not change production code in Batch 0. Then stop and wait for my "proceed to Batch 1".**
+

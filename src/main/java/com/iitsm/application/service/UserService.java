@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,10 +34,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
     private final UserRepository userRepository;
     private final UserFactory userFactory;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
+    private final LoginAttemptService loginAttemptService;
     private final int maxFailedLogins;
 
     public UserService(
@@ -43,11 +48,13 @@ public class UserService {
             UserFactory userFactory,
             PasswordEncoder passwordEncoder,
             JwtTokenProvider tokenProvider,
+            LoginAttemptService loginAttemptService,
             @Value("${iitsm.security.max-failed-logins:5}") int maxFailedLogins) {
         this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
         this.userFactory = Objects.requireNonNull(userFactory, "userFactory cannot be null");
         this.passwordEncoder = Objects.requireNonNull(passwordEncoder, "passwordEncoder cannot be null");
         this.tokenProvider = Objects.requireNonNull(tokenProvider, "tokenProvider cannot be null");
+        this.loginAttemptService = Objects.requireNonNull(loginAttemptService, "loginAttemptService cannot be null");
         this.maxFailedLogins = maxFailedLogins;
     }
 
@@ -55,35 +62,42 @@ public class UserService {
 
     public AuthResult authenticate(String emailStr, String rawPassword) {
         if (emailStr == null || rawPassword == null) {
-            throw new InvalidCredentialsException("Email and password must be provided");
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         Email email = new Email(emailStr);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+                .orElse(null);
+
+        if (user == null) {
+            log.warn("Authentication failed: user not found for '{}'", emailStr);
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
 
         if (!user.isActive()) {
-            throw new InvalidCredentialsException("User account is deactivated");
+            log.warn("Authentication failed: user '{}' is deactivated", emailStr);
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         if (user.isLocked()) {
-            throw new InvalidCredentialsException("Account is locked after too many failed login attempts");
+            log.warn("Authentication failed: user '{}' is locked", emailStr);
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            user.recordFailedLogin(maxFailedLogins);
-            userRepository.save(user);
-            if (user.isLocked()) {
-                throw new InvalidCredentialsException("Account locked after 5 failed login attempts");
-            }
+            log.warn("Authentication failed: invalid password for '{}'", emailStr);
+            loginAttemptService.recordFailedAttempt(emailStr);
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
         // Successful authentication
-        user.resetFailedLogins();
-        userRepository.save(user);
+        loginAttemptService.resetFailedAttempts(emailStr);
         String token = tokenProvider.generateToken(user);
         return new AuthResult(token, user);
+    }
+
+    public void unlockUser(String userId) {
+        loginAttemptService.unlockUser(userId);
     }
 
     public Employee registerEmployee(
@@ -171,6 +185,23 @@ public class UserService {
         String id = "ADMIN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         Administrator admin = userFactory.createAdministrator(id, name, emailStr, passwordHash, adminLevel);
         return (Administrator) userRepository.save(admin);
+    }
+
+    public Employee updateEmployeeDesignation(String employeeId, Designation newDesignation) {
+        Objects.requireNonNull(employeeId, "employeeId cannot be null");
+        Objects.requireNonNull(newDesignation, "newDesignation cannot be null");
+
+        User user = userRepository.findById(employeeId)
+                .orElseThrow(() -> new ValidationException("employeeId", "Employee not found: " + employeeId));
+
+        if (!(user instanceof Employee employee)) {
+            throw new ValidationException("userId", "User is not an employee: " + employeeId);
+        }
+
+        employee.setDesignation(newDesignation);
+        User saved = userRepository.save(employee);
+        log.info("Admin updated designation of employee '{}' to {}", employeeId, newDesignation);
+        return (Employee) saved;
     }
 
     @Transactional(readOnly = true)

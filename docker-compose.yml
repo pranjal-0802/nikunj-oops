@@ -11,10 +11,11 @@ services:
       - "8085:8085"
     environment:
       PORT: 8085
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: demo
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/iitsm_prod
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: nimbus-finserve-iitsm-demo-super-secret-key-2026-production-grade
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: 1025
     depends_on:

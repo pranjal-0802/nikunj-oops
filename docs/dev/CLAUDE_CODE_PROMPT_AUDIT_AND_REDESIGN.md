@@ -36,3 +36,4 @@ As specified in `CLAUDE_CODE_PROMPT_V2.md`:
 - Updated documentation matching actual measured metrics (real test counts, real JaCoCo instruction and line coverage).
 - Verified `docker-compose.yml` environment with seeded demo accounts ready for end-to-end evaluation.
 - Clean conventional git commit history.
+

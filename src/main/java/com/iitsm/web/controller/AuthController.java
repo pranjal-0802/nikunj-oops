@@ -44,14 +44,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        // Finding S3: Self-registration ignores client-supplied designation to prevent privilege escalation
         Designation designation = Designation.ASSOCIATE;
-        if (request.designation() != null) {
-            try {
-                designation = Designation.valueOf(request.designation().trim().toUpperCase());
-            } catch (IllegalArgumentException ignored) {
-                // Default to ASSOCIATE
-            }
-        }
 
         String dept = (request.department() != null && !request.department().isBlank())
                 ? request.department().trim()

@@ -204,6 +204,8 @@ public class CompanySeeder implements CommandLineRunner {
                 Set.of("laptop", "monitor", "dock", "keyboard", "mouse", "screen flickering", "charger"));
         seedService("SVC-WIKI", "Intranet Wiki", appTeam.getId(), BusinessCriticality.TIER_1_INTERNAL_SUPPORT, 3500,
                 Set.of("wiki", "confluence", "intranet", "knowledge base", "docs"));
+        seedService("SRV-GEN-001", "General IT / Unclassified", deskTeam.getId(), BusinessCriticality.TIER_1_INTERNAL_SUPPORT, 500,
+                Set.of("general", "unclassified", "helpdesk", "other"));
 
         // 5. Seed Primary Demo Employee
         Employee demoEmployee = userFactory.createEmployee(

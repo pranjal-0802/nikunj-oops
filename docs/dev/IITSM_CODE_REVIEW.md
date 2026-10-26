@@ -86,3 +86,4 @@ Severity: **Critical** = exploitable or breaks a core flow; **High** = wrong beh
 3. **Then UI** (Stages 3-4 of the redesign prompt), then E2E + accessibility, then the demo script.
 
 If you only have time for five fixes: **S1, S2, S3, F1, A1**. Those are the ones an evaluator is most likely to hit or disprove in a live demo or a code read.
+

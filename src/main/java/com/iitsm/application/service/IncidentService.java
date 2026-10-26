@@ -151,8 +151,11 @@ public class IncidentService {
         // 2. IT Service Identification
         List<ItService> services = itServiceRepository.findAll();
         Optional<ItService> matchedService = serviceMatcher.findBestMatch(title, description, services);
-        ItService service = matchedService.orElse(null);
-        String serviceId = (service != null) ? service.getId() : "SRV-DEFAULT";
+        ItService service = matchedService.orElseGet(() ->
+                itServiceRepository.findById("SRV-GEN-001")
+                        .or(() -> services.stream().filter(s -> s.getName().toLowerCase().contains("general") || s.getName().toLowerCase().contains("unclassified")).findFirst())
+                        .orElse(null));
+        String serviceId = (service != null) ? service.getId() : (services.isEmpty() ? null : services.getFirst().getId());
 
         // 3. Automated Duplicate Detection and Correlation
         duplicateDetectionService.checkAndLinkDuplicate(incident);
@@ -172,15 +175,16 @@ public class IncidentService {
         incident.classify(category, serviceId, decision, slaPolicy, now);
 
         // 6. Intelligent Technician Routing via active Assignment Strategy
-        List<Technician> allTechs = technicianRepository.findAvailableTechnicians();
-        if (allTechs.isEmpty()) {
-            allTechs = technicianRepository.findAll();
-        }
+        List<Technician> availableTechs = technicianRepository.findAvailableTechnicians().stream()
+                .filter(Technician::hasCapacity)
+                .collect(Collectors.toList());
 
         String preferredTeamId = (service != null) ? service.getOwningTeamId() : null;
-        List<Technician> candidates = candidateFilter.filterCandidates(allTechs, preferredTeamId, Collections.emptySet());
+        List<Technician> candidates = candidateFilter.filterCandidates(availableTechs, preferredTeamId, Collections.emptySet())
+                .stream().filter(Technician::hasCapacity).collect(Collectors.toList());
+
         if (candidates.isEmpty()) {
-            candidates = allTechs;
+            candidates = availableTechs;
         }
 
         if (!candidates.isEmpty()) {
@@ -188,9 +192,11 @@ public class IncidentService {
             AssignmentRecommendation recommendation = activeStrategy.recommend(incident, candidates);
             Technician assignedTech = recommendation.technician();
 
-            incident.assign(assignedTech.getId(), now);
-            assignedTech.assignIncident(incident.getId());
-            technicianRepository.save(assignedTech);
+            if (assignedTech != null && assignedTech.hasCapacity()) {
+                incident.assign(assignedTech.getId(), now);
+                assignedTech.assignIncident(incident.getId());
+                technicianRepository.save(assignedTech);
+            }
         }
 
         Incident saved = incidentRepository.save(incident);

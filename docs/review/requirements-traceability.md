@@ -107,3 +107,4 @@ This document establishes bidirectional traceability between the CS F213 Course 
 | **A4** | Optimistic locking failures throw generic `PersistenceFailureException` instead of `ConcurrentModificationException` | Med | Batch 2 | `CorrectnessRegressionTest.A4_concurrentAcknowledgmentThrowsConcurrentModificationException` |
 | **F8** | `EmailChannel` only simulates notifications without connecting to real SMTP server | Med | Batch 2 | `CorrectnessRegressionTest.F8_emailChannelSendsRealSmtpMessage` |
 | **A3** | Dashboard and reporting rely on in-memory `findAll()` instead of SQL aggregations and indexing | Med | Batch 2 | Performance test (5,000 incidents benchmark) |
+
