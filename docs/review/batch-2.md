@@ -118,3 +118,4 @@ All 21 regression tests across three dedicated regression suites are **100% GREE
 
 Total Project Test Results: **186 passed, 0 failed, 0 skipped**.
 Coverage: **85% instructions, 64% branches** (JaCoCo).
+

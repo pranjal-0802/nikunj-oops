@@ -43,3 +43,4 @@ The classification architecture employs the **Composite Pattern** (`CompositeCla
 - When composite classification confidence is below the minimum threshold ($0.60$), the incident is flagged with `needsTriage = true`, left unassigned in the `CLASSIFIED` state, and routed to the Administrator Triage Queue (`/api/admin/triage/queue`).
 - Verified by regression test `F5_lowConfidenceClassificationLeavesIncidentInTriageQueue`.
 - Verified in scenario `S3_wrongDomainAndTriage`.
+

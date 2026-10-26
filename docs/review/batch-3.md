@@ -40,3 +40,4 @@ Batch 3 reconciles all repository documentation with measured reality from the s
 3. `docs/03-architecture.md`: Updated architecture diagrams, layer definitions, and ArchUnit dependency rules.
 4. `docs/testing/classifier-eval.md`: Documented dataset, Laplace Naive Bayes formulas, and F5 confidence thresholds.
 5. `docs/review/batch-3.md`: This report.
+
