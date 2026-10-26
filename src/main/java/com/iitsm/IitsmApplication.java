@@ -1,6 +1,9 @@
 package com.iitsm;
 
+import com.iitsm.infrastructure.config.AdjustableClock;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -18,12 +21,12 @@ public class IitsmApplication {
     }
 
     /**
-     * Injects standard system UTC clock for production and development profiles.
-     * Replaced by AdjustableClock in simulation and testing.
+     * Injects an AdjustableClock instance allowing live simulation acceleration (x1, x60, x600)
+     * and fast-forward jumps across the application.
      */
     @Bean
     public Clock clock() {
-        return Clock.systemUTC();
+        return new AdjustableClock(Instant.now(), ZoneId.of("UTC"));
     }
 }
 

@@ -126,3 +126,4 @@
 1. **SLA Monitoring Background Daemon**: Scheduled cron/timer thread detecting approaching SLA warning thresholds (75%) and hard breaches.
 2. **Multi-Tier Escalation Engine**: Automated reassignment and managerial alerting when incidents remain unacknowledged or unaddressed.
 3. **Simulation Engine**: Interactive time-accelerated simulation driver (`AdjustableClock`) executing demo scenarios at $\times 1$, $\times 60$, and $\times 600$ speeds.
+

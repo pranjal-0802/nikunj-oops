@@ -433,6 +433,79 @@ package "com.iitsm.domain.strategy.similarity" {
         - similarityMeasure: SimilarityMeasure
         + checkAndLinkDuplicate(newIncident: Incident): Optional<DuplicateMatch>
     }
+
+    class SlaService {
+        - incidentRepository: IncidentRepository
+        - eventPublisher: DomainEventPublisher
+        - escalationService: EscalationService
+        + evaluateActiveIncidents(): List<SlaEvaluationResult>
+        + evaluateIncident(incidentId: String): SlaEvaluationResult
+    }
+
+    class EscalationService {
+        - escalationChain: EscalationHandler
+        - escalationRecordRepository: SpringDataEscalationRecordRepository
+        - eventPublisher: DomainEventPublisher
+        + evaluateAndEscalate(incident: Incident): Optional<EscalationAction>
+        + getEscalationHistory(incidentId: String): List<EscalationRecord>
+    }
+
+    class ReportingService {
+        - incidentRepository: IncidentRepository
+        - supportTeamRepository: SupportTeamRepository
+        - itServiceRepository: ItServiceRepository
+        + generateWorkloadReport(): WorkloadReportDto
+        + generateServiceAnalysisReport(): ServiceAnalysisReportDto
+        + generateSlaPerformanceReport(): SlaPerformanceReportDto
+        + generateMttrReport(): MttrReportDto
+    }
+}
+
+package "com.iitsm.domain.chain.escalation" #E0F2FE {
+    interface EscalationHandler <<Chain of Responsibility>> {
+        + setNext(next: EscalationHandler): EscalationHandler
+        + handle(incident: Incident, context: EscalationContext): Optional<EscalationAction>
+    }
+
+    abstract class AbstractEscalationHandler implements EscalationHandler {
+        # next: EscalationHandler
+        + setNext(next: EscalationHandler): EscalationHandler
+        + handle(incident: Incident, context: EscalationContext): Optional<EscalationAction>
+        # {abstract} canHandle(incident: Incident, context: EscalationContext): boolean
+        # {abstract} execute(incident: Incident, context: EscalationContext): EscalationAction
+    }
+
+    class Tier1TechnicianHandler extends AbstractEscalationHandler
+    class Tier2TeamLeadHandler extends AbstractEscalationHandler
+    class Tier3SystemAdminHandler extends AbstractEscalationHandler
+    class Tier4ItManagerHandler extends AbstractEscalationHandler
+
+    class EscalationChainBuilder {
+        + {static} buildDefaultChain(): EscalationHandler
+    }
+}
+
+package "com.iitsm.simulation" #F5F3FF {
+    class AdjustableClock <<Decorator>> {
+        - baseClock: Clock
+        - speedMultiplier: long
+        - virtualOffset: Duration
+        + instant(): Instant
+        + setSpeedMultiplier(multiplier: long): void
+        + fastForward(duration: Duration): void
+        + reset(): void
+    }
+
+    class SimulationService {
+        - clock: AdjustableClock
+        - incidentService: IncidentService
+        - slaService: SlaService
+        - escalationService: EscalationService
+        + runScenario(scenarioId: String): SimulationResult
+        + setSpeedMultiplier(speed: long): void
+        + advanceClock(duration: Duration): void
+        + resetSimulation(): void
+    }
 }
 
 IncidentService --> IncidentFactory
@@ -453,7 +526,15 @@ CosineTfIdfSimilarity --> TfIdfVectorizer
 EmployeeController --> IncidentService
 TechnicianController --> IncidentService
 AdminController --> IncidentService
+ReportController --> ReportingService
+SimulationController --> SimulationService
 NotificationObserver --> NotificationRouter
 NotificationRouter --> NotificationChannel
+SlaService --> EscalationService
+EscalationService --> EscalationHandler
+AbstractEscalationHandler --> EscalationHandler : next
+SimulationService --> AdjustableClock
+SimulationService --> IncidentService
+SimulationService --> SlaService
 
 @enduml

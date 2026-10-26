@@ -83,3 +83,18 @@ This document records architectural, design, and technical decisions made during
   2. *Single Naive Bayes model*: Can produce false positives on edge cases where explicit technical terms (e.g. "VPN", "PostgreSQL") clearly dictate the domain.
   3. *Static if-else technician routing*: Violates the Open/Closed Principle and prevents dynamic operational load balancing.
 - **Reason**: The composite approach pairs deterministic technical precision with statistical generalization, ensures full transparency and explainability in priority scoring, provides runtime algorithm extensibility (OCP), and runs 100% offline in pure Java.
+
+---
+
+## ADR-008: Chain of Responsibility for Multi-Tier Escalation and Virtual Time-Accelerated Simulation
+- **Status**: Accepted
+- **Context**: SLA degradation and high-impact outages require progressive multi-tier escalation (Tier 1 Technician Reminder -> Tier 2 Team Lead Intervention -> Tier 3 System Administrator Action -> Tier 4 IT Operations Manager Breach Notification) governed by dynamic SLA thresholds (75%, 90%, 100% hard breach) and service criticality. Live evaluation, testing, and viva demonstration of temporal degradation requires accelerating time without modifying system clocks or sleeping.
+- **Decision**:
+  1. Implement the **Chain of Responsibility Pattern** (`EscalationHandler`, `AbstractEscalationHandler`) with 4 distinct tier handlers (`Tier4ItManagerHandler`, `Tier3SystemAdminHandler`, `Tier2TeamLeadHandler`, `Tier1TechnicianHandler`) assembled via `EscalationChainBuilder`.
+  2. Implement `AdjustableClock` extending `java.time.Clock` with virtual epoch tracking, dynamic speed multipliers ($\times 1$, $\times 60$, $\times 600$), discrete fast-forward jumps (`fastForward(Duration)`), and state resets.
+  3. Decouple SLA evaluation into domain model logic (`SlaTracker.evaluateStatus`, continuous risk scoring $0.0 \dots 1.0$), application service orchestration (`SlaService`), and scheduled background scanning (`SlaMonitoringScheduler`), publishing `DomainEvent.SlaWarning`, `DomainEvent.SlaViolated`, and `DomainEvent.IncidentEscalated`.
+  4. Build a deterministic `SimulationService` orchestrating 5 core demonstration scenarios (S1 Happy Path, S2 Critical Outage & Multi-Tier Escalation, S3 Wrong-Domain & Triage Reassignment, S4 Duplicate Storm Avalanche, S5 Rejection Loop & SLA Clock Pausing).
+- **Alternatives Considered**:
+  1. *Monolithic if-else blocks in SlaService*: Violates the Open/Closed Principle and Single Responsibility Principle; adding or reordering escalation tiers requires modifying application service code.
+  2. *OS system time manipulation or Thread.sleep in tests*: Flaky, dangerous, causes timeout in CI/CD, and cannot support interactive simulation speed adjustments.
+- **Reason**: The Chain of Responsibility pattern isolates escalation criteria into independently testable classes with clear precedence; `AdjustableClock` provides instantaneous temporal simulation with zero thread blocking; and domain events seamlessly trigger notifications and audit logs across all tiers.

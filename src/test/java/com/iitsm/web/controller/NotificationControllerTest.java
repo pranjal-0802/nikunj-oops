@@ -55,6 +55,8 @@ class NotificationControllerTest {
         employee = userRepository.findById("EMP-0001").orElseThrow();
         token = tokenProvider.generateToken(employee);
 
+        notificationRepository.deleteAll();
+
         NotificationJpaEntity entity = new NotificationJpaEntity();
         entity.setId("NOTIF-" + UUID.randomUUID().toString().substring(0, 8));
         entity.setRecipientId(employee.getId());

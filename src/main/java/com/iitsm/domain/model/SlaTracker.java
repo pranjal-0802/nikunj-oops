@@ -184,5 +184,25 @@ public class SlaTracker {
             this.status = SlaStatus.ON_TRACK;
         }
     }
+
+    /**
+     * Calculates a continuous risk score between 0.0 (fresh) and 1.0 (breached).
+     */
+    public double getRiskScore(Instant now) {
+        if (status == SlaStatus.MET) {
+            return 0.0;
+        }
+        if (status == SlaStatus.BREACHED || now.isAfter(resolutionDueAt)) {
+            return 1.0;
+        }
+        Instant effectiveNow = isPaused() ? pausedAt : now;
+        Duration totalWindow = Duration.between(createdAt, resolutionDueAt).minus(pausedDuration);
+        if (totalWindow.toMillis() <= 0) {
+            return 1.0;
+        }
+        Duration elapsed = Duration.between(createdAt, effectiveNow).minus(pausedDuration);
+        double ratio = (double) Math.max(0, elapsed.toMillis()) / (double) totalWindow.toMillis();
+        return Math.min(1.0, Math.max(0.0, ratio));
+    }
 }
 

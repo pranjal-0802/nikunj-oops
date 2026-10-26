@@ -202,6 +202,12 @@ public class Incident {
         this.priorityDecision = this.priorityDecision.withOverride(newPriority, adminId, reason.trim(), now);
     }
 
+    public void updateSlaStatus(Instant now) {
+        if (this.slaTracker != null) {
+            this.slaTracker.evaluateStatus(now);
+        }
+    }
+
     // --- Invariant & HTML Escaping Helpers ---
 
     private static String sanitizeHtml(String input) {
@@ -247,6 +253,10 @@ public class Incident {
 
     public PriorityDecision getPriorityDecision() {
         return priorityDecision;
+    }
+
+    public Priority getPriority() {
+        return (priorityDecision != null) ? priorityDecision.priority() : null;
     }
 
     public IncidentStatus getStatus() {

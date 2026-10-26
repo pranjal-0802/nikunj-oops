@@ -61,7 +61,7 @@ public class NotificationObserver implements DomainEventListener {
             case DomainEvent.ResolutionVerified ver -> resolveAssigneeId(ver.incidentId());
             case DomainEvent.IncidentReopened re -> resolveAssigneeId(re.incidentId());
             case DomainEvent.IncidentClosed cls -> resolveReporterId(cls.incidentId());
-            case DomainEvent.ReassignmentRequested rr -> "ADMIN"; // Admin triage
+            case DomainEvent.ReassignmentRequested rr -> resolveAdminId(); // Admin triage
             case DomainEvent.PriorityOverridden po -> resolveAssigneeId(po.incidentId());
             case DomainEvent.SlaWarning sw -> resolveAssigneeId(sw.incidentId());
             case DomainEvent.SlaViolated sv -> resolveAssigneeId(sv.incidentId());
@@ -82,6 +82,10 @@ public class NotificationObserver implements DomainEventListener {
         return incidentRepository.findById(incidentId)
                 .map(Incident::getAssigneeId)
                 .orElse(null);
+    }
+
+    private String resolveAdminId() {
+        return "ADMIN-SYS-01";
     }
 }
 

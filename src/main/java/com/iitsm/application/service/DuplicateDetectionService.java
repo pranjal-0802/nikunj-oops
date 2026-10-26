@@ -11,9 +11,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,11 +91,19 @@ public class DuplicateDetectionService {
 
         if (bestParent != null) {
             Instant now = clock.instant();
+            Incident rootParent = findRootParent(bestParent);
 
-            // Bidirectional correlation link
-            bestParent.linkIncident(newIncident.getId());
-            newIncident.linkIncident(bestParent.getId());
-            incidentRepository.save(bestParent);
+            // Bidirectional correlation link to the root parent of the cluster
+            rootParent.linkIncident(newIncident.getId());
+            newIncident.linkIncident(rootParent.getId());
+            incidentRepository.save(rootParent);
+
+            // Also link to bestParent if different from root parent
+            if (!bestParent.getId().equals(rootParent.getId())) {
+                bestParent.linkIncident(newIncident.getId());
+                newIncident.linkIncident(bestParent.getId());
+                incidentRepository.save(bestParent);
+            }
 
             // Publish DuplicateDetected domain event
             eventPublisher.publish(new DomainEvent.DuplicateDetected(
@@ -101,14 +111,39 @@ public class DuplicateDetectionService {
                     now,
                     newIncident.getId(),
                     "SYSTEM",
-                    bestParent.getId(),
+                    rootParent.getId(),
                     maxSimilarity
             ));
 
-            return Optional.of(new DuplicateMatch(bestParent.getId(), maxSimilarity));
+            return Optional.of(new DuplicateMatch(rootParent.getId(), maxSimilarity));
         }
 
         return Optional.empty();
+    }
+
+    private Incident findRootParent(Incident candidate) {
+        Set<String> visited = new HashSet<>();
+        return findRootParent(candidate, visited);
+    }
+
+    private Incident findRootParent(Incident current, Set<String> visited) {
+        visited.add(current.getId());
+        Incident oldest = current;
+        for (String linkedId : current.getLinkedIncidentIds()) {
+            if (!visited.contains(linkedId)) {
+                Optional<Incident> opt = incidentRepository.findById(linkedId);
+                if (opt.isPresent()) {
+                    Incident candidate = opt.get();
+                    if (candidate.getCreatedAt().isBefore(oldest.getCreatedAt())) {
+                        Incident deepOldest = findRootParent(candidate, visited);
+                        if (deepOldest.getCreatedAt().isBefore(oldest.getCreatedAt())) {
+                            oldest = deepOldest;
+                        }
+                    }
+                }
+            }
+        }
+        return oldest;
     }
 
     /**
