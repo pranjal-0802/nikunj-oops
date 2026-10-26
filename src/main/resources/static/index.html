@@ -3,756 +3,943 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nimbus FinServe - Intelligent IT Service Management (I-ITSM)</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              750: '#233044',
-              850: '#151f32',
-              950: '#070a12',
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-            mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
-  <!-- Google Fonts: Inter & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Core Stylesheet -->
+  <title>Nimbus FinServe :: Intelligent IT Service Management (I-ITSM)</title>
+  <!-- Self-Contained Modern Stylesheet (Zero CDN Dependencies, CSP script-src 'self' compliant) -->
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white">
+<body>
 
-  <!-- Top Navbar & Simulation HUD -->
-  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Upper Header: Brand & Simulation HUD & Quick Controls -->
-      <div class="h-16 flex items-center justify-between gap-4">
-        
-        <!-- Logo & Brand -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-5 h-5 text-white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">Nimbus FinServe</span>
-              <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-semibold font-mono">I-ITSM 1.0</span>
-            </div>
-            <p class="text-[11px] text-slate-400 font-medium hidden sm:block">Intelligent IT Service Management & Automation</p>
-          </div>
-        </div>
-
-        <!-- Real-Time Simulation HUD -->
-        <div class="flex items-center gap-2 sm:gap-3 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 shadow-inner">
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider hidden md:inline">Sim Clock:</span>
-          </div>
-          <span id="virtual-time-display" class="font-mono text-xs sm:text-sm font-bold text-cyan-300">--:--:--</span>
-          <span id="virtual-speed-badge" class="px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-mono text-[10px] font-bold">1x</span>
-
-          <!-- Quick Jump Buttons right in the HUD -->
-          <div class="hidden lg:flex items-center gap-1 border-l border-slate-800 pl-2">
-            <button class="sim-ff-btn px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-semibold text-slate-300" data-minutes="15">+15m</button>
-            <button class="sim-ff-btn px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-semibold text-slate-300" data-minutes="60">+1h</button>
-            <button class="sim-ff-btn px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-semibold text-slate-300" data-minutes="1440">+24h</button>
-          </div>
-        </div>
-
-        <!-- Right Side: Notification Bell & Active Profile -->
-        <div class="flex items-center gap-3">
-          <!-- Notification Bell -->
-          <button id="notification-bell-btn" class="relative p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Notifications">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <span id="unread-count-badge" class="hidden absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
-          </button>
-
-          <!-- Active Profile Pill -->
-          <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 border border-slate-700/80 rounded-lg px-2.5 py-1">
-            <div class="w-6 h-6 rounded-full bg-indigo-600/30 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-bold text-xs">
-              <span id="active-user-avatar">A</span>
-            </div>
-            <div class="text-left">
-              <div id="active-user-name" class="text-xs font-bold text-white truncate max-w-[130px]">System Administrator</div>
-              <div id="active-user-role" class="text-[9px] font-mono text-indigo-400 font-semibold uppercase">ROLE_ADMIN</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Lower Header: 1-Click Interactive Persona Switcher Bar -->
-      <div class="py-2 border-t border-slate-800/80 flex items-center justify-between gap-2 overflow-x-auto text-xs">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap flex items-center gap-1">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-3.5 h-3.5 text-indigo-400">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          Persona Switcher:
-        </span>
-
-        <div class="flex items-center gap-1.5 overflow-x-auto py-0.5">
-          <button class="persona-chip" data-email="employee@nimbusfinserve.com">
-            <span>👤</span>
-            <span>Employee (Demo User)</span>
-          </button>
-          <button class="persona-chip" data-email="tech.network@nimbusfinserve.com">
-            <span>🛠️</span>
-            <span>Technician (David Kim)</span>
-          </button>
-          <button class="persona-chip" data-email="lead.network@nimbusfinserve.com">
-            <span>👥</span>
-            <span>Team Lead (Sarah Jenkins)</span>
-          </button>
-          <button class="persona-chip active" data-email="admin@nimbusfinserve.com">
-            <span>⚡</span>
-            <span>System Admin</span>
-          </button>
-          <button class="persona-chip" data-email="manager@nimbusfinserve.com">
-            <span>💼</span>
-            <span>IT Manager</span>
-          </button>
-        </div>
-
-        <!-- Hidden Native Select for programmatic sync -->
-        <select id="persona-selector" class="sr-only">
-          <option value="employee@nimbusfinserve.com">Employee</option>
-          <option value="tech.network@nimbusfinserve.com">Technician</option>
-          <option value="lead.network@nimbusfinserve.com">Team Lead</option>
-          <option value="admin@nimbusfinserve.com" selected>System Admin</option>
-          <option value="manager@nimbusfinserve.com">IT Manager</option>
-        </select>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- Navigation Tabs -->
-  <nav class="bg-slate-900 border-b border-slate-800 shadow-sm sticky top-[105px] z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-2 overflow-x-auto py-2">
-      <button class="nav-tab active" data-target="console-employee">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-        </svg>
-        <span>Employee Portal</span>
-      </button>
-      <button class="nav-tab" data-target="console-technician">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        <span>Technician Console</span>
-      </button>
-      <button class="nav-tab" data-target="console-admin">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-        </svg>
-        <span>Admin Command Centre</span>
-      </button>
-      <button class="nav-tab" data-target="console-simulation">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <span>Simulation Engine</span>
-      </button>
-      <button class="nav-tab" data-target="console-reports">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-        </svg>
-        <span>Executive Reports</span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- Main Content Area -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-
-    <!-- ============================================================== -->
-    <!-- CONSOLE 1: EMPLOYEE PORTAL -->
-    <!-- ============================================================== -->
-    <section id="console-employee" class="tab-panel active space-y-6">
-      
-      <!-- Privacy Banner Notice -->
-      <div class="bg-indigo-950/30 border border-indigo-800/50 rounded-xl p-4 flex items-start gap-3 shadow-sm">
-        <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 mt-0.5 flex-shrink-0">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+  <!-- ============================================================== -->
+  <!-- AUTHENTICATION VIEW (Shown when unauthenticated) -->
+  <!-- ============================================================== -->
+  <div id="auth-view" class="auth-container">
+    
+    <!-- Sign In Card -->
+    <div id="login-card" class="auth-card">
+      <div class="flex items-center gap-3" style="margin-bottom: 1.5rem;">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-md">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
         <div>
-          <h4 class="text-sm font-semibold text-white">Employee Self-Service Privacy Protection</h4>
-          <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
-            Internal priority ranks (P1–P4), SLA resolution timers, and private engineering notes are strictly masked from this portal in compliance with corporate privacy policy.
-          </p>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #fff;">Nimbus FinServe</h2>
+          <span class="text-xs text-muted">Intelligent IT Service Management (I-ITSM)</span>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <form id="form-login" class="space-y-4">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Corporate Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="user@nimbusfinserve.com" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn btn-primary w-full" style="padding: 0.65rem 1rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+          </svg>
+          <span>Sign In</span>
+        </button>
+      </form>
+
+      <div class="flex items-center justify-between" style="margin-top: 1rem; font-size: 0.8125rem;">
+        <span class="text-dim">New employee?</span>
+        <button type="button" id="btn-toggle-register" class="btn btn-xs btn-secondary">Self-Register</button>
+      </div>
+
+      <!-- Demo Accounts Section (Populated only when /api/public/config reports demoMode=true) -->
+      <div id="demo-accounts-container" class="demo-pills hidden">
+        <span class="text-xs font-semibold text-muted w-full" style="display: block; margin-bottom: 0.25rem;">
+          Quick Demo Evaluation Accounts:
+        </span>
+        <button type="button" class="demo-pill" data-email="employee@nimbusfinserve.com" data-role="Employee">
+          <span>👤 Employee</span>
+        </button>
+        <button type="button" class="demo-pill" data-email="tech.network@nimbusfinserve.com" data-role="Technician">
+          <span>🛠️ Technician</span>
+        </button>
+        <button type="button" class="demo-pill" data-email="lead.network@nimbusfinserve.com" data-role="Team Lead">
+          <span>👥 Team Lead</span>
+        </button>
+        <button type="button" class="demo-pill" data-email="admin@nimbusfinserve.com" data-role="System Admin">
+          <span>⚡ System Admin</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Self-Registration Card (Hidden by default) -->
+    <div id="register-card" class="auth-card hidden">
+      <div class="flex items-center gap-3" style="margin-bottom: 1.5rem;">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-md">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #fff;">Employee Self-Service</h2>
+          <span class="text-xs text-muted">Create corporate incident reporting account</span>
+        </div>
+      </div>
+
+      <form id="form-register" class="space-y-4">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="e.g. Jane Doe" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Corporate Email Address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="jane.doe@nimbusfinserve.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Min. 8 characters" required minlength="8">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-department">Department</label>
+          <select id="reg-department" class="form-select">
+            <option value="Engineering">Engineering</option>
+            <option value="Finance">Finance & Accounting</option>
+            <option value="Operations">Operations</option>
+            <option value="Human Resources">Human Resources</option>
+            <option value="Risk & Compliance">Risk & Compliance</option>
+          </select>
+        </div>
+
+        <button type="submit" id="btn-register-submit" class="btn btn-primary w-full" style="padding: 0.65rem 1rem;">
+          <span>Register Account</span>
+        </button>
+      </form>
+
+      <div class="text-center" style="margin-top: 1rem;">
+        <button type="button" id="btn-toggle-login" class="btn btn-xs btn-secondary">
+          <span>&larr; Back to Sign In</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MAIN APPLICATION VIEW (Shown when authenticated) -->
+  <!-- ============================================================== -->
+  <div id="app-view" class="app-container hidden">
+
+    <!-- Top Navbar -->
+    <header class="navbar">
+      <div class="navbar-inner max-w-7xl">
         
-        <!-- Raise New Ticket Form (Col 1-5) -->
-        <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-indigo-400">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>Report an Incident</span>
-              </h3>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-semibold">Self-Service</span>
+        <!-- Brand -->
+        <div class="brand">
+          <div class="brand-logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-md">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div class="brand-text">
+            <div class="flex items-center">
+              <h1>Nimbus FinServe</h1>
+              <span class="brand-badge">I-ITSM 1.0</span>
+            </div>
+            <p class="text-xs text-muted" style="display: block;">Intelligent IT Service Management &amp; Automation</p>
+          </div>
+        </div>
+
+        <!-- Real-Time Simulation Virtual Clock HUD -->
+        <div class="sim-hud">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+          <span class="text-muted" style="font-size: 0.7rem; font-weight: 600;">SIM CLOCK:</span>
+          <span id="virtual-time-display" class="sim-hud-time">--:--:--</span>
+          <span id="virtual-speed-badge" class="sim-hud-multiplier">1x</span>
+          <div class="flex items-center gap-1" style="border-left: 1px solid var(--border); padding-left: 0.4rem; margin-left: 0.2rem;">
+            <button type="button" class="btn btn-xs btn-secondary sim-ff-btn" data-minutes="15" title="Fast-forward 15 minutes">+15m</button>
+            <button type="button" class="btn btn-xs btn-secondary sim-ff-btn" data-minutes="60" title="Fast-forward 1 hour">+1h</button>
+            <button type="button" class="btn btn-xs btn-secondary sim-ff-btn" data-minutes="1440" title="Fast-forward 24 hours">+24h</button>
+          </div>
+        </div>
+
+        <!-- User Profile & Actions -->
+        <div class="nav-actions">
+          <!-- Notification Bell -->
+          <button type="button" id="btn-notification-bell" class="btn btn-sm btn-secondary" style="position: relative; padding: 0.35rem 0.6rem;" title="In-App Notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span id="unread-count-badge" class="badge badge-p1 hidden" style="position: absolute; top: -6px; right: -6px; font-size: 0.65rem; padding: 0.1rem 0.35rem;">0</span>
+          </button>
+
+          <!-- User Badge -->
+          <div class="user-badge">
+            <div id="user-avatar-badge" class="user-avatar">U</div>
+            <div>
+              <div id="user-display-name" class="font-bold text-white text-xs">User</div>
+              <div id="user-display-role" class="font-mono text-dim" style="font-size: 0.65rem;">ROLE</div>
+            </div>
+          </div>
+
+          <!-- Sign Out -->
+          <button type="button" id="btn-logout" class="btn btn-sm btn-secondary" title="Sign Out">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sm">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Exit</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Persona Switcher Bar (Demo Mode Only) -->
+    <div id="persona-switcher-bar" class="persona-bar">
+      <div class="flex items-center gap-2 max-w-7xl w-full">
+        <span class="text-xs font-semibold text-muted uppercase font-mono flex items-center gap-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sm text-indigo">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span>Persona:</span>
+        </span>
+        <div class="flex items-center gap-1 flex-wrap">
+          <button type="button" class="persona-chip" data-email="employee@nimbusfinserve.com">
+            <span>👤 Employee</span>
+          </button>
+          <button type="button" class="persona-chip" data-email="tech.network@nimbusfinserve.com">
+            <span>🛠️ Technician</span>
+          </button>
+          <button type="button" class="persona-chip" data-email="lead.network@nimbusfinserve.com">
+            <span>👥 Team Lead</span>
+          </button>
+          <button type="button" class="persona-chip" data-email="admin@nimbusfinserve.com">
+            <span>⚡ System Admin</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav">
+      <div class="flex items-center gap-1 max-w-7xl w-full">
+        <button type="button" class="nav-tab active" data-target="console-employee">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span>Employee Portal</span>
+        </button>
+        <button type="button" class="nav-tab" data-target="console-technician">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span>Technician Console</span>
+        </button>
+        <button type="button" class="nav-tab" data-target="console-teamlead">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <span>Team Lead Console</span>
+        </button>
+        <button type="button" class="nav-tab" data-target="console-admin">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+          <span>Admin Command Centre</span>
+        </button>
+        <button type="button" class="nav-tab" data-target="console-simulation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Simulation Engine</span>
+        </button>
+        <button type="button" class="nav-tab" data-target="console-reports">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span>Executive Reports</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- ============================================================== -->
+      <!-- CONSOLE 1: EMPLOYEE PORTAL -->
+      <!-- ============================================================== -->
+      <section id="console-employee" class="tab-panel active space-y-6">
+        
+        <!-- Privacy Guarantee Banner -->
+        <div class="card" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.3);">
+          <div class="flex items-start gap-3">
+            <div style="padding: 0.4rem; border-radius: var(--radius-sm); background: var(--primary-subtle); color: var(--primary);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <div>
+              <h4 style="font-size: 0.875rem; font-weight: 700; color: #fff;">Employee Self-Service Privacy Protection</h4>
+              <p class="text-xs text-muted" style="margin-top: 0.15rem;">
+                Internal priority ranks (P1–P4), SLA resolution timers, and private engineering notes are strictly masked from this portal in compliance with corporate privacy policy.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employee KPIs -->
+        <div class="grid-cols-4">
+          <div class="kpi-card">
+            <span class="kpi-label">My Total Tickets</span>
+            <div id="emp-stat-total" class="kpi-value">0</div>
+            <span class="kpi-subtext">Lifetime reported</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Active / In Progress</span>
+            <div id="emp-stat-active" class="kpi-value text-cyan">0</div>
+            <span class="kpi-subtext">Under technical handling</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Awaiting Your Info</span>
+            <div id="emp-stat-pending" class="kpi-value text-amber">0</div>
+            <span class="kpi-subtext">Action required from you</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Resolved / Closed</span>
+            <div id="emp-stat-resolved" class="kpi-value text-emerald">0</div>
+            <span class="kpi-subtext">Completed requests</span>
+          </div>
+        </div>
+
+        <div class="grid-cols-2">
+          
+          <!-- Report Ticket Form -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon text-indigo">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>Report an Incident</span>
+                </h3>
+                <p class="card-subtitle">Submit a request to the IT service desk</p>
+              </div>
+              <span class="badge badge-status-new">Self-Service</span>
             </div>
 
-            <!-- Quick Template Chips -->
-            <div class="mb-4">
-              <label class="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Quick Fill Templates:</label>
-              <div class="flex flex-wrap gap-1.5">
+            <!-- Quick Fill Templates -->
+            <div class="form-group">
+              <label class="form-label">Quick Fill Templates:</label>
+              <div class="flex flex-wrap gap-1">
                 <button type="button" class="template-chip" data-template="vpn">🌐 VPN Disconnected</button>
                 <button type="button" class="template-chip" data-template="payment">💳 Payment Gateway 502</button>
-                <button type="button" class="template-chip" data-template="hardware">💻 Laptop Display Flickering</button>
-                <button type="button" class="template-chip" data-template="sso">🔑 SSO Access Locked</button>
+                <button type="button" class="template-chip" data-template="display">💻 Display Flickering</button>
+                <button type="button" class="template-chip" data-template="sso">🔑 SSO Locked</button>
               </div>
             </div>
 
-            <form id="create-incident-form" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Incident Summary / Title</label>
-                <input type="text" id="inc-title" required minlength="5" maxlength="120"
-                  placeholder="e.g. VPN tunnel disconnects during wire transfer"
-                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
-                <p class="text-[11px] text-slate-500 mt-1">Brief summary (5–120 characters)</p>
+            <form id="form-create-incident" class="space-y-4">
+              <div class="form-group">
+                <label class="form-label" for="emp-inc-title">Summary / Short Title</label>
+                <input type="text" id="emp-inc-title" class="form-input" required minlength="5" maxlength="120" placeholder="e.g. VPN tunnel disconnects during wire transfer">
               </div>
 
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Detailed Description</label>
-                <textarea id="inc-desc" rows="4" required minlength="20" maxlength="4000"
-                  placeholder="Describe what occurred, any error codes displayed, affected software, and your workstation location..."
-                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"></textarea>
-                <div class="flex justify-between items-center text-[11px] text-slate-500 mt-1">
-                  <span>Minimum 20 characters</span>
+              <div class="form-group">
+                <label class="form-label" for="emp-inc-desc">Detailed Description</label>
+                <textarea id="emp-inc-desc" class="form-textarea" required minlength="20" maxlength="4000" rows="4" placeholder="Describe the issue, workstation location, error codes, and symptoms..."></textarea>
+                <div class="flex justify-between items-center text-xs text-dim" style="margin-top: 0.25rem;">
+                  <span>Min 20 characters</span>
                   <span id="desc-char-count" class="font-mono">0 / 4000</span>
                 </div>
               </div>
 
               <!-- AI Classification Preview -->
-              <div id="ai-preview-box" class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-1.5 transition">
-                <div class="flex items-center gap-1.5 text-indigo-400 font-semibold">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <div id="emp-ai-preview" class="card" style="background: rgba(11, 19, 36, 0.8); padding: 0.75rem;">
+                <div class="flex items-center gap-1.5 text-indigo font-bold text-xs" style="margin-bottom: 0.4rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sm">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                   </svg>
                   <span>AI Pre-Classification Engine</span>
                 </div>
-                <div class="flex items-center justify-between text-slate-300">
-                  <span class="text-slate-400">Detected Domain:</span>
-                  <span id="preview-category" class="font-mono font-bold text-white bg-slate-800 px-2 py-0.5 rounded text-[11px]">NETWORK</span>
+                <div class="flex items-center justify-between text-xs text-muted" style="margin-bottom: 0.2rem;">
+                  <span>Detected Domain:</span>
+                  <span id="preview-category" class="font-mono font-bold text-white">GENERAL</span>
                 </div>
-                <div class="flex items-center justify-between text-slate-300">
-                  <span class="text-slate-400">Target Service:</span>
-                  <span id="preview-service" class="font-mono text-cyan-400 text-[11px]">SVC-VPN (VPN Gateway)</span>
+                <div class="flex items-center justify-between text-xs text-muted">
+                  <span>Routing Service:</span>
+                  <span id="preview-service" class="font-mono text-cyan">SVC-GENERAL</span>
                 </div>
               </div>
 
-              <div class="pt-2">
-                <button type="submit" id="btn-submit-incident" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-                  <span>Submit Service Ticket</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                  </svg>
-                </button>
-              </div>
+              <button type="submit" id="btn-submit-incident" class="btn btn-primary w-full">
+                <span>Submit Incident Ticket</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </button>
             </form>
           </div>
 
-          <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500">
-            Tickets are analyzed in real-time by natural language classifiers and routed to specialist engineering teams.
-          </div>
-        </div>
-
-        <!-- My Raised Tickets Table (Col 6-12) -->
-        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
-          <div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <!-- My Raised Tickets List -->
+          <div class="card">
+            <div class="card-header">
               <div>
-                <h3 class="text-base font-bold text-white">My Incident Tickets</h3>
-                <p class="text-xs text-slate-400">Track progress in real-time from report to verified resolution</p>
+                <h3 class="card-title">My Incident Tickets</h3>
+                <p class="card-subtitle">Real-time status tracking with visual lifecycle stepper</p>
               </div>
-              <div class="flex items-center gap-2">
-                <button id="btn-refresh-employee-tickets" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                  </svg>
-                  <span>Refresh</span>
-                </button>
-              </div>
+              <button type="button" id="btn-refresh-emp-tickets" class="btn btn-xs btn-secondary">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-xs">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Refresh</span>
+              </button>
             </div>
 
-            <!-- Employee Tickets List Container -->
-            <div id="employee-tickets-container" class="space-y-4 min-h-[380px] mt-4">
-              <div class="text-center py-16 text-slate-500 text-sm">Loading your tickets...</div>
+            <div id="emp-tickets-container" class="space-y-4" style="min-height: 380px;">
+              <div class="text-center text-muted" style="padding: 3rem 1rem;">Loading your tickets...</div>
             </div>
           </div>
 
-          <div class="pt-3 border-t border-slate-800 text-right">
-            <span class="text-[11px] text-slate-500 font-mono">Incident Service Level Agreement Guarantee</span>
-          </div>
         </div>
+      </section>
 
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- CONSOLE 2: TECHNICIAN CONSOLE -->
-    <!-- ============================================================== -->
-    <section id="console-technician" class="tab-panel space-y-6">
-      
-      <!-- Metrics Summary Ribbon -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-          <span class="text-xs text-slate-400 font-medium">Assigned to Me</span>
-          <p id="tech-metric-assigned" class="text-2xl font-bold text-white font-mono mt-1">0</p>
-          <span class="text-[10px] text-slate-500">Active Workload</span>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-          <span class="text-xs text-amber-400 font-medium">Under Investigation</span>
-          <p id="tech-metric-investigating" class="text-2xl font-bold text-amber-400 font-mono mt-1">0</p>
-          <span class="text-[10px] text-slate-500">In-Flight Tasks</span>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-          <span class="text-xs text-cyan-400 font-medium">Waiting on User Info</span>
-          <p id="tech-metric-pending" class="text-2xl font-bold text-cyan-400 font-mono mt-1">0</p>
-          <span class="text-[10px] text-slate-500">SLA Paused</span>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-          <span class="text-xs text-red-400 font-medium">At Risk / Warning</span>
-          <p id="tech-metric-atrisk" class="text-2xl font-bold text-red-400 font-mono mt-1">0</p>
-          <span class="text-[10px] text-slate-500">SLA &gt; 75% Consumed</span>
-        </div>
-      </div>
-
-      <!-- Queue Header & Filter -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-              <span>Technician Assigned Work Queue</span>
-            </h3>
-            <p class="text-xs text-slate-400">Tickets prioritized by Urgency Ordering and Real-time SLA Deadline Risk</p>
-          </div>
-          
-          <div class="flex items-center gap-2">
-            <select id="tech-queue-filter" class="bg-slate-800 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-              <option value="ALL">All Active Tickets</option>
-              <option value="ASSIGNED">Assigned (Unacknowledged)</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="PENDING_INFO">Waiting on User Info</option>
-            </select>
-            <button id="btn-refresh-tech-queue" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 text-xs font-semibold flex items-center gap-1 transition" title="Refresh Queue">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div id="tech-queue-container" class="space-y-4 min-h-[420px]">
-          <div class="text-center py-16 text-slate-500 text-sm">Loading technician queue...</div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- CONSOLE 3: ADMIN COMMAND CENTRE -->
-    <!-- ============================================================== -->
-    <section id="console-admin" class="tab-panel space-y-6">
-      
-      <!-- Sub-tabs for Admin -->
-      <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
-        <button class="admin-subtab active" data-subtarget="admin-all-incidents">Enterprise Incident Catalog</button>
-        <button class="admin-subtab" data-subtarget="admin-triage-queue">Triage & Reclassification Queue</button>
-        <button class="admin-subtab" data-subtarget="admin-strategy-manager">Dynamic Routing Strategies</button>
-      </div>
-
-      <!-- Sub-panel 1: All Incidents Monitor -->
-      <div id="admin-all-incidents" class="admin-panel active space-y-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <!-- ============================================================== -->
+      <!-- CONSOLE 2: TECHNICIAN CONSOLE -->
+      <!-- ============================================================== -->
+      <section id="console-technician" class="tab-panel space-y-6">
+        
+        <!-- Technician Workload & Capacity Banner -->
+        <div class="card">
+          <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <h3 class="text-base font-bold text-white">Global Enterprise Incident Catalog</h3>
-              <p class="text-xs text-slate-400">Complete visibility across all ITIL incident lifecycles</p>
+              <span class="text-xs text-muted font-bold uppercase tracking-wider">Assigned Capacity &amp; Workload</span>
+              <h3 id="tech-capacity-text" class="text-lg font-bold text-white font-mono" style="margin-top: 0.15rem;">0 / 7 Active Tickets (0%)</h3>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <input type="text" id="admin-search-input" placeholder="Search title or ID..." class="bg-slate-800 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-              <select id="admin-category-filter" class="bg-slate-800 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                <option value="">All Categories</option>
-                <option value="HARDWARE">HARDWARE</option>
-                <option value="SOFTWARE">SOFTWARE</option>
-                <option value="NETWORK">NETWORK</option>
-                <option value="DATABASE">DATABASE</option>
-                <option value="SECURITY">SECURITY</option>
-                <option value="CLOUD">CLOUD</option>
-                <option value="ACCESS">ACCESS</option>
-                <option value="APPLICATION">APPLICATION</option>
+            <div id="tech-capacity-status" class="badge badge-status-resolved">Available</div>
+          </div>
+          <div class="capacity-bar">
+            <div id="tech-capacity-fill" class="capacity-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Metric Ribbon -->
+        <div class="grid-cols-4">
+          <div class="kpi-card">
+            <span class="kpi-label">Assigned to Me</span>
+            <div id="tech-stat-assigned" class="kpi-value">0</div>
+            <span class="kpi-subtext">Active queue</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Under Investigation</span>
+            <div id="tech-stat-investigating" class="kpi-value text-cyan">0</div>
+            <span class="kpi-subtext">In-flight work</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Waiting on User Info</span>
+            <div id="tech-stat-pending" class="kpi-value text-amber">0</div>
+            <span class="kpi-subtext">SLA clock paused</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">At-Risk SLA</span>
+            <div id="tech-stat-atrisk" class="kpi-value text-red">0</div>
+            <span class="kpi-subtext">&gt; 75% SLA consumed</span>
+          </div>
+        </div>
+
+        <!-- Work Queue -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Assigned Incident Queue</h3>
+              <p class="card-subtitle">Prioritized by Urgency and SLA Deadline Risk</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="tech-queue-filter" class="form-select" style="width: auto; padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+                <option value="ALL">All Active Tickets</option>
+                <option value="ASSIGNED">Assigned (Unacknowledged)</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="PENDING_INFO">Waiting on User</option>
               </select>
+              <button type="button" id="btn-refresh-tech-queue" class="btn btn-sm btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sm">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+              </button>
             </div>
           </div>
 
-          <div class="overflow-x-auto rounded-xl border border-slate-800">
-            <table class="w-full text-left text-xs text-slate-300 border-collapse">
-              <thead class="bg-slate-950">
-                <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
-                  <th class="py-3 px-3">Ticket ID</th>
-                  <th class="py-3 px-3">Title</th>
-                  <th class="py-3 px-3">Category</th>
-                  <th class="py-3 px-3">Priority</th>
-                  <th class="py-3 px-3">Status</th>
-                  <th class="py-3 px-3">Assignee</th>
-                  <th class="py-3 px-3">SLA Risk</th>
-                  <th class="py-3 px-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="admin-incidents-tbody">
-                <tr><td colspan="8" class="text-center py-8 text-slate-500">Loading enterprise catalog...</td></tr>
-              </tbody>
-            </table>
+          <div id="tech-queue-container" class="space-y-4" style="min-height: 380px;">
+            <div class="text-center text-muted" style="padding: 3rem 1rem;">Loading assigned queue...</div>
           </div>
         </div>
-      </div>
 
-      <!-- Sub-panel 2: Triage Queue -->
-      <div id="admin-triage-queue" class="admin-panel space-y-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span>Admin Triage & Wrong-Domain Review Queue</span>
-            </h3>
-            <p class="text-xs text-slate-400">Tickets in CLASSIFIED state or flagged by technicians as out-of-scope</p>
-          </div>
+      </section>
 
-          <div id="admin-triage-container" class="space-y-3 min-h-[300px]">
-            <div class="text-center py-12 text-slate-500 text-sm">Scanning triage queue...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-panel 3: Assignment Strategies -->
-      <div id="admin-strategy-manager" class="admin-panel space-y-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-          <div>
-            <h3 class="text-base font-bold text-white">Dynamic Technician Assignment Strategies</h3>
-            <p class="text-xs text-slate-400">Strategy Pattern + Open/Closed Principle: Hot-swap technician routing algorithms at runtime without restarting the application.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <!-- ============================================================== -->
+      <!-- CONSOLE 3: TEAM LEAD CONSOLE -->
+      <!-- ============================================================== -->
+      <section id="console-teamlead" class="tab-panel space-y-6">
+        
+        <div class="card">
+          <div class="card-header">
             <div>
-              <span class="text-xs text-slate-400 font-medium">Currently Active Routing Engine:</span>
-              <p id="current-active-strategy-name" class="text-lg font-bold text-cyan-400 font-mono mt-0.5">WEIGHTED_COMPOSITE</p>
-              <p id="current-active-strategy-desc" class="text-xs text-slate-400 mt-1">Multi-factor routing balancing skills, real-time workload, and seniority.</p>
+              <h3 class="card-title">Team Capacity &amp; Member Roster</h3>
+              <p class="card-subtitle">Real-time workload distribution and active tickets per technician</p>
             </div>
-            <span class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">Active in Engine</span>
+            <button type="button" id="btn-refresh-teamlead" class="btn btn-xs btn-secondary">Refresh</button>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="strategy-cards-container">
-            <!-- Cards rendered dynamically -->
+          <div id="teamlead-roster-grid" class="grid-cols-3">
+            <div class="text-center text-muted w-full" style="padding: 2rem 1rem; grid-column: 1 / -1;">Loading team roster...</div>
           </div>
         </div>
-      </div>
 
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- CONSOLE 4: SIMULATION ENGINE -->
-    <!-- ============================================================== -->
-    <section id="console-simulation" class="tab-panel space-y-6">
-      
-      <!-- Virtual Clock Control Hub -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-cyan-400">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <span>Time-Accelerated Virtual Clock Control</span>
-            </h3>
-            <p class="text-xs text-slate-400">Decorator Pattern (`AdjustableClock`). Fast-forward hours and days in seconds without thread-blocking.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="btn-clock-reset" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-semibold transition">
-              Reset to Real Time
+        <!-- Unassigned Incidents in Team Domain -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Unassigned Team Queue</h3>
+              <p class="card-subtitle">Incidents classified into your domain waiting for technician assignment</p>
+            </div>
+            <button type="button" id="btn-auto-dispatch" class="btn btn-sm btn-primary">
+              <span>Auto-Dispatch All</span>
             </button>
           </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Current Virtual Time -->
-          <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-            <span class="text-xs text-slate-400 font-medium">Virtual Time Epoch</span>
-            <p id="sim-clock-display" class="text-xl font-bold font-mono text-cyan-300 mt-1">2026-10-26 14:00:00</p>
-            <span class="text-[11px] text-slate-500">Decorates java.time.Clock</span>
-          </div>
-
-          <!-- Speed Multiplier Controls -->
-          <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-            <span class="text-xs text-slate-400 font-medium">Time Multiplier</span>
-            <div class="flex items-center gap-2 mt-2">
-              <button class="sim-speed-btn px-2.5 py-1 rounded bg-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-700" data-speed="1">1x</button>
-              <button class="sim-speed-btn px-2.5 py-1 rounded bg-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-700" data-speed="60">60x (1m/s)</button>
-              <button class="sim-speed-btn px-2.5 py-1 rounded bg-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-700" data-speed="600">600x (10m/s)</button>
-            </div>
-          </div>
-
-          <!-- Discrete Fast Forward -->
-          <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-            <span class="text-xs text-slate-400 font-medium">Discrete Fast-Forward</span>
-            <div class="flex items-center gap-2 mt-2">
-              <button class="sim-ff-btn px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-bold hover:bg-indigo-900" data-minutes="15">+15m</button>
-              <button class="sim-ff-btn px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-bold hover:bg-indigo-900" data-minutes="60">+1h</button>
-              <button class="sim-ff-btn px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-bold hover:bg-indigo-900" data-minutes="1440">+24h</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Canonical Demonstration Scenarios -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        <!-- Scenarios List -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <h3 class="text-base font-bold text-white">Evaluation Demonstration Scenarios (S1–S5)</h3>
-          <p class="text-xs text-slate-400">Click any scenario to execute the complete end-to-end operational flow.</p>
-
-          <div class="space-y-3">
-            
-            <!-- S1 Card -->
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between gap-3">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold font-mono">SCENARIO S1</span>
-                  <span class="text-sm font-bold text-white">Happy Path Full Lifecycle</span>
-                </div>
-                <p class="text-xs text-slate-400 mt-1">Creation &rarr; Acknowledge &rarr; Investigation &rarr; Fix Applied &rarr; Verify &rarr; 5-Star Close.</p>
-              </div>
-              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/20 whitespace-nowrap" data-scenario="S1">
-                Run S1
-              </button>
-            </div>
-
-            <!-- S2 Card -->
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between gap-3">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-red-950 text-red-400 border border-red-800 text-[10px] font-bold font-mono">SCENARIO S2</span>
-                  <span class="text-sm font-bold text-white">P1 Outage & Multi-Tier Escalations</span>
-                </div>
-                <p class="text-xs text-slate-400 mt-1">75% warning, 93% warning, hard breach &rarr; Tier 1&ndash;4 escalations to Sarah &amp; Manager.</p>
-              </div>
-              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow-lg shadow-red-600/20 whitespace-nowrap" data-scenario="S2">
-                Run S2
-              </button>
-            </div>
-
-            <!-- S3 Card -->
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between gap-3">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 text-[10px] font-bold font-mono">SCENARIO S3</span>
-                  <span class="text-sm font-bold text-white">Wrong-Domain Triage & Reassignment</span>
-                </div>
-                <p class="text-xs text-slate-400 mt-1">Network tech flags ticket &rarr; Admin reclassifies to DATABASE and reassigns.</p>
-              </div>
-              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-lg shadow-amber-600/20 whitespace-nowrap" data-scenario="S3">
-                Run S3
-              </button>
-            </div>
-
-            <!-- S4 Card -->
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between gap-3">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 text-[10px] font-bold font-mono">SCENARIO S4</span>
-                  <span class="text-sm font-bold text-white">Duplicate Storm & Avalanche Escalation</span>
-                </div>
-                <p class="text-xs text-slate-400 mt-1">5 concurrent duplicate VPN tickets correlate via TF-IDF &rarr; priority elevated to P1.</p>
-              </div>
-              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-lg shadow-cyan-600/20 whitespace-nowrap" data-scenario="S4">
-                Run S4
-              </button>
-            </div>
-
-            <!-- S5 Card -->
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between gap-3">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-400 border border-purple-800 text-[10px] font-bold font-mono">SCENARIO S5</span>
-                  <span class="text-sm font-bold text-white">Rejection Loop & SLA Clock Pausing</span>
-                </div>
-                <p class="text-xs text-slate-400 mt-1">SLA clock pauses during PENDING_INFO, resumes with deadline extension.</p>
-              </div>
-              <button class="btn-run-scenario px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/20 whitespace-nowrap" data-scenario="S5">
-                Run S5
-              </button>
-            </div>
-
+          <div id="teamlead-unassigned-container" class="space-y-3">
+            <div class="text-center text-muted" style="padding: 2rem 1rem;">No unassigned incidents in team domain.</div>
           </div>
         </div>
 
-        <!-- Real-time Scenario Execution Console -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                <span>Execution Audit Terminal</span>
+        <!-- Tier 2 SLA Escalation Monitor -->
+        <div class="card" style="border-color: rgba(245, 158, 11, 0.4);">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title text-amber">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon text-amber">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>Tier 2 SLA Escalation Monitor (&gt; 90% Threshold)</span>
               </h3>
-              <div class="flex items-center gap-2">
-                <button id="btn-copy-sim-logs" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800">Copy</button>
-                <button id="btn-clear-sim-logs" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800">Clear</button>
+              <p class="card-subtitle">Critical tickets nearing or breaching SLA deadlines requiring supervisory intervention</p>
+            </div>
+          </div>
+
+          <div id="teamlead-escalation-container" class="space-y-3">
+            <div class="text-center text-muted" style="padding: 2rem 1rem;">All team tickets within safe SLA thresholds.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- CONSOLE 4: ADMIN COMMAND CENTRE -->
+      <!-- ============================================================== -->
+      <section id="console-admin" class="tab-panel space-y-6">
+        
+        <!-- Admin High-Level KPIs -->
+        <div class="grid-cols-4">
+          <div class="kpi-card">
+            <span class="kpi-label">Enterprise Incidents</span>
+            <div id="admin-kpi-total" class="kpi-value">0</div>
+            <span class="kpi-subtext">Total catalog count</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Active / Open</span>
+            <div id="admin-kpi-open" class="kpi-value text-cyan">0</div>
+            <span class="kpi-subtext">Currently unresolved</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Triage Review Queue</span>
+            <div id="admin-kpi-triage" class="kpi-value text-amber">0</div>
+            <span class="kpi-subtext">Low confidence &amp; flags</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">SLA Compliance</span>
+            <div id="admin-kpi-compliance" class="kpi-value text-emerald">0%</div>
+            <span class="kpi-subtext">Met deadline SLA</span>
+          </div>
+        </div>
+
+        <!-- Admin Subtabs -->
+        <div class="admin-subtabs">
+          <button type="button" class="admin-subtab active" data-subtarget="admin-catalog-panel">Enterprise Incident Catalog</button>
+          <button type="button" class="admin-subtab" data-subtarget="admin-triage-panel">Triage &amp; Reclassification Queue</button>
+          <button type="button" class="admin-subtab" data-subtarget="admin-strategy-panel">Dynamic Routing Strategies</button>
+        </div>
+
+        <!-- Subpanel 1: Catalog -->
+        <div id="admin-catalog-panel" class="admin-panel active space-y-4">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Enterprise Incident Directory</h3>
+                <p class="card-subtitle">Search, filter, inspect, and override incident lifecycles</p>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <input type="text" id="admin-search-text" class="form-input" style="width: 180px; padding: 0.35rem 0.65rem; font-size: 0.75rem;" placeholder="Search title or ID...">
+                <select id="admin-filter-category" class="form-select" style="width: auto; padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+                  <option value="">All Categories</option>
+                  <option value="HARDWARE">HARDWARE</option>
+                  <option value="SOFTWARE">SOFTWARE</option>
+                  <option value="NETWORK">NETWORK</option>
+                  <option value="DATABASE">DATABASE</option>
+                  <option value="SECURITY">SECURITY</option>
+                  <option value="CLOUD">CLOUD</option>
+                  <option value="ACCESS">ACCESS</option>
+                  <option value="APPLICATION">APPLICATION</option>
+                </select>
+                <select id="admin-filter-priority" class="form-select" style="width: auto; padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+                  <option value="">All Priorities</option>
+                  <option value="P1">P1 (Critical)</option>
+                  <option value="P2">P2 (High)</option>
+                  <option value="P3">P3 (Medium)</option>
+                  <option value="P4">P4 (Low)</option>
+                </select>
+                <button type="button" id="btn-admin-search" class="btn btn-sm btn-secondary">Filter</button>
               </div>
             </div>
-            <p class="text-xs text-slate-400">Step-by-step state transitions, event spine dispatches, and SLA changes.</p>
-          </div>
 
-          <div id="sim-terminal-logs" class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-1.5 h-[360px] overflow-y-auto mt-4">
-            <div class="text-slate-600">// Ready. Select a scenario above to start simulation.</div>
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ticket ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Assignee</th>
+                    <th>SLA Deadline</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-incidents-tbody">
+                  <tr><td colspan="8" class="text-center text-muted" style="padding: 2.5rem 1rem;">Loading enterprise incidents...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-      </div>
+        <!-- Subpanel 2: Triage Queue -->
+        <div id="admin-triage-panel" class="admin-panel space-y-4">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title text-amber">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon text-amber">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  <span>Admin Triage &amp; Wrong-Domain Queue</span>
+                </h3>
+                <p class="card-subtitle">Incidents gated due to low AI confidence (&lt; 0.60) or flagged out-of-scope by technicians</p>
+              </div>
+              <button type="button" id="btn-refresh-triage" class="btn btn-xs btn-secondary">Refresh</button>
+            </div>
 
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- CONSOLE 5: EXECUTIVE & OPERATIONAL REPORTS -->
-    <!-- ============================================================== -->
-    <section id="console-reports" class="tab-panel space-y-6">
-      
-      <!-- Key Executive KPI Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-lg">
-          <span class="text-xs font-semibold text-slate-400">Mean Time to Resolution (MTTR)</span>
-          <div class="flex items-baseline gap-2 mt-2">
-            <span id="kpi-mttr-val" class="text-3xl font-extrabold text-cyan-400 font-mono">--</span>
-            <span class="text-xs text-slate-500">minutes</span>
+            <div id="admin-triage-container" class="space-y-3" style="min-height: 280px;">
+              <div class="text-center text-muted" style="padding: 2.5rem 1rem;">Checking triage queue...</div>
+            </div>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Average time from intake to successful resolution</p>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-lg">
-          <span class="text-xs font-semibold text-slate-400">Mean Time to Respond (MTTResp)</span>
-          <div class="flex items-baseline gap-2 mt-2">
-            <span id="kpi-mttresp-val" class="text-3xl font-extrabold text-indigo-400 font-mono">--</span>
-            <span class="text-xs text-slate-500">minutes</span>
+        <!-- Subpanel 3: Routing Strategies -->
+        <div id="admin-strategy-panel" class="admin-panel space-y-4">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Dynamic Technician Assignment Strategies</h3>
+                <p class="card-subtitle">Strategy Pattern &amp; Open/Closed Principle: Hot-swap routing algorithms at runtime without redeployment</p>
+              </div>
+              <span class="badge badge-status-in-progress">Hot-Swappable</span>
+            </div>
+
+            <div id="strategies-grid" class="grid-cols-3" style="margin-top: 1rem;">
+              <div class="text-center text-muted w-full" style="padding: 2rem 1rem; grid-column: 1 / -1;">Loading strategies...</div>
+            </div>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Average time until initial technician acknowledgment</p>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl shadow-lg">
-          <span class="text-xs font-semibold text-slate-400">Overall SLA Compliance Rate</span>
-          <div class="flex items-baseline gap-2 mt-2">
-            <span id="kpi-sla-compliance-val" class="text-3xl font-extrabold text-emerald-400 font-mono">--%</span>
-            <span class="text-xs text-slate-500">met target</span>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-1">Percentage of incidents resolved within SLA deadlines</p>
-        </div>
-      </div>
+      </section>
 
-      <!-- Report Tables & Visual Breakdowns -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- ============================================================== -->
+      <!-- CONSOLE 5: SIMULATION ENGINE -->
+      <!-- ============================================================== -->
+      <section id="console-simulation" class="tab-panel space-y-6">
         
-        <!-- Team Workload Distribution -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <h3 class="text-base font-bold text-white">Support Team Capacity & Workload</h3>
-          <div id="workload-table-container" class="space-y-3">
-            <div class="text-center py-8 text-slate-500 text-xs">Loading workload metrics...</div>
+        <!-- Virtual Clock Hub -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon text-cyan">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Time-Accelerated Virtual Clock Control</span>
+              </h3>
+              <p class="card-subtitle">Decorator Pattern (AdjustableClock). Accelerates hours and days without thread-blocking.</p>
+            </div>
+            <button type="button" id="btn-clock-reset" class="btn btn-sm btn-danger">Reset to Real Time</button>
+          </div>
+
+          <div class="grid-cols-3">
+            <div class="kpi-card">
+              <span class="kpi-label">Virtual Time Epoch</span>
+              <div id="sim-clock-epoch" class="font-mono font-bold text-cyan text-lg" style="margin-top: 0.25rem;">2026-10-26 14:00:00</div>
+              <span class="kpi-subtext">Decorates java.time.Clock</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Speed Multiplier</span>
+              <div class="flex items-center gap-1" style="margin-top: 0.4rem;">
+                <button type="button" class="btn btn-xs btn-secondary sim-speed-btn" data-speed="1">1x</button>
+                <button type="button" class="btn btn-xs btn-secondary sim-speed-btn" data-speed="60">60x (1m/s)</button>
+                <button type="button" class="btn btn-xs btn-secondary sim-speed-btn" data-speed="600">600x (10m/s)</button>
+              </div>
+              <span class="kpi-subtext">Continuous time acceleration</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Discrete Fast-Forward</span>
+              <div class="flex items-center gap-1" style="margin-top: 0.4rem;">
+                <button type="button" class="btn btn-xs btn-primary sim-ff-btn" data-minutes="15">+15m</button>
+                <button type="button" class="btn btn-xs btn-primary sim-ff-btn" data-minutes="60">+1h</button>
+                <button type="button" class="btn btn-xs btn-primary sim-ff-btn" data-minutes="1440">+24h</button>
+              </div>
+              <span class="kpi-subtext">Instant epoch advance</span>
+            </div>
           </div>
         </div>
 
-        <!-- Service Incident Analysis -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <h3 class="text-base font-bold text-white">Service Volume & Criticality Breakdown</h3>
-          <div id="service-analysis-container" class="space-y-3">
-            <div class="text-center py-8 text-slate-500 text-xs">Loading service breakdown...</div>
+        <div class="grid-cols-2">
+          
+          <!-- Canonical Demonstration Scenarios -->
+          <div class="card space-y-3">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Evaluation Demonstration Scenarios (S1–S5)</h3>
+                <p class="card-subtitle">Click to execute end-to-end operational workflows verified by regression tests</p>
+              </div>
+            </div>
+
+            <!-- S1 -->
+            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-status-resolved font-mono">SCENARIO S1</span>
+                    <span class="font-bold text-white text-xs">Happy Path Full Lifecycle</span>
+                  </div>
+                  <p class="text-xs text-muted" style="margin-top: 0.2rem;">Creation &rarr; Acknowledge &rarr; Investigate &rarr; Resolve &rarr; Verify &rarr; 5-Star Close.</p>
+                </div>
+                <button type="button" class="btn btn-xs btn-success btn-run-scenario" data-scenario="S1">Run S1</button>
+              </div>
+            </div>
+
+            <!-- S2 -->
+            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-p1 font-mono">SCENARIO S2</span>
+                    <span class="font-bold text-white text-xs">P1 Outage &amp; Multi-Tier Escalations</span>
+                  </div>
+                  <p class="text-xs text-muted" style="margin-top: 0.2rem;">75% warning, 93% warning, hard breach &rarr; Tier 1–4 escalations to Team Lead &amp; Manager.</p>
+                </div>
+                <button type="button" class="btn btn-xs btn-danger btn-run-scenario" data-scenario="S2">Run S2</button>
+              </div>
+            </div>
+
+            <!-- S3 -->
+            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-p2 font-mono">SCENARIO S3</span>
+                    <span class="font-bold text-white text-xs">Wrong-Domain Triage &amp; Reassignment</span>
+                  </div>
+                  <p class="text-xs text-muted" style="margin-top: 0.2rem;">Network tech flags ticket out-of-scope &rarr; Admin reclassifies to DATABASE and reassigns.</p>
+                </div>
+                <button type="button" class="btn btn-xs btn-primary btn-run-scenario" data-scenario="S3">Run S3</button>
+              </div>
+            </div>
+
+            <!-- S4 -->
+            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-p3 font-mono">SCENARIO S4</span>
+                    <span class="font-bold text-white text-xs">Duplicate Avalanche Storm Escalation</span>
+                  </div>
+                  <p class="text-xs text-muted" style="margin-top: 0.2rem;">5 duplicate VPN tickets correlate via TF-IDF &rarr; cluster elevates parent priority to P1.</p>
+                </div>
+                <button type="button" class="btn btn-xs btn-primary btn-run-scenario" data-scenario="S4">Run S4</button>
+              </div>
+            </div>
+
+            <!-- S5 -->
+            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-status-in-progress font-mono">SCENARIO S5</span>
+                    <span class="font-bold text-white text-xs">Rejection Loop &amp; SLA Clock Pausing</span>
+                  </div>
+                  <p class="text-xs text-muted" style="margin-top: 0.2rem;">Pending user info pauses SLA clock; resumes with calculated deadline extension.</p>
+                </div>
+                <button type="button" class="btn btn-xs btn-primary btn-run-scenario" data-scenario="S5">Run S5</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Real-Time Execution Log Terminal -->
+          <div class="card flex flex-col justify-between">
+            <div>
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #06b6d4; display: inline-block;"></span>
+                    <span>Execution Audit Terminal</span>
+                  </h3>
+                  <p class="card-subtitle">Real-time state transitions, event spine dispatches, and SLA changes</p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button type="button" id="btn-copy-sim-logs" class="btn btn-xs btn-secondary">Copy</button>
+                  <button type="button" id="btn-clear-sim-logs" class="btn btn-xs btn-secondary">Clear</button>
+                </div>
+              </div>
+
+              <div id="sim-terminal-logs" class="log-terminal">
+                <span class="log-entry info">// Simulation terminal initialized. Select a scenario above to run.</span>
+              </div>
+            </div>
+
+            <div class="text-dim text-xs font-mono" style="margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+              Event Spine &middot; Observer Pattern &middot; Idempotent Dispatcher
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- CONSOLE 6: EXECUTIVE REPORTS -->
+      <!-- ============================================================== -->
+      <section id="console-reports" class="tab-panel space-y-6">
+        
+        <!-- Key Executive KPIs -->
+        <div class="grid-cols-3">
+          <div class="kpi-card">
+            <span class="kpi-label">Mean Time to Resolution (MTTR)</span>
+            <div id="kpi-mttr-val" class="kpi-value text-cyan">--</div>
+            <span class="kpi-subtext">Average minutes intake to resolution</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Mean Time to Respond (MTTResp)</span>
+            <div id="kpi-mttresp-val" class="kpi-value text-indigo">--</div>
+            <span class="kpi-subtext">Average minutes to technician ack</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Overall SLA Compliance Rate</span>
+            <div id="kpi-compliance-val" class="kpi-value text-emerald">--%</div>
+            <span class="kpi-subtext">Incidents resolved within target SLA</span>
           </div>
         </div>
 
-        <!-- SLA Breach Breakdown by Priority -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <h3 class="text-base font-bold text-white">SLA Performance by Priority Level</h3>
-          <div id="sla-breakdown-container" class="space-y-3">
-            <div class="text-center py-8 text-slate-500 text-xs">Loading SLA statistics...</div>
+        <div class="grid-cols-2">
+          
+          <!-- Support Team Workload -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Support Team Capacity &amp; Workload</h3>
+            </div>
+            <div id="report-workload-container" class="space-y-3">
+              <div class="text-center text-muted" style="padding: 2rem 1rem;">Loading team workload metrics...</div>
+            </div>
           </div>
+
+          <!-- Service Volume Analysis -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Service Volume &amp; Criticality</h3>
+            </div>
+            <div id="report-services-container" class="space-y-3">
+              <div class="text-center text-muted" style="padding: 2rem 1rem;">Loading service metrics...</div>
+            </div>
+          </div>
+
+          <!-- SLA Performance by Priority -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">SLA Performance by Priority Level</h3>
+            </div>
+            <div id="report-sla-container" class="space-y-3">
+              <div class="text-center text-muted" style="padding: 2rem 1rem;">Loading SLA statistics...</div>
+            </div>
+          </div>
+
+          <!-- Multi-Tier Escalation History -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Multi-Tier Escalation History Log</h3>
+            </div>
+            <div id="report-escalations-container" class="space-y-2" style="max-height: 300px; overflow-y: auto;">
+              <div class="text-center text-muted" style="padding: 2rem 1rem;">Loading escalation records...</div>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Escalation History Log -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <h3 class="text-base font-bold text-white">Multi-Tier Escalation History Log</h3>
-          <div id="escalation-log-container" class="space-y-2 max-h-[300px] overflow-y-auto">
-            <div class="text-center py-8 text-slate-500 text-xs">Loading escalation records...</div>
-          </div>
-        </div>
+      </section>
 
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: var(--bg-surface); border-top: 1px solid var(--border); padding: 1rem 1.25rem; margin-top: 2rem;">
+      <div class="max-w-7xl flex items-center justify-between flex-wrap gap-2 text-xs text-dim">
+        <span>CS F213 Object-Oriented Programming &mdash; Nimbus FinServe I-ITSM</span>
+        <span class="font-mono">Hexagonal Architecture &middot; Pure Domain Core &middot; 8 Design Patterns &middot; Injectable Clock</span>
       </div>
+    </footer>
 
-    </section>
+  </div>
 
-  </main>
-
-  <!-- Interactive Action Modals -->
-  <div id="modal-container" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div id="modal-content" class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4 animate-fadeIn">
-      <!-- Modal dynamically populated by app.js -->
+  <!-- ============================================================== -->
+  <!-- ACTION MODALS (Single dynamic overlay) -->
+  <!-- ============================================================== -->
+  <div id="modal-container" class="modal-overlay hidden">
+    <div id="modal-content" class="modal-content">
+      <!-- Populated dynamically by app.js -->
     </div>
   </div>
 
-  <!-- In-App Notifications Modal -->
-  <div id="notification-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-indigo-400">
+  <!-- In-App Notifications Drawer/Modal -->
+  <div id="notification-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon text-indigo">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
           </svg>
           <span>In-App Notifications</span>
         </h3>
-        <button id="btn-close-notifications" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+        <button type="button" id="btn-close-notifications" class="btn btn-xs btn-secondary">&times;</button>
       </div>
-      <div id="notifications-list-container" class="max-h-80 overflow-y-auto space-y-2 text-xs">
-        <div class="text-center py-6 text-slate-500">Loading notifications...</div>
+      <div id="notifications-list-container" class="space-y-2" style="max-height: 360px; overflow-y: auto;">
+        <div class="text-center text-muted" style="padding: 2rem 1rem;">Loading notifications...</div>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Container -->
   <div id="toast-container"></div>
 
-  <!-- Footer -->
-  <footer class="bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <span>CS F213 Object-Oriented Programming &mdash; Nimbus FinServe I-ITSM</span>
-      <span class="font-mono text-[11px] text-slate-400">Strict Pure Java Domain Core &middot; 8 Design Patterns &middot; Injected Clock</span>
-    </div>
-  </footer>
-
-  <!-- Application Logic -->
+  <!-- Application Logic (Self-Contained Vanilla ES6, CSP Compliant) -->
   <script src="/app.js"></script>
 </body>
 </html>
