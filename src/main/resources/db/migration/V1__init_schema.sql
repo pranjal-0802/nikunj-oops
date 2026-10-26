@@ -22,7 +22,8 @@ CREATE TABLE users (
     max_capacity INT,
     availability_status VARCHAR(32),
     support_team_id VARCHAR(64),
-    admin_level VARCHAR(32)
+    admin_level VARCHAR(32),
+    version BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE INDEX idx_users_email ON users(email);

@@ -34,6 +34,7 @@ public class TechnicianRepositoryAdapter implements TechnicianRepository {
         try {
             UserJpaEntity jpaEntity = UserMapper.toJpaEntity(technician);
             UserJpaEntity saved = springDataRepository.save(jpaEntity);
+            technician.setVersion(saved.getVersion());
             return (Technician) UserMapper.toDomain(saved);
         } catch (DataAccessException ex) {
             throw new PersistenceFailureException("Failed to save technician: " + technician.getId(), ex);

@@ -17,3 +17,4 @@ curl -s -X POST %BASE_URL%/api/auth/login -H "Content-Type: application/json" -d
 echo.
 
 echo Smoke test complete.
+

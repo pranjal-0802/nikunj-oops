@@ -97,7 +97,14 @@ public class UserJpaEntity {
     @Column(name = "admin_level", length = 32)
     private AdminLevel adminLevel;
 
+    @jakarta.persistence.Version
+    @Column(name = "version")
+    private Long version;
+
     public UserJpaEntity() {}
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 
     // Getters and setters
     public String getId() { return id; }

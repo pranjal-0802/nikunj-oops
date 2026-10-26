@@ -61,3 +61,4 @@ fi
 echo "Roster check OK (no passwordHash)"
 
 echo "=== ALL SMOKE TESTS PASSED SUCCESSFULLY ==="
+

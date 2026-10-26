@@ -17,6 +17,7 @@ public abstract class User {
     private boolean active;
     private int failedLoginAttempts;
     private boolean locked;
+    private Long version;
 
     protected User(String id, String name, Email email, String passwordHash, UserRole role) {
         if (id == null || id.trim().isEmpty()) {
@@ -101,5 +102,17 @@ public abstract class User {
     public void activate() {
         this.active = true;
     }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public abstract boolean canViewIncident(Incident incident, String owningTeamId);
+
+    public abstract boolean canExecuteAction(Incident incident, IncidentAction action, String owningTeamId);
 }
 

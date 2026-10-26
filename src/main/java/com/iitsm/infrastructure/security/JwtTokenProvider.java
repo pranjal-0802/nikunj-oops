@@ -1,5 +1,6 @@
 package com.iitsm.infrastructure.security;
 
+import com.iitsm.application.port.TokenPort;
 import com.iitsm.domain.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
  * Enforces production security checks: minimum 256-bit key length and blocks committed secret in prod.
  */
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements TokenPort {
 
     public static final String COMMITTED_DEFAULT_SECRET = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
 

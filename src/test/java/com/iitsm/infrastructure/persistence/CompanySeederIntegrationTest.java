@@ -60,8 +60,8 @@ class CompanySeederIntegrationTest {
         // 3. Verify Technicians (6 Team Leads + 18 Technicians = 24 total)
         assertThat(technicianRepository.findAll()).hasSize(24);
 
-        // 4. Verify 14 IT Services
-        assertThat(itServiceRepository.findAll()).hasSize(14);
+        // 4. Verify 15 IT Services (including General IT / Unclassified fallback)
+        assertThat(itServiceRepository.findAll()).hasSize(15);
 
         // 5. Verify 4 default SLA Policies
         assertThat(slaPolicyRepository.findAll()).hasSize(4);

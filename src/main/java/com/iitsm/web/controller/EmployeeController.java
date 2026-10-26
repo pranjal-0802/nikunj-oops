@@ -1,12 +1,12 @@
 package com.iitsm.web.controller;
 
+import com.iitsm.application.service.AuditService;
 import com.iitsm.application.service.IncidentService;
+import com.iitsm.application.service.UserService;
+import com.iitsm.domain.model.AuditRecord;
 import com.iitsm.domain.model.Feedback;
 import com.iitsm.domain.model.Incident;
 import com.iitsm.domain.model.User;
-import com.iitsm.domain.repository.UserRepository;
-import com.iitsm.infrastructure.persistence.entity.AuditRecordJpaEntity;
-import com.iitsm.infrastructure.persistence.repository.SpringDataAuditRecordRepository;
 import com.iitsm.web.dto.CreateIncidentRequest;
 import com.iitsm.web.dto.EmployeeIncidentView;
 import com.iitsm.web.dto.FeedbackRequest;
@@ -40,18 +40,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmployeeController {
 
     private final IncidentService incidentService;
-    private final UserRepository userRepository;
-    private final SpringDataAuditRecordRepository auditRecordRepository;
+    private final UserService userService;
+    private final AuditService auditService;
     private final Clock clock;
 
     public EmployeeController(
             IncidentService incidentService,
-            UserRepository userRepository,
-            SpringDataAuditRecordRepository auditRecordRepository,
+            UserService userService,
+            AuditService auditService,
             Clock clock) {
         this.incidentService = Objects.requireNonNull(incidentService, "incidentService cannot be null");
-        this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
-        this.auditRecordRepository = Objects.requireNonNull(auditRecordRepository, "auditRecordRepository cannot be null");
+        this.userService = Objects.requireNonNull(userService, "userService cannot be null");
+        this.auditService = Objects.requireNonNull(auditService, "auditService cannot be null");
         this.clock = Objects.requireNonNull(clock, "clock cannot be null");
     }
 
@@ -127,12 +127,11 @@ public class EmployeeController {
     private EmployeeIncidentView mapToEmployeeView(Incident incident) {
         String assigneeName = null;
         if (incident.getAssigneeId() != null) {
-            assigneeName = userRepository.findById(incident.getAssigneeId())
+            assigneeName = userService.findById(incident.getAssigneeId())
                     .map(User::getName)
                     .orElse("Assigned Support");
         }
-        List<AuditRecordJpaEntity> auditRecords = auditRecordRepository.findByIncidentIdOrderByTimestampAsc(incident.getId());
+        List<AuditRecord> auditRecords = auditService.getAuditTrailForIncident(incident.getId());
         return IncidentDtoMapper.toEmployeeView(incident, assigneeName, auditRecords);
     }
 }
-

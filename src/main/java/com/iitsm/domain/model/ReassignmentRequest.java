@@ -93,5 +93,21 @@ public class ReassignmentRequest {
         this.reviewedByAdminId = adminId;
         this.resolvedAt = Objects.requireNonNull(now, "resolvedAt cannot be null");
     }
+
+    public static ReassignmentRequest reconstitute(
+            String id,
+            String incidentId,
+            String requestingTechnicianId,
+            String reason,
+            Status status,
+            Instant requestedAt,
+            Instant resolvedAt,
+            String reviewedByAdminId) {
+        ReassignmentRequest req = new ReassignmentRequest(id, incidentId, requestingTechnicianId, reason, requestedAt);
+        req.status = status != null ? status : Status.PENDING;
+        req.resolvedAt = resolvedAt;
+        req.reviewedByAdminId = reviewedByAdminId;
+        return req;
+    }
 }
 

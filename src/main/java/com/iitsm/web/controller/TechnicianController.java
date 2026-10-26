@@ -1,10 +1,10 @@
 package com.iitsm.web.controller;
 
 import com.iitsm.application.service.IncidentService;
+import com.iitsm.application.service.UserService;
 import com.iitsm.domain.model.Incident;
 import com.iitsm.domain.model.Resolution;
 import com.iitsm.domain.model.User;
-import com.iitsm.domain.repository.UserRepository;
 import com.iitsm.web.dto.AddNoteRequest;
 import com.iitsm.web.dto.FlagWrongDomainRequest;
 import com.iitsm.web.dto.ProvideInfoRequest;
@@ -35,15 +35,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class TechnicianController {
 
     private final IncidentService incidentService;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final Clock clock;
 
     public TechnicianController(
             IncidentService incidentService,
-            UserRepository userRepository,
+            UserService userService,
             Clock clock) {
         this.incidentService = Objects.requireNonNull(incidentService, "incidentService cannot be null");
-        this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
+        this.userService = Objects.requireNonNull(userService, "userService cannot be null");
         this.clock = Objects.requireNonNull(clock, "clock cannot be null");
     }
 
@@ -97,7 +97,7 @@ public class TechnicianController {
             @Valid @RequestBody AddNoteRequest request,
             Authentication authentication) {
         String authorId = authentication.getName();
-        String authorName = userRepository.findById(authorId).map(User::getName).orElse(authorId);
+        String authorName = userService.findById(authorId).map(User::getName).orElse(authorId);
         Incident incident = incidentService.addNote(id, authorId, authorName, request.noteText(), request.internalOnly());
         return ResponseEntity.ok(mapToTechnicianView(incident));
     }
@@ -142,7 +142,7 @@ public class TechnicianController {
     }
 
     private TechnicianIncidentView mapToTechnicianView(Incident incident) {
-        User reporter = userRepository.findById(incident.getReporterId()).orElse(null);
+        User reporter = userService.findById(incident.getReporterId()).orElse(null);
         return IncidentDtoMapper.toTechnicianView(incident, reporter);
     }
 }

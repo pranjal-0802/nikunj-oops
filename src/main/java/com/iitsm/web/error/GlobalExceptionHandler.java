@@ -102,6 +102,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
+    @ExceptionHandler(java.util.ConcurrentModificationException.class)
+    public ResponseEntity<ErrorResponse> handleConcurrentModification(java.util.ConcurrentModificationException ex) {
+        log.warn("Concurrent modification caught: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                "ERR_CONCURRENT_MODIFICATION",
+                "The resource was modified concurrently by another transaction. Please reload and retry.",
+                Collections.emptyList());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unhandled server exception: {}", ex.getMessage(), ex);

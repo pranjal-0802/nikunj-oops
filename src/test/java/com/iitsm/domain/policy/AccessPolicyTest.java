@@ -50,7 +50,7 @@ class AccessPolicyTest {
         // Bob attempting to view Alice's ticket is blocked
         assertThatThrownBy(() -> accessPolicy.enforceCanViewIncident(employeeBob, aliceIncident))
                 .isInstanceOf(UnauthorizedOperationException.class)
-                .hasMessageContaining("cannot view ticket");
+                .hasMessageContaining("not authorized to view incident");
     }
 
     @Test

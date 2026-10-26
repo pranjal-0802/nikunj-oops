@@ -47,5 +47,24 @@ public class Employee extends User {
     public int getSeniorityYears() {
         return seniorityYears;
     }
+
+    @Override
+    public boolean canViewIncident(Incident incident, String owningTeamId) {
+        if (incident == null) return false;
+        return getId().equals(incident.getReporterId());
+    }
+
+    @Override
+    public boolean canExecuteAction(Incident incident, IncidentAction action, String owningTeamId) {
+        if (incident == null || action == null) return false;
+        if (!getId().equals(incident.getReporterId())) {
+            return false;
+        }
+        return action == IncidentAction.PROVIDE_INFO
+                || action == IncidentAction.VERIFY
+                || action == IncidentAction.REJECT
+                || action == IncidentAction.CLOSE
+                || action == IncidentAction.VIEW;
+    }
 }
 

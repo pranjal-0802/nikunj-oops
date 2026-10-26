@@ -61,7 +61,13 @@ public class DuplicateDetectionService {
         Instant cutoff = clock.instant().minus(RECENCY_WINDOW);
         List<Incident> candidateIncidents;
 
-        if (newIncident.getCategory() != null) {
+        if (newIncident.getServiceId() != null && newIncident.getCategory() != null) {
+            candidateIncidents = incidentRepository.findOpenIncidentsByServiceAndCategorySince(
+                    newIncident.getServiceId(), newIncident.getCategory(), cutoff);
+            if (candidateIncidents.isEmpty()) {
+                candidateIncidents = incidentRepository.findByCategory(newIncident.getCategory());
+            }
+        } else if (newIncident.getCategory() != null) {
             candidateIncidents = incidentRepository.findByCategory(newIncident.getCategory());
         } else {
             candidateIncidents = incidentRepository.findAll();

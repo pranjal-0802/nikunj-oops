@@ -21,11 +21,17 @@ spring:
       hibernate:
         format_sql: true
 
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+
   flyway:
     enabled: true
     locations: classpath:db/migration
 
 iitsm:
+  classification:
+    min-confidence: ${MIN_CONFIDENCE:0.60}
   demo-mode: true
   security:
     jwt:

@@ -82,6 +82,9 @@ public class CompanySeeder implements CommandLineRunner {
     }
 
     public void seedCompanyData() {
+        if (userRepository.count() > 0) {
+            return;
+        }
         Random random = new Random(seed);
         Faker faker = new Faker(random);
         String defaultHash = passwordEncoder.encode("Password123!");

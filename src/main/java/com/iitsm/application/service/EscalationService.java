@@ -14,12 +14,11 @@ import com.iitsm.domain.model.ItService;
 import com.iitsm.domain.model.SupportTeam;
 import com.iitsm.domain.model.User;
 import com.iitsm.domain.model.UserRole;
+import com.iitsm.domain.repository.EscalationRecordRepository;
 import com.iitsm.domain.repository.IncidentRepository;
 import com.iitsm.domain.repository.ItServiceRepository;
 import com.iitsm.domain.repository.SupportTeamRepository;
 import com.iitsm.domain.repository.UserRepository;
-import com.iitsm.infrastructure.persistence.entity.EscalationRecordJpaEntity;
-import com.iitsm.infrastructure.persistence.repository.SpringDataEscalationRecordRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -44,7 +43,7 @@ public class EscalationService {
     private final UserRepository userRepository;
     private final SupportTeamRepository supportTeamRepository;
     private final ItServiceRepository itServiceRepository;
-    private final SpringDataEscalationRecordRepository escalationRepository;
+    private final EscalationRecordRepository escalationRepository;
     private final DomainEventPublisher eventPublisher;
     private final EscalationHandler escalationChain;
     private final Clock clock;
@@ -54,7 +53,7 @@ public class EscalationService {
             UserRepository userRepository,
             SupportTeamRepository supportTeamRepository,
             ItServiceRepository itServiceRepository,
-            SpringDataEscalationRecordRepository escalationRepository,
+            EscalationRecordRepository escalationRepository,
             DomainEventPublisher eventPublisher,
             Clock clock) {
         this.incidentRepository = Objects.requireNonNull(incidentRepository);
@@ -104,10 +103,10 @@ public class EscalationService {
         EscalationAction action = actionOpt.get();
 
         // Check if an identical escalation tier was already triggered recently to prevent spam
-        List<EscalationRecordJpaEntity> existing = escalationRepository.findByIncidentIdOrderByEscalatedAtDesc(incidentId);
+        List<EscalationRecord> existing = escalationRepository.findByIncidentIdOrderByEscalatedAtDesc(incidentId);
         if (!existing.isEmpty()) {
-            EscalationRecordJpaEntity last = existing.get(0);
-            if (last.getToRole().equals(action.targetRole()) && last.getToUserId().equals(action.targetUserId())) {
+            EscalationRecord last = existing.get(0);
+            if (last.toRole().equals(action.targetRole()) && last.toUserId().equals(action.targetUserId())) {
                 log.debug("Incident {} already escalated to {} ({}) recently; skipping duplicate escalation",
                         incidentId, action.targetUserId(), action.targetRole());
                 return Optional.empty();
@@ -116,16 +115,16 @@ public class EscalationService {
 
         // 3. Persist escalation record
         String recordId = "ESC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        EscalationRecordJpaEntity entity = new EscalationRecordJpaEntity();
-        entity.setId(recordId);
-        entity.setIncidentId(incident.getId());
-        entity.setFromRole("SYSTEM_MONITOR");
-        entity.setToRole(action.targetRole());
-        entity.setToUserId(action.targetUserId());
-        entity.setReason(action.reason());
-        entity.setEscalatedAt(now);
-
-        escalationRepository.save(entity);
+        EscalationRecord domainRecord = new EscalationRecord(
+                recordId,
+                incident.getId(),
+                "SYSTEM_MONITOR",
+                action.targetRole(),
+                action.targetUserId(),
+                action.reason(),
+                now
+        );
+        escalationRepository.save(domainRecord);
 
         // 4. Publish DomainEvent.IncidentEscalated
         DomainEvent.IncidentEscalated event = new DomainEvent.IncidentEscalated(
@@ -143,35 +142,17 @@ public class EscalationService {
         log.warn("Escalated incident {} to Tier {} {} (User: {}) - Reason: {}",
                 incident.getId(), action.tier(), action.tierName(), action.targetUserId(), action.reason());
 
-        EscalationRecord domainRecord = new EscalationRecord(
-                entity.getId(),
-                entity.getIncidentId(),
-                entity.getFromRole(),
-                entity.getToRole(),
-                entity.getToUserId(),
-                entity.getReason(),
-                entity.getEscalatedAt()
-        );
-
         return Optional.of(domainRecord);
     }
 
     @Transactional(readOnly = true)
     public List<EscalationRecord> getEscalationHistory(String incidentId) {
-        return escalationRepository.findByIncidentIdOrderByEscalatedAtDesc(incidentId).stream()
-                .map(e -> new EscalationRecord(
-                        e.getId(), e.getIncidentId(), e.getFromRole(), e.getToRole(),
-                        e.getToUserId(), e.getReason(), e.getEscalatedAt()))
-                .toList();
+        return escalationRepository.findByIncidentIdOrderByEscalatedAtDesc(incidentId);
     }
 
     @Transactional(readOnly = true)
     public List<EscalationRecord> getAllEscalations() {
-        return escalationRepository.findAllByOrderByEscalatedAtDesc().stream()
-                .map(e -> new EscalationRecord(
-                        e.getId(), e.getIncidentId(), e.getFromRole(), e.getToRole(),
-                        e.getToUserId(), e.getReason(), e.getEscalatedAt()))
-                .toList();
+        return escalationRepository.findAllByOrderByEscalatedAtDesc();
     }
 
     private String resolveSupportTeamLead(Incident incident) {

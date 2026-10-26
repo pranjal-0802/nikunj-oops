@@ -1,13 +1,12 @@
 package com.iitsm.web.controller;
 
-import com.iitsm.domain.model.Email;
+import com.iitsm.application.service.NotificationService;
+import com.iitsm.application.service.UserService;
 import com.iitsm.domain.model.User;
-import com.iitsm.domain.repository.UserRepository;
-import com.iitsm.infrastructure.notification.SseEmitterRegistry;
-import com.iitsm.infrastructure.persistence.entity.NotificationJpaEntity;
-import com.iitsm.infrastructure.persistence.repository.SpringDataNotificationRepository;
+import com.iitsm.web.dto.NotificationDto;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,17 +24,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/api/notifications")
 public class NotificationController {
 
-    private final SseEmitterRegistry sseEmitterRegistry;
-    private final SpringDataNotificationRepository notificationRepository;
-    private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final UserService userService;
 
     public NotificationController(
-            SseEmitterRegistry sseEmitterRegistry,
-            SpringDataNotificationRepository notificationRepository,
-            UserRepository userRepository) {
-        this.sseEmitterRegistry = Objects.requireNonNull(sseEmitterRegistry, "sseEmitterRegistry cannot be null");
-        this.notificationRepository = Objects.requireNonNull(notificationRepository, "notificationRepository cannot be null");
-        this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
+            NotificationService notificationService,
+            UserService userService) {
+        this.notificationService = Objects.requireNonNull(notificationService, "notificationService cannot be null");
+        this.userService = Objects.requireNonNull(userService, "userService cannot be null");
     }
 
     private String resolveRecipientId(Authentication authentication) {
@@ -44,7 +40,7 @@ public class NotificationController {
         }
         String name = authentication.getName();
         if (name.contains("@")) {
-            return userRepository.findByEmail(new Email(name))
+            return userService.findByEmail(name)
                     .map(User::getId)
                     .orElse(name);
         }
@@ -54,25 +50,24 @@ public class NotificationController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamNotifications(Authentication authentication) {
         String recipientId = resolveRecipientId(authentication);
-        return sseEmitterRegistry.register(recipientId);
+        return notificationService.subscribe(recipientId);
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationJpaEntity>> getMyNotifications(Authentication authentication) {
+    public ResponseEntity<List<NotificationDto>> getMyNotifications(Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(401).build();
         }
         String recipientId = resolveRecipientId(authentication);
-        List<NotificationJpaEntity> notifications = notificationRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId);
+        List<NotificationDto> notifications = notificationService.getNotificationsForUser(recipientId).stream()
+                .map(NotificationDto::fromDomain)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(notifications);
     }
 
     @PostMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable("id") String id) {
-        notificationRepository.findById(id).ifPresent(n -> {
-            n.setDelivered(true);
-            notificationRepository.save(n);
-        });
+        notificationService.markDelivered(id);
         return ResponseEntity.noContent().build();
     }
 }

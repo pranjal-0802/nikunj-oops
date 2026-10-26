@@ -101,11 +101,7 @@ class IncidentRepositoryAdapterTest {
         Incident staleIncident = com.iitsm.infrastructure.persistence.mapper.IncidentMapper.toDomain(entity2);
 
         assertThatThrownBy(() -> incidentRepository.save(staleIncident))
-                .isInstanceOf(PersistenceFailureException.class)
-                .satisfies(ex -> {
-                    PersistenceFailureException pfe = (PersistenceFailureException) ex;
-                    assertThat(pfe.getErrorCode()).isEqualTo("ERR_PERSISTENCE_FAILURE");
-                });
+                .isInstanceOf(java.util.ConcurrentModificationException.class);
     }
 }
 

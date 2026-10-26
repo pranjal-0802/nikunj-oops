@@ -1,5 +1,6 @@
 package com.iitsm.web.mapper;
 
+import com.iitsm.domain.model.AuditRecord;
 import com.iitsm.domain.model.Employee;
 import com.iitsm.domain.model.FactorContribution;
 import com.iitsm.domain.model.Incident;
@@ -8,7 +9,6 @@ import com.iitsm.domain.model.SlaTracker;
 import com.iitsm.domain.model.User;
 import com.iitsm.domain.state.IncidentStates;
 import com.iitsm.domain.state.PublicStatusMapper;
-import com.iitsm.infrastructure.persistence.entity.AuditRecordJpaEntity;
 import com.iitsm.web.dto.AdminIncidentView;
 import com.iitsm.web.dto.EmployeeIncidentView;
 import com.iitsm.web.dto.TechnicianIncidentView;
@@ -29,7 +29,7 @@ public final class IncidentDtoMapper {
     public static EmployeeIncidentView toEmployeeView(
             Incident incident,
             String assigneeName,
-            List<AuditRecordJpaEntity> auditRecords) {
+            List<AuditRecord> auditRecords) {
         if (incident == null) return null;
 
         String publicStatus = PublicStatusMapper.toPublicStatus(incident.getStatus()).name();
@@ -126,7 +126,7 @@ public final class IncidentDtoMapper {
             Incident incident,
             User reporter,
             User assignee,
-            List<AuditRecordJpaEntity> auditRecords) {
+            List<AuditRecord> auditRecords) {
         if (incident == null) return null;
 
         String reporterName = (reporter != null) ? reporter.getName() : "Unknown";

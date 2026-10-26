@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @SpringBootTest
 @ActiveProfiles("dev")
-@Transactional
 class IncidentLifecycleEndToEndTest {
 
     @Autowired
@@ -39,6 +38,19 @@ class IncidentLifecycleEndToEndTest {
 
     @Autowired
     private Clock clock;
+
+    @Autowired
+    private com.iitsm.domain.repository.UserRepository userRepository;
+
+    @Autowired
+    private com.iitsm.infrastructure.persistence.CompanySeeder companySeeder;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        if (userRepository.count() == 0) {
+            companySeeder.seedCompanyData();
+        }
+    }
 
     @Test
     @DisplayName("Complete end-to-end incident lifecycle with audit trails and state transitions")

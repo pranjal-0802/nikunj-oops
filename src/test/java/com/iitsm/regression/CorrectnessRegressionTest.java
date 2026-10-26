@@ -71,6 +71,7 @@ public class CorrectnessRegressionTest {
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
         jdbcTemplate.execute("DELETE FROM technician_active_incidents");
+        greenMail.reset();
         if (userRepository.count() == 0) {
             companySeeder.seedCompanyData();
         }
@@ -84,7 +85,7 @@ public class CorrectnessRegressionTest {
     @RegisterExtension
     static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
             .withConfiguration(GreenMailConfiguration.aConfig().withUser("no-reply@nimbusfinserve.com", "password"))
-            .withPerMethodLifecycle(true);
+            .withPerMethodLifecycle(false);
 
     @Test
     @DisplayName("F1: When all technicians are at capacity, ticket creation must leave incident CLASSIFIED unassigned instead of failing")
@@ -278,7 +279,7 @@ public class CorrectnessRegressionTest {
         }
 
         // Free exactly 1 slot on the first tech
-        Technician targetTech = allTechs.getFirst();
+        Technician targetTech = technicianRepository.findById(allTechs.getFirst().getId()).orElseThrow();
         targetTech.releaseIncident("DUMMY-FILL-0");
         technicianRepository.save(targetTech);
 
@@ -339,7 +340,11 @@ public class CorrectnessRegressionTest {
     @DisplayName("A4: Optimistic lock failure on concurrent update must throw ConcurrentModificationException, not PersistenceFailureException")
     void A4_concurrentAcknowledgmentThrowsConcurrentModificationException() {
         // Finding A4: IncidentRepositoryAdapter catches DataAccessException and throws generic PersistenceFailureException
-        Incident inc = incidentService.createIncident("employee@nimbusfinserve.com", "Test Conflict", "Description for optimistic locking conflict");
+        Incident inc = incidentService.createIncident(
+                "employee@nimbusfinserve.com",
+                "Core network switch port malfunction in rack 2",
+                "Network packet loss and timeout on internal switch VLAN 10 gateway"
+        );
 
         // Stale incident with outdated version
         Incident copy1 = incidentRepository.findById(inc.getId()).orElseThrow();

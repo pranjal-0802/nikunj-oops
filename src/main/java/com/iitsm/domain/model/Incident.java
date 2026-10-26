@@ -135,6 +135,14 @@ public class Incident {
         this.priorityDecision = Objects.requireNonNull(priorityDecision, "PriorityDecision cannot be null");
     }
 
+    public void setCategory(IncidentCategory category) {
+        this.category = category;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
     public void setAssignee(String technicianId) {
         this.assigneeId = Objects.requireNonNull(technicianId, "assigneeId cannot be null");
     }
@@ -175,6 +183,13 @@ public class Incident {
     public void linkIncident(String duplicateIncidentId) {
         if (duplicateIncidentId != null && !duplicateIncidentId.equals(this.id)) {
             this.linkedIncidentIds.add(duplicateIncidentId);
+        }
+    }
+
+    public void updatePriorityDecision(PriorityDecision priorityDecision, SlaPolicy slaPolicy) {
+        this.priorityDecision = Objects.requireNonNull(priorityDecision, "priorityDecision cannot be null");
+        if (slaPolicy != null) {
+            this.slaTracker = SlaTracker.create(this.createdAt, slaPolicy);
         }
     }
 

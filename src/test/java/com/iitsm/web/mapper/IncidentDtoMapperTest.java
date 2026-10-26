@@ -2,6 +2,7 @@ package com.iitsm.web.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.iitsm.domain.model.AuditRecord;
 import com.iitsm.domain.model.Designation;
 import com.iitsm.domain.model.Email;
 import com.iitsm.domain.model.Employee;
@@ -14,7 +15,6 @@ import com.iitsm.domain.model.PriorityDecision;
 import com.iitsm.domain.model.Resolution;
 import com.iitsm.domain.model.SlaPolicy;
 import com.iitsm.domain.model.Technician;
-import com.iitsm.infrastructure.persistence.entity.AuditRecordJpaEntity;
 import com.iitsm.web.dto.AdminIncidentView;
 import com.iitsm.web.dto.EmployeeIncidentView;
 import com.iitsm.web.dto.TechnicianIncidentView;
@@ -56,13 +56,7 @@ class IncidentDtoMapperTest {
         Employee reporter = new Employee("EMP-01", "Alice Reporter", new Email("alice@nimbus.com"), "hash", Designation.MANAGER, "Finance", 5);
         Technician tech = new Technician("TECH-01", "Bob Technician", new Email("bob@nimbus.com"), "hash", Collections.emptySet(), 4, 5, "TEAM-DB");
 
-        AuditRecordJpaEntity audit = new AuditRecordJpaEntity();
-        audit.setId("AUD-1");
-        audit.setAction("IncidentCreated");
-        audit.setDescription("Created");
-        audit.setTimestamp(now);
-        audit.setIncidentId("INC-MAP-01");
-        audit.setActorId("EMP-01");
+        AuditRecord audit = new AuditRecord("AUD-1", now, "EMP-01", "IncidentCreated", "INC-MAP-01", null, null, "Created");
 
         // 1. Employee View
         EmployeeIncidentView empView = IncidentDtoMapper.toEmployeeView(incident, tech.getName(), List.of(audit));

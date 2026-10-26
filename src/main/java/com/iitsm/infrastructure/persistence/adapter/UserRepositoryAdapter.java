@@ -34,6 +34,7 @@ public class UserRepositoryAdapter implements UserRepository {
         try {
             UserJpaEntity jpaEntity = UserMapper.toJpaEntity(user);
             UserJpaEntity saved = springDataRepository.save(jpaEntity);
+            user.setVersion(saved.getVersion());
             return UserMapper.toDomain(saved);
         } catch (DataAccessException ex) {
             throw new PersistenceFailureException("Failed to save user: " + user.getId(), ex);

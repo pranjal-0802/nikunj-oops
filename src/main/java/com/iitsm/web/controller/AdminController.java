@@ -1,35 +1,30 @@
 package com.iitsm.web.controller;
 
+import com.iitsm.application.service.AuditService;
 import com.iitsm.application.service.IncidentService;
 import com.iitsm.application.service.SearchService;
+import com.iitsm.application.service.UserService;
+import com.iitsm.domain.model.AuditRecord;
+import com.iitsm.domain.model.Designation;
 import com.iitsm.domain.model.Feedback;
 import com.iitsm.domain.model.Incident;
 import com.iitsm.domain.model.IncidentCategory;
 import com.iitsm.domain.model.IncidentStatus;
 import com.iitsm.domain.model.Priority;
-import com.iitsm.domain.model.ReassignmentRequest;
-import com.iitsm.domain.model.Technician;
 import com.iitsm.domain.model.User;
-import com.iitsm.domain.repository.TechnicianRepository;
-import com.iitsm.domain.repository.UserRepository;
-import com.iitsm.infrastructure.persistence.entity.AuditRecordJpaEntity;
-import com.iitsm.infrastructure.persistence.entity.ReassignmentRequestJpaEntity;
-import com.iitsm.infrastructure.persistence.repository.SpringDataAuditRecordRepository;
-import com.iitsm.infrastructure.persistence.repository.SpringDataReassignmentRequestRepository;
 import com.iitsm.domain.strategy.assignment.AssignmentStrategy;
 import com.iitsm.domain.strategy.assignment.AssignmentStrategyRegistry;
 import com.iitsm.web.dto.AdminIncidentView;
 import com.iitsm.web.dto.AssignRequest;
 import com.iitsm.web.dto.FeedbackRequest;
 import com.iitsm.web.dto.OverridePriorityRequest;
+import com.iitsm.web.dto.ReassignmentRequestDto;
 import com.iitsm.web.dto.ReclassifyRequest;
 import com.iitsm.web.dto.StrategyInfoDto;
 import com.iitsm.web.dto.SwitchStrategyRequest;
+import com.iitsm.web.dto.TechnicianSummaryDto;
 import com.iitsm.web.mapper.IncidentDtoMapper;
 import jakarta.validation.Valid;
-import com.iitsm.application.service.UserService;
-import com.iitsm.domain.model.Designation;
-import com.iitsm.web.dto.TechnicianSummaryDto;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -59,28 +54,19 @@ public class AdminController {
     private final IncidentService incidentService;
     private final SearchService searchService;
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final TechnicianRepository technicianRepository;
-    private final SpringDataAuditRecordRepository auditRecordRepository;
-    private final SpringDataReassignmentRequestRepository reassignmentRequestRepository;
+    private final AuditService auditService;
     private final Clock clock;
 
     public AdminController(
             IncidentService incidentService,
             SearchService searchService,
             UserService userService,
-            UserRepository userRepository,
-            TechnicianRepository technicianRepository,
-            SpringDataAuditRecordRepository auditRecordRepository,
-            SpringDataReassignmentRequestRepository reassignmentRequestRepository,
+            AuditService auditService,
             Clock clock) {
         this.incidentService = Objects.requireNonNull(incidentService, "incidentService cannot be null");
         this.searchService = Objects.requireNonNull(searchService, "searchService cannot be null");
         this.userService = Objects.requireNonNull(userService, "userService cannot be null");
-        this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
-        this.technicianRepository = Objects.requireNonNull(technicianRepository, "technicianRepository cannot be null");
-        this.auditRecordRepository = Objects.requireNonNull(auditRecordRepository, "auditRecordRepository cannot be null");
-        this.reassignmentRequestRepository = Objects.requireNonNull(reassignmentRequestRepository, "reassignmentRequestRepository cannot be null");
+        this.auditService = Objects.requireNonNull(auditService, "auditService cannot be null");
         this.clock = Objects.requireNonNull(clock, "clock cannot be null");
     }
 
@@ -104,11 +90,10 @@ public class AdminController {
         SearchService.IncidentSearchCriteria criteria = new SearchService.IncidentSearchCriteria(
                 status, priority, category, serviceId, assigneeId, reporterId, query, fromDate, toDate);
 
-        List<Incident> searchResults = searchService.search(criteria);
-        List<AdminIncidentView> views = searchResults.stream()
+        List<Incident> results = searchService.search(criteria);
+        List<AdminIncidentView> views = results.stream()
                 .map(this::mapToAdminView)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(views);
     }
 
@@ -131,7 +116,7 @@ public class AdminController {
         return ResponseEntity.ok(mapToAdminView(updated));
     }
 
-    @PostMapping("/incidents/{id}/override-priority")
+    @PostMapping({"/incidents/{id}/override-priority", "/incidents/{id}/priority-override"})
     public ResponseEntity<AdminIncidentView> overridePriority(
             @PathVariable("id") String id,
             @Valid @RequestBody OverridePriorityRequest request,
@@ -156,14 +141,16 @@ public class AdminController {
     }
 
     @GetMapping("/triage-queue")
-    public ResponseEntity<List<ReassignmentRequestJpaEntity>> getTriageQueue() {
-        List<ReassignmentRequestJpaEntity> pending = reassignmentRequestRepository.findByStatus(ReassignmentRequest.Status.PENDING);
+    public ResponseEntity<List<ReassignmentRequestDto>> getTriageQueue() {
+        List<ReassignmentRequestDto> pending = incidentService.getPendingReassignments().stream()
+                .map(ReassignmentRequestDto::fromDomain)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(pending);
     }
 
     @GetMapping("/technicians")
     public ResponseEntity<List<TechnicianSummaryDto>> getTechnicianRoster() {
-        List<TechnicianSummaryDto> roster = technicianRepository.findAll().stream()
+        List<TechnicianSummaryDto> roster = userService.getAllTechnicians().stream()
                 .map(TechnicianSummaryDto::fromDomain)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(roster);
@@ -227,12 +214,11 @@ public class AdminController {
     }
 
     private AdminIncidentView mapToAdminView(Incident incident) {
-        User reporter = userRepository.findById(incident.getReporterId()).orElse(null);
+        User reporter = userService.findById(incident.getReporterId()).orElse(null);
         User assignee = (incident.getAssigneeId() != null)
-                ? userRepository.findById(incident.getAssigneeId()).orElse(null)
+                ? userService.findById(incident.getAssigneeId()).orElse(null)
                 : null;
-        List<AuditRecordJpaEntity> auditRecords = auditRecordRepository.findByIncidentIdOrderByTimestampAsc(incident.getId());
+        List<AuditRecord> auditRecords = auditService.getAuditTrailForIncident(incident.getId());
         return IncidentDtoMapper.toAdminView(incident, reporter, assignee, auditRecords);
     }
 }
-

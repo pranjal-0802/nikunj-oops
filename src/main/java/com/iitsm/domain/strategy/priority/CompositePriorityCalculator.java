@@ -105,10 +105,10 @@ public class CompositePriorityCalculator {
             }
         }
 
-        // Rule 3: 5+ Linked Duplicates -> Bump one priority level
+        // Rule 3: 5+ Linked Duplicates -> Elevate to P1 via avalanche rule
         int duplicateCount = (context != null) ? context.linkedDuplicateCount() : 0;
         if (duplicateCount >= 5) {
-            Priority elevated = bumpPriority(finalPriority);
+            Priority elevated = Priority.P1;
             if (elevated != finalPriority) {
                 appliedRules.add(String.format("RULE_DUPLICATE_AVALANCHE: Elevated from %s to %s due to %d correlated duplicate tickets",
                         finalPriority, elevated, duplicateCount));

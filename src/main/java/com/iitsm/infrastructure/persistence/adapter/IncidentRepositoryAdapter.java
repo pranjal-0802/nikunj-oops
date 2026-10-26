@@ -37,7 +37,12 @@ public class IncidentRepositoryAdapter implements IncidentRepository {
             IncidentJpaEntity jpaEntity = IncidentMapper.toJpaEntity(incident);
             IncidentJpaEntity saved = springDataRepository.save(jpaEntity);
             return IncidentMapper.toDomain(saved);
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException | jakarta.persistence.OptimisticLockException ex) {
+            throw new java.util.ConcurrentModificationException("Incident " + incident.getId() + " was modified concurrently by another transaction", ex);
         } catch (DataAccessException ex) {
+            if (ex.getCause() instanceof jakarta.persistence.OptimisticLockException || ex instanceof org.springframework.orm.ObjectOptimisticLockingFailureException) {
+                throw new java.util.ConcurrentModificationException("Incident " + incident.getId() + " was modified concurrently by another transaction", ex);
+            }
             throw new PersistenceFailureException("Failed to save incident: " + incident.getId(), ex);
         }
     }

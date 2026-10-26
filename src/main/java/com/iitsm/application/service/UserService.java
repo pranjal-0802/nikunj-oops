@@ -1,5 +1,6 @@
 package com.iitsm.application.service;
 
+import com.iitsm.application.port.TokenPort;
 import com.iitsm.domain.exception.DuplicateIncidentException;
 import com.iitsm.domain.exception.InvalidCredentialsException;
 import com.iitsm.domain.exception.UnauthorizedOperationException;
@@ -14,8 +15,10 @@ import com.iitsm.domain.model.TeamLead;
 import com.iitsm.domain.model.Technician;
 import com.iitsm.domain.model.User;
 import com.iitsm.domain.model.UserRole;
+import com.iitsm.domain.repository.TechnicianRepository;
 import com.iitsm.domain.repository.UserRepository;
-import com.iitsm.infrastructure.security.JwtTokenProvider;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -37,20 +40,23 @@ public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final TechnicianRepository technicianRepository;
     private final UserFactory userFactory;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider tokenProvider;
+    private final TokenPort tokenProvider;
     private final LoginAttemptService loginAttemptService;
     private final int maxFailedLogins;
 
     public UserService(
             UserRepository userRepository,
+            TechnicianRepository technicianRepository,
             UserFactory userFactory,
             PasswordEncoder passwordEncoder,
-            JwtTokenProvider tokenProvider,
+            TokenPort tokenProvider,
             LoginAttemptService loginAttemptService,
             @Value("${iitsm.security.max-failed-logins:5}") int maxFailedLogins) {
         this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
+        this.technicianRepository = Objects.requireNonNull(technicianRepository, "technicianRepository cannot be null");
         this.userFactory = Objects.requireNonNull(userFactory, "userFactory cannot be null");
         this.passwordEncoder = Objects.requireNonNull(passwordEncoder, "passwordEncoder cannot be null");
         this.tokenProvider = Objects.requireNonNull(tokenProvider, "tokenProvider cannot be null");
@@ -202,6 +208,11 @@ public class UserService {
         User saved = userRepository.save(employee);
         log.info("Admin updated designation of employee '{}' to {}", employeeId, newDesignation);
         return (Employee) saved;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Technician> getAllTechnicians() {
+        return technicianRepository.findAll();
     }
 
     @Transactional(readOnly = true)

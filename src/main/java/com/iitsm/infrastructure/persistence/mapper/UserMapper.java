@@ -99,6 +99,7 @@ public final class UserMapper {
         }
         user.setFailedLoginAttempts(entity.getFailedLoginAttempts());
         user.setLocked(entity.isLocked());
+        user.setVersion(entity.getVersion());
     }
 
     public static UserJpaEntity toJpaEntity(User domain) {
@@ -113,6 +114,7 @@ public final class UserMapper {
         entity.setActive(domain.isActive());
         entity.setFailedLoginAttempts(domain.getFailedLoginAttempts());
         entity.setLocked(domain.isLocked());
+        entity.setVersion(domain.getVersion());
 
         if (domain instanceof Employee emp) {
             entity.setUserType("EMPLOYEE");

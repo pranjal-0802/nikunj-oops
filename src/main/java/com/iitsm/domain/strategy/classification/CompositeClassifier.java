@@ -44,9 +44,12 @@ public class CompositeClassifier implements IncidentClassifier {
         double finalConfidence;
 
         if (keywordResult.category() == nbResult.category()) {
-            // Concordance boost
             finalCategory = nbResult.category();
-            finalConfidence = Math.min(0.99, nbResult.confidence() * 1.15 + 0.10);
+            if (keywordResult.confidence() >= 0.60 && nbResult.confidence() >= 0.60) {
+                finalConfidence = Math.min(0.99, Math.max(nbResult.confidence(), keywordResult.confidence()) * 1.15 + 0.10);
+            } else {
+                finalConfidence = Math.max(nbResult.confidence(), keywordResult.confidence());
+            }
             combinedRationale.add("Keyword and Naive Bayes models in agreement: " + finalCategory);
         } else if (nbResult.confidence() >= keywordResult.confidence()) {
             finalCategory = nbResult.category();
@@ -56,6 +59,12 @@ public class CompositeClassifier implements IncidentClassifier {
             finalCategory = keywordResult.category();
             finalConfidence = keywordResult.confidence();
             combinedRationale.add("Selected Keyword prediction over Naive Bayes classifier");
+        }
+
+        if (keywordResult.confidence() <= 0.50) {
+            // Weak or no keyword support indicates an ambiguous or vague ticket; cap confidence below auto-assignment threshold to route to human triage
+            finalConfidence = Math.min(finalConfidence, 0.55);
+            combinedRationale.add("Weak keyword support (confidence <= 0.50); capped at 0.55 for human triage");
         }
 
         return ClassificationResult.of(finalCategory, finalConfidence, CLASSIFIER_NAME, combinedRationale);

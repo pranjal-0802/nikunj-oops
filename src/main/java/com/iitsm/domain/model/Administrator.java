@@ -30,5 +30,15 @@ public class Administrator extends User {
     public boolean isItManager() {
         return adminLevel == AdminLevel.IT_MANAGER;
     }
+
+    @Override
+    public boolean canViewIncident(Incident incident, String owningTeamId) {
+        return true; // Global administrative visibility
+    }
+
+    @Override
+    public boolean canExecuteAction(Incident incident, IncidentAction action, String owningTeamId) {
+        return true; // Global administrative operational authority
+    }
 }
 

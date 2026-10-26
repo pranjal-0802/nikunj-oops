@@ -143,5 +143,36 @@ public class Technician extends User {
         }
         return skills.stream().anyMatch(s -> s.category() == category);
     }
+
+    @Override
+    public boolean canViewIncident(Incident incident, String owningTeamId) {
+        if (incident == null) return false;
+        if (getId().equals(incident.getAssigneeId())) {
+            return true;
+        }
+        // Technicians can view unassigned incidents in their owning team queue
+        if (incident.getAssigneeId() == null && supportTeamId != null && supportTeamId.equals(owningTeamId)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canExecuteAction(Incident incident, IncidentAction action, String owningTeamId) {
+        if (incident == null || action == null) return false;
+        if (action == IncidentAction.VIEW) {
+            return canViewIncident(incident, owningTeamId);
+        }
+        // Technician must be assigned to the ticket to execute technician actions
+        if (!getId().equals(incident.getAssigneeId())) {
+            return false;
+        }
+        return action == IncidentAction.ACKNOWLEDGE
+                || action == IncidentAction.START_INVESTIGATION
+                || action == IncidentAction.REQUEST_INFO
+                || action == IncidentAction.RESOLVE
+                || action == IncidentAction.FLAG_WRONG_DOMAIN
+                || action == IncidentAction.REASSIGN;
+    }
 }
 

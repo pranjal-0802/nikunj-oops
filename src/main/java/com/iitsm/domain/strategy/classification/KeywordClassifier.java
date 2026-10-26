@@ -32,7 +32,8 @@ public class KeywordClassifier implements IncidentClassifier {
         categoryLexicon.put(IncidentCategory.SOFTWARE, Set.of(
                 "excel", "outlook", "teams", "visual", "studio", "ide", "crash", "freeze", "freezing",
                 "dll", "patch", "chrome", "acrobat", "bug", "update", "macro", "slack", "software",
-                "app", "application", "browser", "driver", "install", "compilation"
+                "app", "application", "browser", "driver", "install", "compilation",
+                "git", "gitlab", "github", "repository", "ssh", "intellij", "vscode", "maven", "gradle"
         ));
 
         categoryLexicon.put(IncidentCategory.NETWORK, Set.of(
@@ -67,7 +68,7 @@ public class KeywordClassifier implements IncidentClassifier {
 
         categoryLexicon.put(IncidentCategory.APPLICATION, Set.of(
                 "portal", "crm", "erp", "benefits", "invoice", "hrms", "payroll", "banking",
-                "transfer", "billing", "order", "payment", "checkout", "wiki", "frontend",
+                "transfer", "billing", "order", "payment", "checkout", "wiki", "intranet", "frontend",
                 "concur", "salesforce", "workday", "website", "service"
         ));
 
@@ -90,7 +91,7 @@ public class KeywordClassifier implements IncidentClassifier {
             int currentMatches = 0;
             List<String> currentTerms = new ArrayList<>();
             for (String token : tokens) {
-                if (entry.getValue().contains(token)) {
+                if (entry.getValue().contains(token) || entry.getValue().stream().anyMatch(kw -> TextNormalizer.stem(kw).equalsIgnoreCase(token))) {
                     currentMatches++;
                     currentTerms.add(token);
                 }

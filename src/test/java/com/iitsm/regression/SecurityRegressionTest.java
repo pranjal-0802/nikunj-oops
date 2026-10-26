@@ -75,6 +75,7 @@ public class SecurityRegressionTest {
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
         jdbcTemplate.execute("DELETE FROM technician_active_incidents");
+        jdbcTemplate.execute("UPDATE users SET failed_login_attempts = 0, locked = false, active = true WHERE email = 'admin@nimbusfinserve.com' OR email = 'employee@nimbusfinserve.com'");
         if (userRepository.count() == 0) {
             companySeeder.seedCompanyData();
         }
@@ -83,6 +84,7 @@ public class SecurityRegressionTest {
     @org.junit.jupiter.api.AfterEach
     void tearDown() {
         jdbcTemplate.execute("DELETE FROM technician_active_incidents");
+        jdbcTemplate.execute("UPDATE users SET failed_login_attempts = 0, locked = false, active = true");
     }
 
     @Test
@@ -210,7 +212,7 @@ public class SecurityRegressionTest {
         // Finding S7: Tokens for locked/deactivated users are trusted until 24h expiration
         User user = userRepository.findByEmail(new Email("employee@nimbusfinserve.com")).orElseThrow();
         user.deactivate();
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         try {
             String token = tokenProvider.generateToken(user);
@@ -218,8 +220,9 @@ public class SecurityRegressionTest {
                             .header("Authorization", "Bearer " + token))
                     .andExpect(status().isUnauthorized());
         } finally {
-            user.activate();
-            userRepository.save(user);
+            User fresh = userRepository.findById(user.getId()).orElse(user);
+            fresh.activate();
+            userRepository.save(fresh);
         }
     }
 
