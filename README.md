@@ -2,9 +2,10 @@
 
 [![Java 21](https://img.shields.io/badge/Java-21%20LTS-blue.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Coverage](https://img.shields.io/badge/JaCoCo%20Coverage-86.61%25-success.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-165%20Passed-success.svg)]()
+[![Coverage](https://img.shields.io/badge/JaCoCo%20Coverage-85%25-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-186%20Passed-success.svg)]()
 [![Pure Java Domain](https://img.shields.io/badge/Domain%20Core-Zero%20Spring%20Imports-purple.svg)]()
+[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal%20Ports%20%26%20Adapters-informational.svg)]()
 
 > A production-grade, enterprise IT Service Management platform built for **CS F213 (Object-Oriented Programming)**. Engineered around a 100% pure-Java domain core, 8 design patterns, an explainable pure-Java NLP & priority scoring engine, a multi-tier Chain of Responsibility escalation hierarchy, a time-accelerated virtual simulation engine (`AdjustableClock`), and a modern self-contained single-page web console.
 
@@ -85,14 +86,16 @@ docker compose up -d
 
 ## 4. Running Verification Tests & Coverage Report
 
-To execute the entire 165-test suite and generate the JaCoCo coverage report:
+To execute the entire 186-test suite and generate the JaCoCo coverage report:
 ```bash
 ./mvnw clean verify
 ```
 
 ### Coverage Highlights:
-- **Total Tests**: **165 tests passed (100% green, 0 failures, 0 errors)**
-- **JaCoCo Instruction Coverage**: **86.61%** (20,544 / 23,719 instructions) — comfortably exceeding the $\ge 70\%$ threshold.
+- **Total Tests**: **186 tests passed (100% green, 0 failures, 0 errors, 0 skipped)**
+- **JaCoCo Instruction Coverage**: **85%** (22,526 / 26,306 instructions) across 244 classes.
+- **JaCoCo Branch Coverage**: **64%** (1,222 / 1,890 branches).
+- **Architecture Enforcement**: ArchUnit verifies hexagonal dependency isolation (Application & Web layers have zero imports from Infrastructure; controllers return only DTOs).
 - **Coverage Report**: View `target/site/jacoco/index.html`.
 
 ---
