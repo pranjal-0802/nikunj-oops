@@ -67,16 +67,17 @@ All pre-seeded demo accounts in the simulated company (**Nimbus FinServe**) auth
 ```
 
 Once started:
-- 🌐 **Web Application**: Open [http://localhost:8080/](http://localhost:8080/) in any modern browser.
+- 🌐 **Web Application**: Open [http://localhost:8085/](http://localhost:8085/) in any modern browser.
   - Features an instant **Persona Switcher** in the top navigation to switch between Employee, Technician, Team Lead, and Administrator.
-- 📖 **Interactive Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-- 📊 **Actuator Health**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
+- 📖 **Interactive Swagger UI**: [http://localhost:8085/swagger-ui.html](http://localhost:8085/swagger-ui.html)
+- 📊 **Actuator Health**: [http://localhost:8085/actuator/health](http://localhost:8085/actuator/health)
 
 ### Running with Docker Compose (PostgreSQL 16 + Mailpit)
 ```bash
 docker compose up -d
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
 ```
+- Web Application: `http://localhost:8085/`
 - PostgreSQL: `localhost:5432` (database: `iitsm_prod`)
 - Mailpit Web Mailbox: [http://localhost:8025](http://localhost:8025)
 
@@ -102,16 +103,16 @@ The platform provides 5 automated scenarios that can be executed directly from t
 
 ```bash
 # 1. Obtain Admin JWT Token
-TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8085/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@nimbusfinserve.com","password":"Password123!"}' | jq -r .token)
 
 # 2. Run Any Scenario (S1..S5)
-curl -X POST http://localhost:8080/api/simulation/run/S1 -H "Authorization: Bearer $TOKEN"
-curl -X POST http://localhost:8080/api/simulation/run/S2 -H "Authorization: Bearer $TOKEN"
-curl -X POST http://localhost:8080/api/simulation/run/S3 -H "Authorization: Bearer $TOKEN"
-curl -X POST http://localhost:8080/api/simulation/run/S4 -H "Authorization: Bearer $TOKEN"
-curl -X POST http://localhost:8080/api/simulation/run/S5 -H "Authorization: Bearer $TOKEN"
+curl -X POST http://localhost:8085/api/simulation/run/S1 -H "Authorization: Bearer $TOKEN"
+curl -X POST http://localhost:8085/api/simulation/run/S2 -H "Authorization: Bearer $TOKEN"
+curl -X POST http://localhost:8085/api/simulation/run/S3 -H "Authorization: Bearer $TOKEN"
+curl -X POST http://localhost:8085/api/simulation/run/S4 -H "Authorization: Bearer $TOKEN"
+curl -X POST http://localhost:8085/api/simulation/run/S5 -H "Authorization: Bearer $TOKEN"
 ```
 
 | Scenario ID | Scenario Name | Operational Flow Demonstrated |
