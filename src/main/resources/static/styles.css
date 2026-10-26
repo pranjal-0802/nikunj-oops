@@ -1,70 +1,139 @@
 /* ==========================================================================
-   Nimbus FinServe :: Intelligent IT Service Management (I-ITSM) Styles
+   Nimbus FinServe :: Intelligent IT Service Management (I-ITSM)
+   Modern, Sleek, Professional Enterprise UI Stylesheet
    ========================================================================== */
 
-:root {
-  --bg-main: #020617;
-  --bg-card: #0f172a;
-  --bg-card-hover: #1e293b;
-  --border-color: #1e293b;
-  --primary: #4f46e5;
-  --primary-hover: #6366f1;
-  --cyan: #06b6d4;
-  --emerald: #10b981;
-  --amber: #f59e0b;
-  --rose: #f43f5e;
+/* --------------------------------------------------------------------------
+   1. Strict Universal Icon Sizing Reset
+   Guarantees that SVGs NEVER render out of bounds under any circumstance.
+   -------------------------------------------------------------------------- */
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  max-width: 1.125rem !important;
+  max-height: 1.125rem !important;
+  min-width: 0.875rem;
+  min-height: 0.875rem;
+  flex-shrink: 0;
+  stroke-width: 2;
 }
 
-*, ::before, ::after {
-  box-sizing: border-box;
-  border-width: 0;
-  border-style: solid;
-  border-color: #1e293b;
+.icon-xs, svg.icon-xs {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  max-width: 0.75rem !important;
+  max-height: 0.75rem !important;
+}
+
+.icon-sm, svg.icon-sm {
+  width: 1rem !important;
+  height: 1rem !important;
+  max-width: 1rem !important;
+  max-height: 1rem !important;
+}
+
+.icon-md, svg.icon-md {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  max-width: 1.25rem !important;
+  max-height: 1.25rem !important;
+}
+
+.icon-lg, svg.icon-lg {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  max-width: 1.5rem !important;
+  max-height: 1.5rem !important;
+}
+
+.icon-xl, svg.icon-xl {
+  width: 2rem !important;
+  height: 2rem !important;
+  max-width: 2rem !important;
+  max-height: 2rem !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Design System & Variables
+   -------------------------------------------------------------------------- */
+:root {
+  --bg-primary: #070a12;
+  --bg-secondary: #0d1322;
+  --bg-card: #121a2d;
+  --bg-card-hover: #18233c;
+  --border-subtle: #1e293b;
+  --border-card: rgba(148, 163, 184, 0.12);
+  --border-focus: #6366f1;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-indigo: #6366f1;
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
 }
 
 body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #020617;
-  color: #f8fafc;
-  margin: 0;
-  line-height: 1.5;
+  letter-spacing: -0.011em;
 }
 
-/* Typography & Links */
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-p {
-  margin: 0;
+/* --------------------------------------------------------------------------
+   3. Custom Sleek Scrollbars
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }
 
-/* Tab Navigation */
+/* --------------------------------------------------------------------------
+   4. Navigation Tabs & Subtabs
+   -------------------------------------------------------------------------- */
 .nav-tab {
   display: inline-flex;
   align-items: center;
-  padding: 0.5rem 0.875rem;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
   font-size: 0.8125rem;
   font-weight: 600;
   border-radius: 0.5rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s ease-in-out;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  border: 1px solid transparent;
 }
 
 .nav-tab:hover {
-  color: #ffffff;
+  color: var(--text-primary);
   background-color: #1e293b;
 }
 
 .nav-tab.active {
   color: #ffffff;
-  background-color: #4f46e5;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  border-color: #6366f1;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
 }
 
 .tab-panel {
@@ -73,30 +142,30 @@ p {
 
 .tab-panel.active {
   display: block;
-  animation: fadeIn 0.2s ease-in-out;
+  animation: fadeIn 0.22s ease-out;
 }
 
-/* Admin Subtabs */
 .admin-subtab {
-  padding: 0.375rem 0.75rem;
+  padding: 0.375rem 0.875rem;
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 0.375rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: transparent;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
+  border: 1px solid transparent;
 }
 
 .admin-subtab:hover {
-  color: #ffffff;
+  color: var(--text-primary);
   background: #1e293b;
 }
 
 .admin-subtab.active {
   color: #38bdf8;
-  background: #0c4a6e;
-  border: 1px solid #0284c7;
+  background: rgba(14, 165, 233, 0.12);
+  border-color: rgba(14, 165, 233, 0.4);
 }
 
 .admin-panel {
@@ -105,15 +174,122 @@ p {
 
 .admin-panel.active {
   display: block;
+  animation: fadeIn 0.18s ease-out;
 }
 
-/* Stepper Component */
+/* --------------------------------------------------------------------------
+   5. Persona Switcher Pills
+   -------------------------------------------------------------------------- */
+.persona-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  color: #94a3b8;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.persona-chip:hover {
+  color: #f1f5f9;
+  border-color: #334155;
+  background: #1e293b;
+}
+
+.persona-chip.active {
+  color: #ffffff;
+  background: #1e1b4b;
+  border-color: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   6. Priority Badges & Indicators
+   -------------------------------------------------------------------------- */
+.badge-p1 {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.badge-p2 {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.45);
+}
+
+.badge-p3 {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.45);
+}
+
+.badge-p4 {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+}
+
+/* Card left border accents based on priority */
+.border-l-p1 { border-left: 4px solid #ef4444 !important; }
+.border-l-p2 { border-left: 4px solid #f97316 !important; }
+.border-l-p3 { border-left: 4px solid #eab308 !important; }
+.border-l-p4 { border-left: 4px solid #3b82f6 !important; }
+
+/* --------------------------------------------------------------------------
+   7. SLA Status Indicators
+   -------------------------------------------------------------------------- */
+.sla-on-track {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.sla-at-risk {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+.sla-warning {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+.sla-breached {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  animation: pulseBreach 1.6s infinite;
+}
+
+@keyframes pulseBreach {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.985); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   8. 5-Stage Stepper Progress Component
+   -------------------------------------------------------------------------- */
 .stepper-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  margin-top: 1rem;
+  padding: 0.75rem 0;
+  margin: 0.5rem 0;
 }
 
 .stepper-step {
@@ -122,27 +298,29 @@ p {
   align-items: center;
   position: relative;
   z-index: 2;
+  flex: 1;
 }
 
 .step-node {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.625rem;
+  height: 1.625rem;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  background-color: #1e293b;
+  background-color: #0f172a;
   color: #64748b;
   border: 2px solid #334155;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stepper-step.completed .step-node {
   background-color: #10b981;
   border-color: #10b981;
   color: #ffffff;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
 .stepper-step.current .step-node {
@@ -153,11 +331,13 @@ p {
 }
 
 .step-label {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
-  margin-top: 0.375rem;
+  margin-top: 0.35rem;
   color: #64748b;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
 }
 
 .stepper-step.completed .step-label,
@@ -167,93 +347,111 @@ p {
 
 .stepper-bar {
   position: absolute;
-  top: 0.875rem;
+  top: 1.55rem;
   left: 10%;
   right: 10%;
   height: 2px;
-  background-color: #334155;
+  background-color: #1e293b;
   z-index: 1;
 }
 
-/* Priority Badges */
-.badge-p1 {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+/* --------------------------------------------------------------------------
+   9. Toast Notifications
+   -------------------------------------------------------------------------- */
+#toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
 }
 
-.badge-p2 {
-  background-color: rgba(249, 115, 22, 0.15);
-  color: #fb923c;
-  border: 1px solid rgba(249, 115, 22, 0.3);
+.toast {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 420px;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  animation: slideToast 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
 }
 
-.badge-p3 {
-  background-color: rgba(234, 179, 8, 0.15);
-  color: #facc15;
-  border: 1px solid rgba(234, 179, 8, 0.3);
+@keyframes slideToast {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.badge-p4 {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+.toast-success {
+  background-color: #064e3b;
+  color: #ecfdf5;
+  border: 1px solid #059669;
 }
 
-/* SLA Status Badges */
-.sla-on-track {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+.toast-error {
+  background-color: #7f1d1d;
+  color: #fef2f2;
+  border: 1px solid #dc2626;
 }
 
-.sla-at-risk {
-  background-color: rgba(234, 179, 8, 0.15);
-  color: #facc15;
-  border: 1px solid rgba(234, 179, 8, 0.3);
+.toast-info {
+  background-color: #1e1b4b;
+  color: #e0e7ff;
+  border: 1px solid #4f46e5;
 }
 
-.sla-warning {
-  background-color: rgba(249, 115, 22, 0.15);
-  color: #fb923c;
-  border: 1px solid rgba(249, 115, 22, 0.3);
+.toast-warning {
+  background-color: #78350f;
+  color: #fffbeb;
+  border: 1px solid #d97706;
 }
 
-.sla-breached {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  animation: pulseBreach 1.5s infinite;
-}
-
-@keyframes pulseBreach {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Modals */
-.modal-backdrop {
-  backdrop-filter: blur(4px);
-}
-
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #090d16;
-}
-::-webkit-scrollbar-thumb {
+/* --------------------------------------------------------------------------
+   10. Quick Templates Chips
+   -------------------------------------------------------------------------- */
+.template-chip {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  color: #94a3b8;
   background: #1e293b;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  border: 1px solid #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
+.template-chip:hover {
+  color: #ffffff;
+  background: #334155;
+  border-color: #6366f1;
+}
+
+/* --------------------------------------------------------------------------
+   11. Monospace Scenario Execution Terminal
+   -------------------------------------------------------------------------- */
+#sim-terminal-logs {
+  background: #040711;
+  border: 1px solid #172138;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+#sim-terminal-logs div {
+  padding: 0.125rem 0;
+  word-break: break-word;
+}
