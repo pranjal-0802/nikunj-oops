@@ -67,3 +67,19 @@ This document records architectural, design, and technical decisions made during
   1. *Stateful HTTP Sessions*. (Rejected: hard to scale, poor match for single-page applications and REST APIs).
   2. *OAuth2 / Keycloak*. (Rejected: requires external identity provider server setup, complicating standalone viva and grading evaluation).
 - **Reason**: Lightweight, completely self-contained in pure Java, satisfies all security criteria, and returns clean, uniform JSON error contracts.
+
+---
+
+## ADR-007: Composite ML/Rule-Based Classification and Multi-Factor Priority Engine Architecture
+- **Status**: Accepted
+- **Context**: Incident intake requires automated category assignment, service association, multi-dimensional business priority scoring, duplicate correlation, and technician routing without external SaaS dependencies or non-deterministic behavior.
+- **Decision**:
+  1. Build a Composite Classifier combining high-precision Keyword matching with a pure-Java Multinomial Naive Bayes model trained on a 630-sample synthetic corpus with Laplace smoothing and log-space likelihood calculation.
+  2. Implement a 6-Factor Composite Priority Engine using the Strategy Pattern ($\sum w_i \times s_i$, where $\sum w_i = 1.0$) coupled with policy override rule chains for security breaches, critical outages, and duplicate ticket avalanches.
+  3. Implement swappable Technician Assignment Strategies managed via a thread-safe runtime registry (`AssignmentStrategyRegistry`), enabling zero-downtime routing strategy hot-swapping via Admin REST endpoints.
+  4. Perform duplicate ticket detection using TF-IDF vector cosine similarity and Jaccard token similarity over a 72-hour sliding window, bidirectionally linking incidents when similarity exceeds 0.70.
+- **Alternatives Considered**:
+  1. *Rule-only keyword matching*: Lacks generalization on conversational descriptions or variations in user phrasing.
+  2. *Single Naive Bayes model*: Can produce false positives on edge cases where explicit technical terms (e.g. "VPN", "PostgreSQL") clearly dictate the domain.
+  3. *Static if-else technician routing*: Violates the Open/Closed Principle and prevents dynamic operational load balancing.
+- **Reason**: The composite approach pairs deterministic technical precision with statistical generalization, ensures full transparency and explainability in priority scoring, provides runtime algorithm extensibility (OCP), and runs 100% offline in pure Java.

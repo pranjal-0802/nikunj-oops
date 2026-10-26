@@ -21,6 +21,8 @@ public interface SpringDataIncidentRepository
 
     List<IncidentJpaEntity> findByStatus(IncidentStatus status);
 
+    List<IncidentJpaEntity> findByCategory(IncidentCategory category);
+
     @Query("SELECT i FROM IncidentJpaEntity i WHERE i.serviceId = :serviceId AND i.category = :category AND i.createdAt >= :since AND i.status NOT IN ('RESOLVED', 'VERIFIED', 'CLOSED')")
     List<IncidentJpaEntity> findOpenIncidentsByServiceAndCategorySince(
             @Param("serviceId") String serviceId,

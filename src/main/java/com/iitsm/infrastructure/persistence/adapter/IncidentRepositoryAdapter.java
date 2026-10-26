@@ -85,6 +85,17 @@ public class IncidentRepositoryAdapter implements IncidentRepository {
     }
 
     @Override
+    public List<Incident> findByCategory(IncidentCategory category) {
+        try {
+            return springDataRepository.findByCategory(category).stream()
+                    .map(IncidentMapper::toDomain)
+                    .collect(Collectors.toList());
+        } catch (DataAccessException ex) {
+            throw new PersistenceFailureException("Failed to retrieve incidents by category: " + category, ex);
+        }
+    }
+
+    @Override
     public List<Incident> findOpenIncidentsByServiceAndCategorySince(
             String serviceId, IncidentCategory category, Instant since) {
         try {

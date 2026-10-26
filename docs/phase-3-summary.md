@@ -105,3 +105,4 @@ Phase 3 establishes the complete transactional and lifecycle foundation. In acco
    - Multi-factor evaluation: Category Baseline, Role/Seniority Impact, Business Criticality of affected IT Service, and Keyword Urgency Boost.
 4. **Smart Technician Routing**:
    - Swappable assignment strategies (Round-Robin, Lowest Workload, Skill-Match, Composite Affinity).
+

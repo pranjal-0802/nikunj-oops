@@ -23,6 +23,8 @@ public interface IncidentRepository {
 
     List<Incident> findByStatus(IncidentStatus status);
 
+    List<Incident> findByCategory(IncidentCategory category);
+
     List<Incident> findOpenIncidentsByServiceAndCategorySince(
             String serviceId, IncidentCategory category, Instant since);
 

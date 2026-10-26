@@ -16,10 +16,15 @@ import com.iitsm.infrastructure.persistence.entity.AuditRecordJpaEntity;
 import com.iitsm.infrastructure.persistence.entity.ReassignmentRequestJpaEntity;
 import com.iitsm.infrastructure.persistence.repository.SpringDataAuditRecordRepository;
 import com.iitsm.infrastructure.persistence.repository.SpringDataReassignmentRequestRepository;
+import com.iitsm.domain.strategy.assignment.AssignmentStrategy;
+import com.iitsm.domain.strategy.assignment.AssignmentStrategyRegistry;
 import com.iitsm.web.dto.AdminIncidentView;
 import com.iitsm.web.dto.AssignRequest;
 import com.iitsm.web.dto.FeedbackRequest;
 import com.iitsm.web.dto.OverridePriorityRequest;
+import com.iitsm.web.dto.ReclassifyRequest;
+import com.iitsm.web.dto.StrategyInfoDto;
+import com.iitsm.web.dto.SwitchStrategyRequest;
 import com.iitsm.web.mapper.IncidentDtoMapper;
 import jakarta.validation.Valid;
 import java.time.Clock;
@@ -34,6 +39,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -153,6 +159,44 @@ public class AdminController {
     public ResponseEntity<List<Technician>> getTechnicianRoster() {
         List<Technician> roster = technicianRepository.findAll();
         return ResponseEntity.ok(roster);
+    }
+
+    @GetMapping("/assignment/strategies")
+    public ResponseEntity<List<StrategyInfoDto>> getAssignmentStrategies() {
+        AssignmentStrategyRegistry registry = incidentService.getAssignmentStrategyRegistry();
+        String activeName = registry.getActiveStrategyName();
+        List<StrategyInfoDto> dtos = registry.getAllStrategies().stream()
+                .map(s -> new StrategyInfoDto(s.getStrategyName(), s.getDescription(), s.getStrategyName().equalsIgnoreCase(activeName)))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PutMapping("/assignment/strategies/active")
+    public ResponseEntity<StrategyInfoDto> setActiveAssignmentStrategy(
+            @Valid @RequestBody SwitchStrategyRequest request) {
+        AssignmentStrategyRegistry registry = incidentService.getAssignmentStrategyRegistry();
+        registry.setActiveStrategy(request.strategyName());
+        AssignmentStrategy active = registry.getActiveStrategy();
+        return ResponseEntity.ok(new StrategyInfoDto(active.getStrategyName(), active.getDescription(), true));
+    }
+
+    @PostMapping("/incidents/{id}/reclassify")
+    public ResponseEntity<AdminIncidentView> reclassifyIncident(
+            @PathVariable("id") String id,
+            @Valid @RequestBody ReclassifyRequest request,
+            Authentication authentication) {
+        String adminId = authentication.getName();
+        Incident updated = incidentService.reclassify(id, adminId, request.category(), request.serviceId(), request.reason());
+        return ResponseEntity.ok(mapToAdminView(updated));
+    }
+
+    @GetMapping("/incidents/{id}/duplicates")
+    public ResponseEntity<List<AdminIncidentView>> getIncidentDuplicates(@PathVariable("id") String id) {
+        List<Incident> duplicates = incidentService.getDuplicateDetectionService().findLinkedDuplicates(id);
+        List<AdminIncidentView> views = duplicates.stream()
+                .map(this::mapToAdminView)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(views);
     }
 
     private AdminIncidentView mapToAdminView(Incident incident) {

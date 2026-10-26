@@ -1,5 +1,5 @@
 @startuml
-title I-ITSM Architecture & Class Diagram (Phases 1, 2, & 3)
+title I-ITSM Architecture & Class Diagram (Phases 1, 2, 3, & 4)
 skinparam classAttributeIconSize 0
 skinparam monochrome false
 skinparam roundcorner 8
@@ -310,9 +310,146 @@ package "com.iitsm.infrastructure.observer" {
     }
 }
 
+package "com.iitsm.domain.strategy.nlp" {
+    class TextNormalizer {
+        + {static} normalize(text: String): String
+        + {static} tokenize(text: String): List<String>
+        + {static} stem(word: String): String
+    }
+
+    class TfIdfVectorizer {
+        - idfMap: Map<String, Double>
+        + train(documents: Collection<String>): void
+        + transform(text: String): Map<String, Double>
+        + cosineSimilarity(u, v): double
+    }
+}
+
+package "com.iitsm.domain.strategy.classification" {
+    interface IncidentClassifier <<Strategy>> {
+        + classify(title: String, description: String): ClassificationResult
+    }
+
+    class KeywordClassifier implements IncidentClassifier {
+    }
+
+    class NaiveBayesClassifier implements IncidentClassifier {
+        - wordCounts: Map<IncidentCategory, Map<String, Integer>>
+        - totalWordsPerClass: Map<IncidentCategory, Integer>
+        + train(corpus: List<TrainingExample>): void
+        + trainFromCsv(is: InputStream): void
+    }
+
+    class CompositeClassifier <<Composite>> implements IncidentClassifier {
+        - keywordClassifier: KeywordClassifier
+        - naiveBayesClassifier: NaiveBayesClassifier
+    }
+
+    class ServiceMatcher {
+        + matchService(text: String, services: Collection<ItService>): Optional<ItService>
+    }
+
+    class ClassificationResult <<Value Object>> {
+        - category: IncidentCategory
+        - confidence: double
+        - classifierName: String
+        - rationale: String
+        - requiresTriage: boolean
+    }
+}
+
+package "com.iitsm.domain.strategy.priority" {
+    interface PriorityFactor <<Strategy>> {
+        + evaluate(incident, reporter, service, context): FactorContribution
+        + getWeight(): double
+        + getName(): String
+    }
+
+    class ServiceCriticalityFactor implements PriorityFactor
+    class ImpactFactor implements PriorityFactor
+    class UrgencyFactor implements PriorityFactor
+    class ReporterDesignationFactor implements PriorityFactor
+    class AgingFactor implements PriorityFactor
+    class ReporterHistoryFactor implements PriorityFactor
+
+    class CompositePriorityCalculator <<Composite>> {
+        - factors: List<PriorityFactor>
+        + calculate(incident, reporter, service, context, now): PriorityDecision
+    }
+
+    class IncidentEvaluationContext <<Value Object>> {
+        - reporterRecentIncidentCount: int
+        - linkedDuplicateCount: int
+        - evaluationTime: Instant
+    }
+}
+
+package "com.iitsm.domain.strategy.assignment" {
+    interface AssignmentStrategy <<Strategy>> {
+        + recommend(incident: Incident, candidates: List<Technician>): AssignmentRecommendation
+        + getName(): String
+    }
+
+    class SkillBasedStrategy implements AssignmentStrategy
+    class LoadBasedStrategy implements AssignmentStrategy
+    class ExperienceBasedStrategy implements AssignmentStrategy
+    class RoundRobinStrategy implements AssignmentStrategy
+    class WeightedCompositeStrategy implements AssignmentStrategy
+
+    class CandidateFilter {
+        + filter(incident, candidates, excludingTechId): List<Technician>
+    }
+
+    class AssignmentStrategyRegistry <<Registry>> {
+        - strategies: Map<String, AssignmentStrategy>
+        - activeStrategyName: String
+        + register(strategy: AssignmentStrategy): void
+        + setActiveStrategy(name: String): void
+        + getActiveStrategy(): AssignmentStrategy
+    }
+
+    class AssignmentRecommendation <<Value Object>> {
+        - technician: Technician
+        - matchScore: double
+        - strategyName: String
+        - rationale: String
+    }
+}
+
+package "com.iitsm.domain.strategy.similarity" {
+    interface SimilarityMeasure <<Strategy>> {
+        + calculateSimilarity(textA: String, textB: String): double
+    }
+
+    class CosineTfIdfSimilarity implements SimilarityMeasure {
+        - vectorizer: TfIdfVectorizer
+    }
+
+    class JaccardSimilarity implements SimilarityMeasure {
+    }
+
+    class DuplicateDetectionService {
+        - incidentRepository: IncidentRepository
+        - similarityMeasure: SimilarityMeasure
+        + checkAndLinkDuplicate(newIncident: Incident): Optional<DuplicateMatch>
+    }
+}
+
 IncidentService --> IncidentFactory
 IncidentService --> IncidentRepository
 IncidentService --> IncidentUrgencyOrdering
+IncidentService --> IncidentClassifier
+IncidentService --> ServiceMatcher
+IncidentService --> CompositePriorityCalculator
+IncidentService --> AssignmentStrategyRegistry
+IncidentService --> CandidateFilter
+IncidentService --> DuplicateDetectionService
+CompositeClassifier --> KeywordClassifier
+CompositeClassifier --> NaiveBayesClassifier
+CompositePriorityCalculator --> PriorityFactor
+AssignmentStrategyRegistry --> AssignmentStrategy
+DuplicateDetectionService --> SimilarityMeasure
+CosineTfIdfSimilarity --> TfIdfVectorizer
 EmployeeController --> IncidentService
 TechnicianController --> IncidentService
 AdminController --> IncidentService

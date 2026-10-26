@@ -1,0 +1,37 @@
+category,title,description
+HARDWARE,MacBook Pro screen flickering and showing pink vertical lines,The built-in retina display blinks and shows lines when moving the hinge.
+HARDWARE,Dell USB-C dock Ethernet port completely dead,The RJ-45 LAN port on the dock does not show link lights. Monitors work fine.
+HARDWARE,Wireless mouse left clicker switch failing physically,Left mouse button does not register single clicks or registers double clicks.
+HARDWARE,Desktop PC power supply unit failed with burning smell,Tower PC in finance suddenly powered off with an electrical burning odor.
+SOFTWARE,Visual Studio Code extension host keeps crashing on TypeScript files,Opening any ts file crashes the language server extension host with code 1.
+SOFTWARE,PowerBI desktop app freezes when refreshing PostgreSQL data source,Clicking refresh queries freezes PowerBI on evaluating data model.
+SOFTWARE,IntelliJ IDEA reporting out of heap space during indexing,IDE displays java.lang.OutOfMemoryError Java heap space dialog and hangs.
+SOFTWARE,Zoom client video frozen while audio continues transmitting,"During video conference, the webcam feed freezes after 10 minutes."
+NETWORK,Cannot connect to corporate Cisco AnyConnect VPN from home,AnyConnect client reports connection attempt has failed due to gateway timeout.
+NETWORK,Packet loss over 40% when accessing AWS Frankfurt region,Direct Connect link to eu-central-1 is dropping packets during data replication.
+NETWORK,Branch office Cisco Meraki router showing red status LED,"The WAN uplink on Meraki MX68 in Singapore branch is down, staff offline."
+NETWORK,DNS lookup failure for internal gitlab server hostname,nslookup gitlab.internal.nimbusfinserve.com returns server failure SERVFAIL.
+DATABASE,PostgreSQL vacuum process blocked by long running idle transaction,Autovacuum cannot clean transaction table due to idle in transaction connection.
+DATABASE,Redis cache memory saturation causing eviction of session keys,"Redis maxmemory 8GB reached, evicting user JWT auth tokens causing logout."
+DATABASE,Oracle database archiver error ORA-00257 out of archivelog space,Database cannot commit transactions because archive log destination is full.
+DATABASE,MySQL slave IO thread stopped with duplicate key error on replica,Replication stopped on worker thread due to unique key constraint violation on id 4892.
+CLOUD,Amazon EKS worker node state NotReady in cluster prod-east,Kubelet stopped posting status due to disk pressure on root volume of node.
+CLOUD,Terraform apply failed creating AWS security group rule limit exceeded,Cannot create ingress rule because maximum security group rules limit is reached.
+CLOUD,Azure App Service returning HTTP 503 service temporarily unavailable,Web app failed to respond within 230 seconds during high traffic surge.
+CLOUD,GCP service account key expired blocking CI/CD deployment pipeline,GitHub Actions runner fails to authenticate against Google Container Registry.
+SECURITY,Urgent suspicious wire transfer request email from spoofed CFO address,Finance employee received phishing email requesting urgent ACH payment transfer.
+SECURITY,Endpoint anti-malware detected Cobalt Strike beacon memory injection,SentinelOne agent alerted on process injection into spoolsv.exe on server.
+SECURITY,Compromised SSH private key discovered in public gist,Senior engineer inadvertently committed internal deployment key to GitHub gist.
+SECURITY,Brute force attack detected on customer portal login endpoint,SIEM reports 5000 failed password attempts against user accounts from Tor node.
+AUTHENTICATION,Okta 2FA push notification timing out on mobile app,"Okta verify does not deliver push notification, user cannot log into work machine."
+AUTHENTICATION,Active Directory account locked out due to expired cached password,"After password change, iPad mail app keeps sending old password locking account."
+AUTHENTICATION,SAML assertion signature verification failed on Workday SSO,Single sign-on login into Workday fails with invalid signature error code.
+AUTHENTICATION,YubiKey FIDO2 hardware token not recognized during Windows Hello,WebAuthn prompt displays error code 0x80070057 device not detected.
+APPLICATION,Employee expense claim submission returns HTTP 500 error,Clicking submit claim on Concur portal throws application error exception.
+APPLICATION,Customer CRM cannot display account balance history tab,Frontend JavaScript throws TypeError cannot read property balance of undefined.
+APPLICATION,Core banking payment gateway timeout on real-time NEFT transfers,Payment API returns 504 Gateway Timeout on bank partner gateway handshake.
+APPLICATION,Internal HRMS portal displays blank page on employee directory,Angular routing error prevents employee profile directory page from rendering.
+STORAGE,SAN storage fiber channel switch port disabled due to CRC errors,Brocade FC switch port disabled port due to high bit error rate on SFP optical module.
+STORAGE,Network share nas-finance read-only error preventing document save,Windows explorer reports read only error when saving Excel spreadsheets to shared drive.
+STORAGE,Disk array controller battery backup unit BBU replacement warning,Dell PowerVault storage enclosure reports write-cache disabled due to dead BBU battery.
+STORAGE,Backup snapshot deletion failed causing datastore out of space,"VMware ESXi cannot delete delta vmdk file, datastore volume is 100% full."

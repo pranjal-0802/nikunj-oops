@@ -130,3 +130,4 @@ Svc -> Bus: publish(IncidentClosed)
 AdminCtrl --> Admin: 200 OK (AdminIncidentView)
 
 @enduml
+

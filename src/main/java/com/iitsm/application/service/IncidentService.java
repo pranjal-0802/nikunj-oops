@@ -29,6 +29,15 @@ import com.iitsm.domain.repository.TechnicianRepository;
 import com.iitsm.domain.repository.UserRepository;
 import com.iitsm.infrastructure.persistence.entity.ReassignmentRequestJpaEntity;
 import com.iitsm.infrastructure.persistence.repository.SpringDataReassignmentRequestRepository;
+import com.iitsm.domain.strategy.assignment.AssignmentRecommendation;
+import com.iitsm.domain.strategy.assignment.AssignmentStrategy;
+import com.iitsm.domain.strategy.assignment.AssignmentStrategyRegistry;
+import com.iitsm.domain.strategy.assignment.CandidateFilter;
+import com.iitsm.domain.strategy.classification.ClassificationResult;
+import com.iitsm.domain.strategy.classification.IncidentClassifier;
+import com.iitsm.domain.strategy.classification.ServiceMatcher;
+import com.iitsm.domain.strategy.priority.CompositePriorityCalculator;
+import com.iitsm.domain.strategy.priority.IncidentEvaluationContext;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -36,6 +45,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -85,6 +95,12 @@ public class IncidentService {
     private final DomainEventPublisher eventPublisher;
     private final IncidentFactory incidentFactory;
     private final AccessPolicy accessPolicy;
+    private final IncidentClassifier incidentClassifier;
+    private final ServiceMatcher serviceMatcher;
+    private final CompositePriorityCalculator priorityCalculator;
+    private final AssignmentStrategyRegistry assignmentStrategyRegistry;
+    private final CandidateFilter candidateFilter;
+    private final DuplicateDetectionService duplicateDetectionService;
     private final Clock clock;
 
     public IncidentService(
@@ -97,6 +113,12 @@ public class IncidentService {
             DomainEventPublisher eventPublisher,
             IncidentFactory incidentFactory,
             AccessPolicy accessPolicy,
+            IncidentClassifier incidentClassifier,
+            ServiceMatcher serviceMatcher,
+            CompositePriorityCalculator priorityCalculator,
+            AssignmentStrategyRegistry assignmentStrategyRegistry,
+            CandidateFilter candidateFilter,
+            DuplicateDetectionService duplicateDetectionService,
             Clock clock) {
         this.incidentRepository = Objects.requireNonNull(incidentRepository, "incidentRepository cannot be null");
         this.userRepository = Objects.requireNonNull(userRepository, "userRepository cannot be null");
@@ -107,6 +129,12 @@ public class IncidentService {
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher cannot be null");
         this.incidentFactory = Objects.requireNonNull(incidentFactory, "incidentFactory cannot be null");
         this.accessPolicy = Objects.requireNonNull(accessPolicy, "accessPolicy cannot be null");
+        this.incidentClassifier = Objects.requireNonNull(incidentClassifier, "incidentClassifier cannot be null");
+        this.serviceMatcher = Objects.requireNonNull(serviceMatcher, "serviceMatcher cannot be null");
+        this.priorityCalculator = Objects.requireNonNull(priorityCalculator, "priorityCalculator cannot be null");
+        this.assignmentStrategyRegistry = Objects.requireNonNull(assignmentStrategyRegistry, "assignmentStrategyRegistry cannot be null");
+        this.candidateFilter = Objects.requireNonNull(candidateFilter, "candidateFilter cannot be null");
+        this.duplicateDetectionService = Objects.requireNonNull(duplicateDetectionService, "duplicateDetectionService cannot be null");
         this.clock = Objects.requireNonNull(clock, "clock cannot be null");
     }
 
@@ -116,38 +144,53 @@ public class IncidentService {
         Incident incident = incidentFactory.createIncident(title, description, reporter.getId());
         Instant now = clock.instant();
 
-        // 1. Initial placeholder classification (will be augmented by ML classifier in Phase 4)
-        IncidentCategory category = IncidentCategory.APPLICATION;
+        // 1. Natural Language & Machine Learning Automated Classification
+        ClassificationResult classResult = incidentClassifier.classify(title, description);
+        IncidentCategory category = classResult.category();
+
+        // 2. IT Service Identification
         List<ItService> services = itServiceRepository.findAll();
-        String serviceId = services.isEmpty() ? "SRV-DEFAULT" : services.get(0).getId();
+        Optional<ItService> matchedService = serviceMatcher.findBestMatch(title, description, services);
+        ItService service = matchedService.orElse(null);
+        String serviceId = (service != null) ? service.getId() : "SRV-DEFAULT";
 
-        Priority priority = Priority.P3;
-        PriorityDecision decision = new PriorityDecision(
-                priority,
-                0.40,
-                Collections.emptyList(),
-                List.of("PHASE3_DEFAULT_POLICY"),
-                now,
-                null,
-                null);
+        // 3. Automated Duplicate Detection and Correlation
+        duplicateDetectionService.checkAndLinkDuplicate(incident);
 
+        // 4. Multi-Factor Priority Calculation (6 factors + Policy Override Rules)
+        int recentTickets = incidentRepository.findByReporterId(reporter.getId()).size();
+        int linkedDuplicates = incident.getLinkedIncidentIds().size();
+        IncidentEvaluationContext evalContext = new IncidentEvaluationContext(recentTickets, linkedDuplicates, now);
+
+        PriorityDecision decision = priorityCalculator.calculate(incident, reporter, service, evalContext, now);
+        Priority priority = decision.priority();
+
+        // 5. Attach SLA Policy matching calculated priority
         SlaPolicy slaPolicy = slaPolicyRepository.findDefaultByPriority(priority)
-                .orElseGet(() -> new SlaPolicy("SLA-DEF-P3", priority, null, Duration.ofHours(1), Duration.ofHours(8), 0.80));
+                .orElseGet(() -> SlaPolicy.defaultFor(priority));
 
         incident.classify(category, serviceId, decision, slaPolicy, now);
 
-        // 2. Initial assignment: round-robin / lowest load among available technicians
-        List<Technician> availableTechs = technicianRepository.findAvailableTechnicians();
-        if (availableTechs.isEmpty()) {
-            availableTechs = technicianRepository.findAll();
+        // 6. Intelligent Technician Routing via active Assignment Strategy
+        List<Technician> allTechs = technicianRepository.findAvailableTechnicians();
+        if (allTechs.isEmpty()) {
+            allTechs = technicianRepository.findAll();
         }
 
-        if (!availableTechs.isEmpty()) {
-            // Pick technician with lowest active count
-            Technician assigned = availableTechs.stream()
-                    .min(Comparator.comparingInt(t -> incidentRepository.findByAssigneeId(t.getId()).size()))
-                    .orElse(availableTechs.get(0));
-            incident.assign(assigned.getId(), now);
+        String preferredTeamId = (service != null) ? service.getOwningTeamId() : null;
+        List<Technician> candidates = candidateFilter.filterCandidates(allTechs, preferredTeamId, Collections.emptySet());
+        if (candidates.isEmpty()) {
+            candidates = allTechs;
+        }
+
+        if (!candidates.isEmpty()) {
+            AssignmentStrategy activeStrategy = assignmentStrategyRegistry.getActiveStrategy();
+            AssignmentRecommendation recommendation = activeStrategy.recommend(incident, candidates);
+            Technician assignedTech = recommendation.technician();
+
+            incident.assign(assignedTech.getId(), now);
+            assignedTech.assignIncident(incident.getId());
+            technicianRepository.save(assignedTech);
         }
 
         Incident saved = incidentRepository.save(incident);
@@ -165,7 +208,8 @@ public class IncidentService {
                     UUID.randomUUID().toString(), now, saved.getId(), "SYSTEM", saved.getAssigneeId()));
         }
 
-        log.info("Incident {} created successfully for reporter {}", saved.getId(), reporter.getId());
+        log.info("Incident {} created with category {}, priority {} ({}), assigned to {}",
+                saved.getId(), category, priority, decision.compositeScore(), saved.getAssigneeId());
         return saved;
     }
 
@@ -369,6 +413,12 @@ public class IncidentService {
         accessPolicy.enforceCanExecuteAction(actor, incident, "close");
 
         Instant now = clock.instant();
+        if (incident.getAssigneeId() != null) {
+            technicianRepository.findById(incident.getAssigneeId()).ifPresent(tech -> {
+                tech.releaseIncident(incidentId);
+                technicianRepository.save(tech);
+            });
+        }
         incident.close(actorId, feedback, now);
         Incident saved = incidentRepository.save(incident);
 
@@ -385,6 +435,11 @@ public class IncidentService {
         Instant now = clock.instant();
         incident.flagWrongDomain(technicianId, reason, now);
         incidentRepository.save(incident);
+
+        technicianRepository.findById(technicianId).ifPresent(tech -> {
+            tech.releaseIncident(incidentId);
+            technicianRepository.save(tech);
+        });
 
         ReassignmentRequestJpaEntity req = new ReassignmentRequestJpaEntity();
         req.setId("REASSIGN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -429,10 +484,19 @@ public class IncidentService {
                 .orElseThrow(() -> new ServiceNotFoundException("Technician not found: " + technicianId));
 
         Instant now = clock.instant();
+        String previousAssigneeId = incident.getAssigneeId();
         if (incident.getStatus() == IncidentStatus.ASSIGNED || incident.getStatus() == IncidentStatus.ACKNOWLEDGED) {
             incident.flagWrongDomain(adminId, "Administrative reassignment", now);
+            if (previousAssigneeId != null) {
+                technicianRepository.findById(previousAssigneeId).ifPresent(prevTech -> {
+                    prevTech.releaseIncident(incidentId);
+                    technicianRepository.save(prevTech);
+                });
+            }
         }
         incident.assign(technician.getId(), now);
+        technician.assignIncident(incident.getId());
+        technicianRepository.save(technician);
         Incident saved = incidentRepository.save(incident);
 
         // Resolve any pending reassignment requests for this incident
@@ -447,6 +511,43 @@ public class IncidentService {
         eventPublisher.publish(new DomainEvent.IncidentAssigned(
                 UUID.randomUUID().toString(), now, incidentId, adminId, technicianId));
         return saved;
+    }
+
+    public Incident reclassify(String incidentId, String adminId, IncidentCategory newCategory, String serviceId, String reason) {
+        User admin = loadUser(adminId);
+        accessPolicy.enforceAdmin(admin);
+
+        Incident incident = loadIncident(incidentId);
+        Instant now = clock.instant();
+
+        ItService service = (serviceId != null) ? itServiceRepository.findById(serviceId).orElse(null) : null;
+        User reporter = userRepository.findById(incident.getReporterId()).orElse(admin);
+
+        int recentTickets = incidentRepository.findByReporterId(incident.getReporterId()).size();
+        int linkedDuplicates = incident.getLinkedIncidentIds().size();
+        IncidentEvaluationContext evalContext = new IncidentEvaluationContext(recentTickets, linkedDuplicates, now);
+
+        PriorityDecision decision = priorityCalculator.calculate(incident, reporter, service, evalContext, now);
+        SlaPolicy slaPolicy = slaPolicyRepository.findDefaultByPriority(decision.priority())
+                .orElseGet(() -> SlaPolicy.defaultFor(decision.priority()));
+
+        incident.reclassify(newCategory, (service != null) ? service.getId() : serviceId, decision, slaPolicy, now);
+        Incident saved = incidentRepository.save(incident);
+
+        eventPublisher.publish(new DomainEvent.IncidentClassified(
+                UUID.randomUUID().toString(), now, incidentId, adminId, newCategory, (service != null) ? service.getId() : serviceId));
+        eventPublisher.publish(new DomainEvent.PriorityCalculated(
+                UUID.randomUUID().toString(), now, incidentId, adminId, decision));
+
+        return saved;
+    }
+
+    public AssignmentStrategyRegistry getAssignmentStrategyRegistry() {
+        return assignmentStrategyRegistry;
+    }
+
+    public DuplicateDetectionService getDuplicateDetectionService() {
+        return duplicateDetectionService;
     }
 
     private User loadUser(String userIdOrEmail) {

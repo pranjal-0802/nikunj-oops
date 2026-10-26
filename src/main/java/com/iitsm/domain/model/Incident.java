@@ -178,6 +178,20 @@ public class Incident {
         }
     }
 
+    public void reclassify(IncidentCategory category, String serviceId, PriorityDecision priorityDecision, SlaPolicy slaPolicy, Instant now) {
+        Objects.requireNonNull(category, "category cannot be null");
+        this.category = category;
+        if (serviceId != null) {
+            this.serviceId = serviceId;
+        }
+        if (priorityDecision != null) {
+            this.priorityDecision = priorityDecision;
+        }
+        if (slaPolicy != null) {
+            this.slaTracker = SlaTracker.create(this.createdAt, slaPolicy);
+        }
+    }
+
     public void overridePriority(Priority newPriority, String adminId, String reason, Instant now) {
         if (this.priorityDecision == null) {
             throw new ValidationException("priorityDecision", "Cannot override priority before classification");
