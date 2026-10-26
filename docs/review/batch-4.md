@@ -87,3 +87,4 @@
 - Zero external HTTP/HTTPS network dependencies verified via regex scan across static assets.
 - Complete CSP compliance verified under `script-src 'self'`.
 - All 186 unit, integration, and architecture tests passed (`./mvnw clean verify`).
+

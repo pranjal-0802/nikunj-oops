@@ -160,7 +160,7 @@ function showAppView() {
   startBackgroundPolling();
 }
 
-function setAuthenticatedUser(user) {
+function setAuthenticatedUser(user, switchDefaultTab = true) {
   STATE.currentUser = user;
   sessionStorage.setItem('iitsm_session', JSON.stringify(user));
 
@@ -180,23 +180,25 @@ function setAuthenticatedUser(user) {
 
   showAppView();
 
-  // Switch natural starting tab based on role
-  if (user.role === 'ROLE_EMPLOYEE') {
-    switchTab('console-employee');
-  } else if (user.role === 'ROLE_TECHNICIAN') {
-    switchTab('console-technician');
-  } else if (user.role === 'ROLE_TEAM_LEAD') {
-    switchTab('console-teamlead');
-  } else if (user.role === 'ROLE_ADMIN') {
-    switchTab('console-admin');
-  } else {
-    switchTab('console-employee');
+  // Switch natural starting tab based on role if requested
+  if (switchDefaultTab) {
+    if (user.role === 'ROLE_EMPLOYEE') {
+      switchTab('console-employee');
+    } else if (user.role === 'ROLE_TECHNICIAN') {
+      switchTab('console-technician');
+    } else if (user.role === 'ROLE_TEAM_LEAD') {
+      switchTab('console-teamlead');
+    } else if (user.role === 'ROLE_ADMIN') {
+      switchTab('console-admin');
+    } else {
+      switchTab('console-employee');
+    }
   }
 
-  showToast(`Welcome, ${user.name || user.email}`, 'info');
+  showToast(`Active persona: ${user.name || user.email} (${user.role})`, 'info');
 }
 
-async function loginUser(email, password) {
+async function loginUser(email, password, switchDefaultTab = true) {
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -214,7 +216,7 @@ async function loginUser(email, password) {
       name: data.name,
       email: data.email,
       role: data.role
-    });
+    }, switchDefaultTab);
   } catch (err) {
     showToast(err.message || 'Authentication error', 'error');
   }
@@ -230,7 +232,18 @@ function handleSignOut(notify = true) {
 // ============================================================================
 // 4. Tab Navigation & View Management
 // ============================================================================
-function switchTab(targetId) {
+async function switchTab(targetId) {
+  // Seamless demo mode role alignment: ensure credentials match required console
+  if (STATE.demoMode && STATE.currentUser) {
+    if ((targetId === 'console-admin' || targetId === 'console-simulation' || targetId === 'console-reports') && STATE.currentUser.role !== 'ROLE_ADMIN') {
+      await loginUser('admin@nimbusfinserve.com', STATE.demoPassword, false);
+    } else if (targetId === 'console-technician' && STATE.currentUser.role === 'ROLE_EMPLOYEE') {
+      await loginUser('tech.network@nimbusfinserve.com', STATE.demoPassword, false);
+    } else if (targetId === 'console-teamlead' && STATE.currentUser.role === 'ROLE_EMPLOYEE') {
+      await loginUser('lead.network@nimbusfinserve.com', STATE.demoPassword, false);
+    }
+  }
+
   document.querySelectorAll('.nav-tab').forEach(tab => {
     if (tab.getAttribute('data-target') === targetId) {
       tab.classList.add('active');
@@ -872,6 +885,15 @@ async function runScenario(scenarioId) {
   logTerminal(`[SCENARIO] Initiating execution of ${scenarioId}...`, 'info');
 
   try {
+    if (STATE.currentUser && STATE.currentUser.role !== 'ROLE_ADMIN') {
+      if (STATE.demoMode) {
+        logTerminal(`[AUTH] Auto-elevating to System Admin (admin@nimbusfinserve.com) for simulation privileges...`, 'info');
+        await loginUser('admin@nimbusfinserve.com', STATE.demoPassword, false);
+      } else {
+        throw new Error('Simulation scenarios require Administrator privileges.');
+      }
+    }
+
     const result = await apiCall(`/api/simulation/run/${scenarioId}`, { method: 'POST' });
     logTerminal(`[SCENARIO ${scenarioId}] Execution finished with status: ${result.status}`, result.status === 'SUCCESS' ? 'success' : 'warn');
     if (Array.isArray(result.logs)) {

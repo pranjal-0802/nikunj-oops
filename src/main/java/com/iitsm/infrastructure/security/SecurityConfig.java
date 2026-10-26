@@ -80,8 +80,8 @@ public class SecurityConfig {
                                 "/actuator/health"
                         ).permitAll()
                         .requestMatchers("/api/admin/**", "/api/simulation/**").hasRole("ADMIN")
-                        .requestMatchers("/api/technician/**").hasAnyRole("TECHNICIAN", "TEAM_LEAD")
-                        .requestMatchers("/api/employee/**").hasRole("EMPLOYEE")
+                        .requestMatchers("/api/technician/**").hasAnyRole("TECHNICIAN", "TEAM_LEAD", "ADMIN")
+                        .requestMatchers("/api/employee/**").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers("/api/notifications/**").authenticated()
                         .anyRequest().authenticated()
                 )
