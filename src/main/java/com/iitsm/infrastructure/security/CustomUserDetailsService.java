@@ -30,13 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         List<GrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority(user.getRole().name()));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail().value())
-                .password(user.getPasswordHash())
-                .authorities(authorities)
-                .disabled(!user.isActive())
-                .accountLocked(user.isLocked())
-                .build();
+        return new IitsmUserDetails(user, authorities);
     }
 }
 

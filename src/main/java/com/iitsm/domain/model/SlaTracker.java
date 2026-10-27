@@ -40,6 +40,15 @@ public class SlaTracker {
         return new SlaTracker(createdAt, new DeadlinePair(responseDue, resolutionDue));
     }
 
+    public void updatePolicy(SlaPolicy newPolicy, Instant now) {
+        Objects.requireNonNull(newPolicy, "newPolicy cannot be null");
+        Objects.requireNonNull(now, "now cannot be null");
+        Duration pauseOffset = (this.pausedDuration != null) ? this.pausedDuration : Duration.ZERO;
+        this.responseDueAt = this.createdAt.plus(newPolicy.getResponseTarget()).plus(pauseOffset);
+        this.resolutionDueAt = this.createdAt.plus(newPolicy.getResolutionTarget()).plus(pauseOffset);
+        evaluateStatus(now);
+    }
+
     public static SlaTracker reconstitute(
             Instant createdAt,
             Instant responseDueAt,

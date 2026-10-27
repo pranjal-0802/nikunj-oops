@@ -35,6 +35,8 @@ public class Incident {
     private Feedback feedback;
     private int reopenCount;
     private final Set<String> linkedIncidentIds;
+    private boolean needsTriage;
+    private final Set<String> excludedTechnicianIds;
     private Long version; // Optimistic locking
 
     public Incident(String id, String title, String description, String reporterId, Instant createdAt) {
@@ -63,6 +65,8 @@ public class Incident {
         this.status = IncidentStatus.NEW;
         this.notes = new ArrayList<>();
         this.linkedIncidentIds = new HashSet<>();
+        this.excludedTechnicianIds = new HashSet<>();
+        this.needsTriage = false;
         this.reopenCount = 0;
         this.version = 0L;
     }
@@ -187,9 +191,17 @@ public class Incident {
     }
 
     public void updatePriorityDecision(PriorityDecision priorityDecision, SlaPolicy slaPolicy) {
+        updatePriorityDecision(priorityDecision, slaPolicy, Instant.now());
+    }
+
+    public void updatePriorityDecision(PriorityDecision priorityDecision, SlaPolicy slaPolicy, Instant now) {
         this.priorityDecision = Objects.requireNonNull(priorityDecision, "priorityDecision cannot be null");
         if (slaPolicy != null) {
-            this.slaTracker = SlaTracker.create(this.createdAt, slaPolicy);
+            if (this.slaTracker != null) {
+                this.slaTracker.updatePolicy(slaPolicy, now != null ? now : Instant.now());
+            } else {
+                this.slaTracker = SlaTracker.create(this.createdAt, slaPolicy);
+            }
         }
     }
 
@@ -312,6 +324,28 @@ public class Incident {
 
     public Set<String> getAllowedActions() {
         return IncidentStates.of(this.status).allowedActions();
+    }
+
+    public boolean isNeedsTriage() {
+        return needsTriage;
+    }
+
+    public void setNeedsTriage(boolean needsTriage) {
+        this.needsTriage = needsTriage;
+    }
+
+    public Set<String> getExcludedTechnicianIds() {
+        return Collections.unmodifiableSet(excludedTechnicianIds);
+    }
+
+    public void addExcludedTechnician(String technicianId) {
+        if (technicianId != null && !technicianId.trim().isEmpty()) {
+            this.excludedTechnicianIds.add(technicianId.trim());
+        }
+    }
+
+    public void clearExcludedTechnicians() {
+        this.excludedTechnicianIds.clear();
     }
 }
 

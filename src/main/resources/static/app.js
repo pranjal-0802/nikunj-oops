@@ -169,14 +169,8 @@ function setAuthenticatedUser(user, switchDefaultTab = true) {
   document.getElementById('user-display-role').textContent = user.role || 'ROLE_USER';
   document.getElementById('user-avatar-badge').textContent = (user.name ? user.name.charAt(0) : 'U').toUpperCase();
 
-  // Sync persona chip highlight
-  document.querySelectorAll('.persona-chip').forEach(chip => {
-    if (chip.getAttribute('data-email') === user.email) {
-      chip.classList.add('active');
-    } else {
-      chip.classList.remove('active');
-    }
-  });
+  // Enforce persona isolation: Show ONLY the console(s) belonging to this specific user role
+  updateNavTabsForRole(user.role);
 
   showAppView();
 
@@ -195,7 +189,37 @@ function setAuthenticatedUser(user, switchDefaultTab = true) {
     }
   }
 
-  showToast(`Active persona: ${user.name || user.email} (${user.role})`, 'info');
+  showToast(`Signed in: ${user.name || user.email} (${user.role})`, 'info');
+}
+
+function updateNavTabsForRole(role) {
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(tab => {
+    const target = tab.getAttribute('data-target');
+    let visible = false;
+    if (role === 'ROLE_EMPLOYEE') {
+      visible = (target === 'console-employee');
+    } else if (role === 'ROLE_TECHNICIAN') {
+      visible = (target === 'console-technician');
+    } else if (role === 'ROLE_TEAM_LEAD') {
+      visible = (target === 'console-technician' || target === 'console-teamlead');
+    } else if (role === 'ROLE_ADMIN') {
+      visible = (target === 'console-admin' || target === 'console-simulation' || target === 'console-reports');
+    }
+    if (visible) {
+      tab.classList.remove('hidden');
+      tab.style.display = 'inline-flex';
+    } else {
+      tab.classList.add('hidden');
+      tab.style.display = 'none';
+    }
+  });
+
+  const personaBar = document.getElementById('persona-switcher-bar');
+  if (personaBar) {
+    personaBar.classList.add('hidden');
+    personaBar.style.display = 'none';
+  }
 }
 
 async function loginUser(email, password, switchDefaultTab = true) {
@@ -233,17 +257,6 @@ function handleSignOut(notify = true) {
 // 4. Tab Navigation & View Management
 // ============================================================================
 async function switchTab(targetId) {
-  // Seamless demo mode role alignment: ensure credentials match required console
-  if (STATE.demoMode && STATE.currentUser) {
-    if ((targetId === 'console-admin' || targetId === 'console-simulation' || targetId === 'console-reports') && STATE.currentUser.role !== 'ROLE_ADMIN') {
-      await loginUser('admin@nimbusfinserve.com', STATE.demoPassword, false);
-    } else if (targetId === 'console-technician' && STATE.currentUser.role === 'ROLE_EMPLOYEE') {
-      await loginUser('tech.network@nimbusfinserve.com', STATE.demoPassword, false);
-    } else if (targetId === 'console-teamlead' && STATE.currentUser.role === 'ROLE_EMPLOYEE') {
-      await loginUser('lead.network@nimbusfinserve.com', STATE.demoPassword, false);
-    }
-  }
-
   document.querySelectorAll('.nav-tab').forEach(tab => {
     if (tab.getAttribute('data-target') === targetId) {
       tab.classList.add('active');
@@ -258,6 +271,11 @@ async function switchTab(targetId) {
     } else {
       panel.classList.remove('active');
     }
+  });
+
+  STATE.activeTab = targetId;
+  refreshActiveTab();
+}
   });
 
   STATE.activeTab = targetId;
@@ -356,6 +374,72 @@ async function updateNotifications() {
 // ============================================================================
 // 6. Console 1: Employee Portal Logic
 // ============================================================================
+function displayTicketCreatedCallout(created) {
+  const container = document.getElementById('emp-callout-container');
+  if (!container || !created) return;
+
+  let techEmail = 'tech.network@nimbusfinserve.com';
+  let techRole = 'David Kim (Senior Network Engineer)';
+  if (created.assigneeName) {
+    const nameLower = created.assigneeName.toLowerCase();
+    if (nameLower.includes('priya') || nameLower.includes('database')) {
+      techEmail = 'tech.database@nimbusfinserve.com';
+      techRole = `${created.assigneeName} (Core Banking & Database Systems)`;
+    } else if (nameLower.includes('sarah')) {
+      techEmail = 'lead.network@nimbusfinserve.com';
+      techRole = `${created.assigneeName} (Network Team Lead)`;
+    } else {
+      techEmail = 'tech.network@nimbusfinserve.com';
+      techRole = `${created.assigneeName} (Network & Infrastructure Specialist)`;
+    }
+  }
+
+  container.innerHTML = `
+    <div class="card" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
+      <div class="flex items-start gap-3">
+        <div style="font-size: 1.5rem; line-height: 1;">🎫</div>
+        <div class="w-full">
+          <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.35rem;">
+            <h4 class="font-bold text-white text-sm">
+              Support Ticket Logged: <span class="font-mono text-cyan">${escapeHtml(created.id)}</span>
+            </h4>
+            <span class="badge badge-status-assigned">ROUTED &amp; ASSIGNED</span>
+          </div>
+          <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">
+            Automated intelligence classified and assigned this incident to domain specialist: 
+            <strong class="text-white">${escapeHtml(created.assigneeName || 'Routing Queue')}</strong>
+          </p>
+          <div style="background: rgba(15, 23, 42, 0.85); border-radius: 6px; padding: 0.85rem; border-left: 3px solid #10b981;">
+            <div class="flex items-center gap-1.5" style="margin-bottom: 0.25rem;">
+              <span class="font-semibold text-xs" style="color: #34d399;">🎬 Live Evaluation Walkthrough Step:</span>
+            </div>
+            <p class="text-xs text-dim" style="line-height: 1.4;">
+              This ticket is now assigned to domain expert <strong>${escapeHtml(techRole)}</strong>.
+              To investigate, acknowledge, add technical notes, and resolve this ticket from the technician console, click 
+              <strong class="text-white">Exit / Sign Out</strong> in the top-right and sign in as:
+            </p>
+            <div class="flex items-center gap-2 flex-wrap" style="margin-top: 0.5rem;">
+              <code class="text-cyan font-mono text-xs" style="background: rgba(0,0,0,0.4); padding: 0.25rem 0.5rem; border-radius: 4px;">${escapeHtml(techEmail)}</code>
+              <button type="button" class="btn btn-xs btn-primary btn-demo-quick-switch" data-email="${escapeHtml(techEmail)}">
+                Sign Out &amp; Login as Specialist &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const switchBtn = container.querySelector('.btn-demo-quick-switch');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', () => {
+      const email = switchBtn.getAttribute('data-email');
+      handleSignOut(false);
+      loginUser(email, STATE.demoPassword);
+    });
+  }
+}
+
 async function loadEmployeeTickets() {
   const container = document.getElementById('emp-tickets-container');
   if (!container) return;
@@ -1544,13 +1628,14 @@ function setupEventListeners() {
       const description = document.getElementById('emp-inc-desc').value.trim();
 
       try {
-        await apiCall('/api/employee/incidents', {
+        const created = await apiCall('/api/employee/incidents', {
           method: 'POST',
           body: JSON.stringify({ title, description })
         });
         showToast('Ticket submitted successfully!', 'success');
         createForm.reset();
         document.getElementById('desc-char-count').textContent = '0 / 4000';
+        displayTicketCreatedCallout(created);
         loadEmployeeTickets();
       } catch (err) {
         showToast(err.message, 'error');

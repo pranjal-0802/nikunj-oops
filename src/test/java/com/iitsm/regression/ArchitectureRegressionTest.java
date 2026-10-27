@@ -69,5 +69,20 @@ public class ArchitectureRegressionTest {
                 )
                 .check(importedClasses);
     }
+
+    @Test
+    @DisplayName("N4: Pure Hexagonal Domain Core - domain layer must not depend on Spring, Jakarta, Application, Infrastructure or Web")
+    void N4_domainLayerMustBePristineHexagonalCore() {
+        noClasses()
+                .that().resideInAPackage("com.iitsm.domain..")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework..",
+                        "jakarta..",
+                        "com.iitsm.application..",
+                        "com.iitsm.infrastructure..",
+                        "com.iitsm.web.."
+                )
+                .check(importedClasses);
+    }
 }
 

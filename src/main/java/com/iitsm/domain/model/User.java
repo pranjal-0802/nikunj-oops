@@ -17,6 +17,8 @@ public abstract class User {
     private boolean active;
     private int failedLoginAttempts;
     private boolean locked;
+    private int tokenVersion = 1;
+    private java.time.Instant lockedUntil;
     private Long version;
 
     protected User(String id, String name, Email email, String passwordHash, UserRole role) {
@@ -89,6 +91,43 @@ public abstract class User {
 
     public void setLocked(boolean locked) {
         this.locked = locked;
+    }
+
+    public int getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void setTokenVersion(int tokenVersion) {
+        this.tokenVersion = Math.max(1, tokenVersion);
+    }
+
+    public void bumpTokenVersion() {
+        this.tokenVersion++;
+    }
+
+    public java.time.Instant getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public void setLockedUntil(java.time.Instant lockedUntil) {
+        this.lockedUntil = lockedUntil;
+    }
+
+    public boolean isCurrentlyLocked(java.time.Instant now) {
+        if (!locked) {
+            return false;
+        }
+        if (lockedUntil != null && now != null && now.isAfter(lockedUntil)) {
+            return false;
+        }
+        return true;
+    }
+
+    public void unlock() {
+        this.locked = false;
+        this.failedLoginAttempts = 0;
+        this.lockedUntil = null;
+        bumpTokenVersion();
     }
 
     public void setFailedLoginAttempts(int attempts) {

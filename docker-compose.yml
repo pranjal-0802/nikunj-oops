@@ -15,7 +15,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/iitsm_prod
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      JWT_SECRET: nimbus-finserve-iitsm-demo-super-secret-key-2026-production-grade
+      JWT_SECRET: ${JWT_SECRET:-nimbus-finserve-jwt-secret-must-be-provided-in-env-file-at-least-32-bytes}
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: 1025
     depends_on:

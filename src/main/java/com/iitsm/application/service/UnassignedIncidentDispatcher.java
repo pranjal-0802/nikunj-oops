@@ -41,6 +41,7 @@ public class UnassignedIncidentDispatcher {
     private final ItServiceRepository itServiceRepository;
     private final CandidateFilter candidateFilter;
     private final AssignmentStrategyRegistry strategyRegistry;
+    private final TechnicianAssignmentService technicianAssignmentService;
     private final DomainEventPublisher eventPublisher;
     private final Clock clock;
 
@@ -50,6 +51,7 @@ public class UnassignedIncidentDispatcher {
             ItServiceRepository itServiceRepository,
             CandidateFilter candidateFilter,
             AssignmentStrategyRegistry strategyRegistry,
+            TechnicianAssignmentService technicianAssignmentService,
             DomainEventPublisher eventPublisher,
             Clock clock) {
         this.incidentRepository = Objects.requireNonNull(incidentRepository, "incidentRepository cannot be null");
@@ -57,6 +59,7 @@ public class UnassignedIncidentDispatcher {
         this.itServiceRepository = Objects.requireNonNull(itServiceRepository, "itServiceRepository cannot be null");
         this.candidateFilter = Objects.requireNonNull(candidateFilter, "candidateFilter cannot be null");
         this.strategyRegistry = Objects.requireNonNull(strategyRegistry, "strategyRegistry cannot be null");
+        this.technicianAssignmentService = Objects.requireNonNull(technicianAssignmentService, "technicianAssignmentService cannot be null");
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher cannot be null");
         this.clock = Objects.requireNonNull(clock, "clock cannot be null");
     }
@@ -66,6 +69,7 @@ public class UnassignedIncidentDispatcher {
     public int dispatchWaitingIncidents() {
         List<Incident> unassigned = incidentRepository.findByStatus(IncidentStatus.CLASSIFIED).stream()
                 .filter(i -> i.getAssigneeId() == null)
+                .filter(i -> !i.isNeedsTriage()) // Skip tickets requiring human triage
                 .sorted(Comparator.comparing(Incident::getPriority, Comparator.nullsLast(Comparator.naturalOrder())))
                 .collect(Collectors.toList());
 
@@ -93,28 +97,25 @@ public class UnassignedIncidentDispatcher {
                 continue; // Still no capacity anywhere
             }
 
-            List<Technician> candidates = candidateFilter.filterCandidates(available, preferredTeamId, Collections.emptySet())
+            java.util.Set<String> exclusions = incident.getExcludedTechnicianIds();
+            List<Technician> candidates = candidateFilter.filterCandidates(available, preferredTeamId, exclusions)
                     .stream().filter(Technician::hasCapacity).collect(Collectors.toList());
 
-            if (candidates.isEmpty()) {
+            if (candidates.isEmpty() && (exclusions == null || exclusions.isEmpty())) {
                 candidates = available;
             }
 
             if (!candidates.isEmpty()) {
                 AssignmentStrategy activeStrategy = strategyRegistry.getActiveStrategy();
-                AssignmentRecommendation recommendation = activeStrategy.recommend(incident, candidates);
-                Technician tech = recommendation.technician();
-
-                if (tech != null && tech.hasCapacity()) {
-                    incident.assign(tech.getId(), now);
-                    tech.assignIncident(incident.getId());
-                    technicianRepository.save(tech);
+                java.util.Optional<String> assignedId = technicianAssignmentService.tryAssignTechnician(incident, candidates, activeStrategy, now);
+                if (assignedId.isPresent()) {
+                    incident.assign(assignedId.get(), now);
                     incidentRepository.save(incident);
 
                     eventPublisher.publish(new DomainEvent.IncidentAssigned(
-                            UUID.randomUUID().toString(), now, incident.getId(), "DISPATCHER", tech.getId()));
+                            UUID.randomUUID().toString(), now, incident.getId(), "DISPATCHER", assignedId.get()));
 
-                    log.info("Dispatcher assigned waiting incident {} to technician {}", incident.getId(), tech.getId());
+                    log.info("Dispatcher assigned waiting incident {} to technician {}", incident.getId(), assignedId.get());
                     assignedCount++;
                 }
             }

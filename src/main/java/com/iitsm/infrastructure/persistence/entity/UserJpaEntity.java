@@ -52,6 +52,12 @@ public class UserJpaEntity {
     @Column(name = "locked", nullable = false)
     private boolean locked = false;
 
+    @Column(name = "token_version", nullable = false)
+    private int tokenVersion = 1;
+
+    @Column(name = "locked_until")
+    private Instant lockedUntil;
+
     @Column(name = "user_type", nullable = false, length = 32)
     private String userType;
 
@@ -130,6 +136,12 @@ public class UserJpaEntity {
 
     public boolean isLocked() { return locked; }
     public void setLocked(boolean locked) { this.locked = locked; }
+
+    public int getTokenVersion() { return tokenVersion; }
+    public void setTokenVersion(int tokenVersion) { this.tokenVersion = tokenVersion; }
+
+    public Instant getLockedUntil() { return lockedUntil; }
+    public void setLockedUntil(Instant lockedUntil) { this.lockedUntil = lockedUntil; }
 
     public String getUserType() { return userType; }
     public void setUserType(String userType) { this.userType = userType; }

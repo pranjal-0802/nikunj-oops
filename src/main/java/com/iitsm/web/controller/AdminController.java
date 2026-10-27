@@ -1,5 +1,6 @@
 package com.iitsm.web.controller;
 
+import com.iitsm.application.dto.TriageQueueItemDto;
 import com.iitsm.application.service.AuditService;
 import com.iitsm.application.service.IncidentService;
 import com.iitsm.application.service.SearchService;
@@ -141,11 +142,24 @@ public class AdminController {
     }
 
     @GetMapping("/triage-queue")
-    public ResponseEntity<List<ReassignmentRequestDto>> getTriageQueue() {
-        List<ReassignmentRequestDto> pending = incidentService.getPendingReassignments().stream()
-                .map(ReassignmentRequestDto::fromDomain)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(pending);
+    public ResponseEntity<List<TriageQueueItemDto>> getTriageQueue() {
+        return ResponseEntity.ok(incidentService.getUnifiedTriageQueue());
+    }
+
+    public record AcceptTriageSuggestionRequest(String category, String serviceId) {}
+
+    @PostMapping("/triage/{id}/accept-suggestion")
+    public ResponseEntity<AdminIncidentView> acceptTriageSuggestion(
+            @PathVariable("id") String id,
+            @RequestBody(required = false) AcceptTriageSuggestionRequest request,
+            Authentication authentication) {
+        String adminId = authentication.getName();
+        IncidentCategory cat = (request != null && request.category() != null)
+                ? IncidentCategory.valueOf(request.category().trim().toUpperCase())
+                : IncidentCategory.SOFTWARE;
+        String srv = (request != null) ? request.serviceId() : null;
+        Incident updated = incidentService.acceptTriageSuggestion(id, adminId, cat, srv);
+        return ResponseEntity.ok(mapToAdminView(updated));
     }
 
     @GetMapping("/technicians")

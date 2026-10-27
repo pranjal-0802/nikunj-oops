@@ -2,74 +2,134 @@
 
 [![Java 21](https://img.shields.io/badge/Java-21%20LTS-blue.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Coverage](https://img.shields.io/badge/JaCoCo%20Coverage-85%25-success.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-186%20Passed-success.svg)]()
 [![Pure Java Domain](https://img.shields.io/badge/Domain%20Core-Zero%20Spring%20Imports-purple.svg)]()
 [![Architecture](https://img.shields.io/badge/Architecture-Hexagonal%20Ports%20%26%20Adapters-informational.svg)]()
+[![Build & Tests](https://img.shields.io/badge/Maven-clean%20verify%20green-success.svg)]()
 
-> A production-grade, enterprise IT Service Management platform built for **CS F213 (Object-Oriented Programming)**. Engineered around a 100% pure-Java domain core, 8 design patterns, an explainable pure-Java NLP & priority scoring engine, a multi-tier Chain of Responsibility escalation hierarchy, a time-accelerated virtual simulation engine (`AdjustableClock`), and a modern self-contained single-page web console.
+> A production-grade, enterprise IT Service Management platform built for **CS F213 (Object-Oriented Programming)**. Engineered around a 100% pure-Java domain core, 8 object-oriented design patterns, an explainable pure-Java NLP & multi-factor priority scoring engine, a multi-tier Chain of Responsibility escalation hierarchy, an accelerated virtual simulation engine (`AdjustableClock`), and a role-isolated single-page enterprise web console.
 
 ---
 
-## 1. Key System Highlights
+## 1. Key System Architecture & OOP Highlights
 
-1. **Pure Java Domain Core (Clean Hexagonal Architecture)**:
-   - `com.iitsm.domain.*` has **zero imports** from Spring Framework (`org.springframework.*`).
+1. **Pure Java Hexagonal Domain Core**:
+   - `com.iitsm.domain.*` has **zero imports** from Spring Framework (`org.springframework.*`), Jakarta (`jakarta.*`), or persistence libraries.
+   - Enforced continuously via ArchUnit architectural test rules in `ArchitectureRegressionTest`.
    - Domain aggregate roots enforce behavioral encapsulation (no public setters; rich behavior methods; Tell-Don't-Ask).
-2. **8 Object-Oriented Design Patterns (Viva-Defensible)**:
-   - **State**: 9-state finite state machine with zero-allocation `EnumMap` flyweight singletons.
-   - **Strategy**: Swappable technician routing (5 strategies), 6-factor priority scoring, NLP classifiers, and text similarity measures.
+2. **8 Viva-Defensible Object-Oriented Design Patterns**:
+   - **State Pattern**: 9-state finite state machine with zero-allocation `EnumMap` flyweight singletons.
+   - **Strategy Pattern**: Dynamic technician routing (5 strategies), 6-factor priority scoring, NLP classifiers, and text similarity measures.
    - **Chain of Responsibility**: 4-tier progressive escalation hierarchy (Technician $\rightarrow$ Team Lead $\rightarrow$ System Admin $\rightarrow$ IT Operations Manager).
-   - **Decorator**: `AdjustableClock` decorating `java.time.Clock` with speed multipliers ($\times 1, \times 60, \times 600$) and discrete fast-forwards.
-   - **Observer**: Sealed `DomainEvent` spine decoupling transactional audit logging and multi-channel notifications.
-   - **Composite**: `CompositeClassifier` and `CompositePriorityCalculator` pairing statistical Naive Bayes with rule-based heuristics.
-   - **Factory**: `UserFactory` and `IncidentFactory` ensuring invariant enforcement and polymorphic creation.
-   - **Repository (Ports & Adapters)**: Pure domain repository interfaces decoupled from Spring Data JPA adapters.
-3. **Pure-Java Algorithmic Text Intelligence (Zero Heavy ML Dependencies)**:
+   - **Decorator Pattern**: `AdjustableClock` decorating `java.time.Clock` with speed multipliers ($\times 1, \times 60, \times 600$) and discrete fast-forwards.
+   - **Observer Pattern**: Sealed `DomainEvent` spine decoupling transactional audit logging and multi-channel notifications.
+   - **Composite Pattern**: `CompositeClassifier` and `CompositePriorityCalculator` pairing statistical Naive Bayes with rule-based heuristics.
+   - **Factory Pattern**: `UserFactory` and `IncidentFactory` ensuring invariant enforcement and polymorphic creation.
+   - **Repository Pattern (Ports & Adapters)**: Pure domain repository interfaces decoupled from Spring Data JPA adapters.
+3. **Pure-Java Algorithmic Intelligence (Zero External Heavy ML)**:
    - Built-in `TextNormalizer`, `TfIdfVectorizer`, `KeywordClassifier`, and `NaiveBayesClassifier` trained on a 630-sample ITIL corpus (`corpus.csv`), achieving **$86.1\%$ accuracy** on unseen enterprise test incidents.
-   - Cosine TF-IDF similarity correlation over a 72-hour sliding window linking duplicate storm incidents to root cluster parents.
+   - Sliding-window Cosine TF-IDF similarity correlation linking duplicate storm incidents to root cluster parents.
 4. **Time-Accelerated Simulation Engine (`AdjustableClock`)**:
    - Zero `Thread.sleep()` calls; runs hours of SLA degradation and multi-tier escalations in milliseconds.
    - Pre-scripted canonical scenarios (S1–S5) demonstrating the full lifecycle, P1 outages, wrong-domain triage loops, duplicate storms, and clock pauses.
-5. **Strict Persona Data Privacy**:
+5. **Strict Role-Isolated Enterprise UI/UX**:
+   - Persona isolation: Employees see only their self-service portal; technicians see only their assigned workload; administrators see command centre and unified triage.
    - Priority ranks (P1–P4), SLA targets/deadlines, and internal technician investigation notes are strictly hidden from employees at the DTO type level (`EmployeeIncidentView`).
 6. **Embedded Single-Page Web Console**:
-   - Modern, responsive SPA served directly by Spring Boot at `http://localhost:8080/` with zero Node.js/npm runtime prerequisites.
+   - Modern, responsive SPA served directly by Spring Boot at `http://localhost:8085/` with zero Node.js/npm runtime prerequisites and full offline compatibility (zero external CDN scripts, compliant with strict CSP `script-src 'self'`).
 
 ---
 
-## 2. Seeded Personas & Demo Accounts
+## 2. Simulated Company Infrastructure: Nimbus FinServe Inc.
 
-All pre-seeded demo accounts in the simulated company (**Nimbus FinServe**) authenticate with password: `Password123!`
+### 2.1 Corporate Purpose & Infrastructure Overview
+**Nimbus FinServe Inc.** is an institutional financial services firm operating low-latency algorithmic trading infrastructure, core digital banking ledgers, risk analytics pipelines, and wealth management services. 
 
-| Persona | Email | System Role | Operational Scope & Privacy Wall |
-| :--- | :--- | :--- | :--- |
-| **Employee** | `employee@nimbusfinserve.com` | `ROLE_EMPLOYEE` | Raises incidents, tracks 5-stage progress stepper, provides diagnostic info, verifies fixes with 1–5 stars. **Priority and internal notes strictly masked.** |
-| **Technician (Network)** | `tech.network@nimbusfinserve.com` | `ROLE_TECHNICIAN` | Manages priority queue, investigates incidents, adds internal notes, pauses SLA via info requests, flags wrong-domain tickets, submits structured fixes. |
-| **Team Lead (Network)** | `lead.network@nimbusfinserve.com` | `ROLE_TEAM_LEAD` | Oversees team queue capacity, receives Tier 2 SLA warning interventions (90% target window). |
-| **System Administrator** | `admin@nimbusfinserve.com` | `ROLE_ADMIN` | Triage queue reclassification, manual overrides, runtime assignment strategy switching, simulation controls, executive reporting. |
-| **IT Operations Manager** | `manager@nimbusfinserve.com` | `ROLE_ADMIN` | Executive oversight, SLA compliance monitoring, receives Tier 4 catastrophic P1 breach alerts. |
+Because minute-by-minute system availability directly prevents market capital loss and regulatory non-compliance, **incident priority is strictly derived from the criticality of the impacted IT service to the company's financial infrastructure**.
+
+### 2.2 Corporate Hierarchy & Specialist Teams
+```
+                            Julian Thorne
+                      (Chief Executive Officer)
+                                 │
+                           Elena Rostova
+                    (Chief Technology Officer)
+                                 │
+                          Alexander Vance
+                   (Chief IT Infrastructure Admin)
+                                 │
+     ┌───────────────────┬───────┴───────────┬───────────────────┐
+     │                   │                   │                   │
+Network Operations  Core Banking DB    Cybersecurity      Workplace & Floor
+  (TEAM-NET)          (TEAM-DB)          (TEAM-SEC)          (TEAM-DESK)
+     │                   │                   │                   │
+Lead: Sarah Jenkins  Priya Patel        Marcus Brody        Carlos Ramirez
+Tech: David Kim     (Lead DBA)         (SecOps Engineer)   (Floor Specialist)
+```
+
+| Persona & Name | Corporate Title & Domain Expertise | Pre-seeded Email |
+| :--- | :--- | :--- |
+| **Vikram Malhotra** | Quantitative Trading Analyst (Retail & Equity Derivatives) | `employee@nimbusfinserve.com` |
+| **David Kim** | Senior Network Engineer (Low-latency fiber, BGP routers, FIX tunnels) | `tech.network@nimbusfinserve.com` |
+| **Priya Patel** | Lead Database Administrator (Oracle RAC, PostgreSQL, Liquibase pipelines) | `tech.database@nimbusfinserve.com` |
+| **Sarah Jenkins** | Network Operations Team Lead (Escalation handling & queue management) | `lead.network@nimbusfinserve.com` |
+| **Alexander Vance** | Chief IT Infrastructure Administrator (Unified triage, policy overrides, audit) | `admin@nimbusfinserve.com` |
+
+*Default password for all seeded evaluation accounts:* `Password123!`
+
+### 2.3 IT Service Catalog & Infrastructure Criticality Tiers
+
+Ticket priority (P1–P4) is computed dynamically based on the IT service's criticality tier, reporter designation weight, and historical failure frequency:
+
+| Tier | Criticality Level | Service Key & Description | Baseline Priority & Target SLA | Financial / Operational Impact Rationale |
+| :---: | :---: | :--- | :---: | :--- |
+| **Tier 1** | **Mission Critical** | `SRV-TRD-001` FIX Protocol Gateway<br>`SRV-DB-001` Core Banking Ledger<br>`SRV-NET-001` Optical Exchange Backplane | **P1 (Critical)**<br>• Response: 5 min<br>• Resolve: 30 min | **Direct Financial Outage**: Halts equity trading and transactions. Carries exchange penalties and severe financial liability. |
+| **Tier 2** | **High Criticality** | `SRV-AUTH-001` Active Directory & SSO<br>`SRV-RISK-001` Quantitative Risk Engine<br>`SRV-VPN-001` Global Trading Tunnel | **P2 (High)**<br>• Response: 15 min<br>• Resolve: 2 hours | **Business Impairment**: Blocks remote trading teams and intraday portfolio risk/margin valuation. |
+| **Tier 3** | **Standard** | `SRV-MAIL-001` Corporate Exchange Email<br>`SRV-REP-001` Regulatory Reporting Portal<br>`SRV-CRM-001` Wealth Management CRM | **P3 (Moderate)**<br>• Response: 1 hour<br>• Resolve: 8 hours | **Operational Degradation**: Non-real-time business workflows with redundant backup processes. |
+| **Tier 4** | **Low / Departmental**| `SRV-WKP-001` Trading Floor Workstation & Print<br>`SRV-GEN-001` General IT Support | **P4 (Minor)**<br>• Response: 4 hours<br>• Resolve: 24 hours | **Routine Requests**: Localized peripheral or cosmetic issues without market impact. |
 
 ---
 
-## 3. Quick Start & Local Execution
+## 3. Evaluation Demo Protocol (Role-Isolated Experience)
+
+To demonstrate the real-world operational separation of duties:
+
+1. **Step 1: Employee Incident Intake**
+   - Open [http://localhost:8085/](http://localhost:8085/) and sign in as **Vikram Malhotra** (`employee@nimbusfinserve.com`).
+   - Notice that **only** the Employee Self-Service Portal is visible.
+   - Click template **"🌐 VPN Disconnected"** or submit: *"VPN tunnel drops during institutional block trade"*.
+   - The ticket is immediately classified into `NETWORK` and assigned to specialist **David Kim (Network Operations)**.
+   - An on-screen evaluation prompt appears instructing the evaluator to sign out and log in as David Kim.
+2. **Step 2: Specialist Technical Handling**
+   - Click **Exit / Sign Out** in the top-right navbar.
+   - On the sign-in card, click the quick evaluation pill for **David Kim** (`tech.network@nimbusfinserve.com`).
+   - Notice that David sees **only** the Technician Console with his real-time workload capacity.
+   - Click the assigned ticket $\rightarrow$ Click **Acknowledge** $\rightarrow$ Click **Start Investigation** $\rightarrow$ Click **Add Technical Note** (internal diagnostics) $\rightarrow$ Click **Resolve** and enter the structured fix (*"BGP tunnel re-keyed and MTU resized"*).
+3. **Step 3: Verification & Formal Closure**
+   - Click **Exit / Sign Out** and log back in as **Vikram Malhotra** (`employee@nimbusfinserve.com`).
+   - The ticket progress stepper now reflects **Resolved**.
+   - Vikram clicks **Verify & Rate Resolution**, submits a 5-star rating, and the ticket formally transitions to `CLOSED`.
+
+---
+
+## 4. Quick Start & Local Execution
 
 ### Prerequisites
 - **JDK 21** (Eclipse Temurin or Microsoft OpenJDK 21)
 - **Maven 3.9+** (or use included `./mvnw`)
 
 ### One-Command Launch (In-Memory Development Mode)
+```powershell
+# Windows PowerShell:
+$env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.12.101-hotspot"
+.\mvnw.cmd spring-boot:run
+```
+*(On Linux / macOS)*:
 ```bash
 ./mvnw spring-boot:run
 ```
-*(On Windows PowerShell)*:
-```powershell
-.\mvnw.cmd spring-boot:run
-```
 
 Once started:
-- 🌐 **Web Application**: Open [http://localhost:8085/](http://localhost:8085/) in any modern browser.
-  - Features an instant **Persona Switcher** in the top navigation to switch between Employee, Technician, Team Lead, and Administrator.
+- 🌐 **Web Application**: Open [http://localhost:8085/](http://localhost:8085/)
 - 📖 **Interactive Swagger UI**: [http://localhost:8085/swagger-ui.html](http://localhost:8085/swagger-ui.html)
 - 📊 **Actuator Health**: [http://localhost:8085/actuator/health](http://localhost:8085/actuator/health)
 
@@ -84,23 +144,60 @@ docker compose up -d
 
 ---
 
-## 4. Running Verification Tests & Coverage Report
+## 5. Real SMTP External Email Configuration
 
-To execute the entire 186-test suite and generate the JaCoCo coverage report:
-```bash
-./mvnw clean verify
+By default, in local development mode, emails are routed to the local Mailpit virtual SMTP server (`localhost:1025`) and viewed at `http://localhost:8025`.
+
+To deliver **REAL** emails to external email accounts (e.g., your personal Gmail or corporate inbox), set standard Spring Boot environment variables before launching:
+
+### Option A: Gmail SMTP (Using Google App Password)
+1. Go to Google Account $\rightarrow$ Security $\rightarrow$ 2-Step Verification $\rightarrow$ **App passwords**.
+2. Generate a 16-character App Password for "Mail".
+3. In PowerShell, set:
+```powershell
+$env:SPRING_MAIL_HOST = "smtp.gmail.com"
+$env:SPRING_MAIL_PORT = "587"
+$env:SPRING_MAIL_USERNAME = "youraccount@gmail.com"
+$env:SPRING_MAIL_PASSWORD = "xxxx xxxx xxxx xxxx"  # Your 16-character Google App Password
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH = "true"
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE = "true"
+
+.\mvnw.cmd spring-boot:run
 ```
 
-### Coverage Highlights:
-- **Total Tests**: **186 tests passed (100% green, 0 failures, 0 errors, 0 skipped)**
-- **JaCoCo Instruction Coverage**: **85%** (22,526 / 26,306 instructions) across 244 classes.
-- **JaCoCo Branch Coverage**: **64%** (1,222 / 1,890 branches).
-- **Architecture Enforcement**: ArchUnit verifies hexagonal dependency isolation (Application & Web layers have zero imports from Infrastructure; controllers return only DTOs).
-- **Coverage Report**: View `target/site/jacoco/index.html`.
+### Option B: Mailtrap (Safe Real SMTP Cloud Testing)
+```powershell
+$env:SPRING_MAIL_HOST = "live.smtp.mailtrap.io"
+$env:SPRING_MAIL_PORT = "587"
+$env:SPRING_MAIL_USERNAME = "your_mailtrap_user"
+$env:SPRING_MAIL_PASSWORD = "your_mailtrap_password"
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH = "true"
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE = "true"
+
+.\mvnw.cmd spring-boot:run
+```
+
+When tickets are created, assigned, or escalated, `EmailChannel` dispatches MIME multipart HTML messages to the user's registered corporate email.
 
 ---
 
-## 5. Simulation Scenarios (S1–S5)
+## 6. Running Verification Tests & Coverage Report
+
+To execute the entire test suite and generate the JaCoCo coverage report:
+```bash
+./mvnw clean verify
+```
+*(On Windows PowerShell)*:
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.12.101-hotspot"
+.\mvnw.cmd clean verify
+```
+
+Coverage report generated at: `target/site/jacoco/index.html`.
+
+---
+
+## 7. Simulation Scenarios (S1–S5)
 
 The platform provides 5 automated scenarios that can be executed directly from the Web Console (Simulation Engine tab) or via REST API:
 
@@ -128,7 +225,7 @@ curl -X POST http://localhost:8085/api/simulation/run/S5 -H "Authorization: Bear
 
 ---
 
-## 6. Comprehensive Project Documentation Index
+## 8. Course Documentation Deliverables
 
 All course documentation deliverables are cataloged under the `docs/` directory:
 
@@ -141,21 +238,6 @@ All course documentation deliverables are cataloged under the `docs/` directory:
 | **Design Patterns Catalog** | [`docs/05-design-patterns.md`](docs/05-design-patterns.md) | Viva defense guide for all 8 patterns (State, Strategy, Chain of Resp, Decorator, Observer, Composite, Factory, Repository). |
 | **Security Architecture** | [`docs/security.md`](docs/security.md) | Stateless JWT, BCrypt, 5-strike lockout, persona privacy wall, application-layer `AccessPolicy`. |
 | **Testing Catalog** | [`docs/testing/test-cases.md`](docs/testing/test-cases.md) | 25 documented test cases across Normal, Boundary, Invalid Input, Exceptions, Auth, Rules, and Integration. |
-| **Database Schema Reference**| [`docs/db/schema.md`](docs/db/schema.md) | Full 23-table relational schema reference, column constraints, and index definitions. |
-| **Database ER Diagram** | [`docs/db/schema.puml`](docs/db/schema.puml) | PlantUML Entity-Relationship diagram covering all tables and foreign key relationships. |
-| **UML Diagrams** | [`docs/uml/`](docs/uml/) | Use Case, Class, State Machine, and Sequence Diagrams in PlantUML. |
+| **Database Schema Reference**| [`docs/db/schema.md`](docs/db/schema.md) | Relational schema reference, column constraints, and index definitions. |
 | **Architecture Decisions** | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Formal ADRs (ADR-001 through ADR-008) recording architectural trade-offs and rationale. |
-| **Phase Summaries** | [`docs/phase-N-summary.md`](docs/) | Summaries for Phases 1 through 6 documenting incremental progress. |
-
----
-
-## 7. Grading Rubric Self-Assessment (120 Marks)
-
-| Evaluation Component | Maximum Marks | Self-Assessed Score | Key Evidence & Viva Defense |
-| :--- | :---: | :---: | :--- |
-| **1. Core MVP Incident Lifecycle** | **60** | **60 / 60** | Complete 10-step lifecycle (Report $\rightarrow$ Classify $\rightarrow$ Assign $\rightarrow$ Ack $\rightarrow$ Investigate $\rightarrow$ Pending Info $\rightarrow$ Resolve $\rightarrow$ Verify $\rightarrow$ Reopen $\rightarrow$ Close). 100% working and verified via `IncidentLifecycleEndToEndTest` and Scenario S1. |
-| **2. Object-Oriented Design & Patterns** | **25** | **25 / 25** | 8 design patterns implemented with Javadoc tags; pure Java domain core (0 Spring imports); Open/Closed Principle proven by dynamic strategy switching; Tell-Don't-Ask state pattern. |
-| **3. Intelligent Capabilities & Multi-Factor Engine**| **15** | **15 / 15** | Pure Java TF-IDF + Naive Bayes (86.1% accuracy); 6-factor composite priority calculation; policy override rules; duplicate ticket correlation ($\ge 0.70$ cosine similarity). |
-| **4. SLA Monitoring & Multi-Tier Escalations** | **10** | **10 / 10** | Continuous risk scoring; automatic pause/resume; 4-tier Chain of Responsibility escalation (Tier 1 Tech, Tier 2 Lead, Tier 3 Admin, Tier 4 IT Manager). |
-| **5. Simulation Engine, Testing & Documentation** | **10** | **10 / 10** | `AdjustableClock` ($\times 1, \times 60, \times 600$); 5 automated scenarios (S1–S5); 165 automated tests with **86.61% JaCoCo coverage**; complete documentation suite and embedded React SPA. |
-| **TOTAL** | **120** | **120 / 120** | Fully working, verified, robust, and comprehensively documented. |
+| **Batch Reports** | [`docs/review/`](docs/review/) | Audit reports and batch progression summaries. |

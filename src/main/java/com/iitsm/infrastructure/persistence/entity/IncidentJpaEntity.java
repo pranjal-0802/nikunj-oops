@@ -82,6 +82,9 @@ public class IncidentJpaEntity {
     @Column(name = "reopen_count", nullable = false)
     private int reopenCount = 0;
 
+    @Column(name = "needs_triage", nullable = false)
+    private boolean needsTriage = false;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -93,6 +96,11 @@ public class IncidentJpaEntity {
     @CollectionTable(name = "incident_linked_ids", joinColumns = @JoinColumn(name = "incident_id"))
     @Column(name = "linked_incident_id", length = 64)
     private Set<String> linkedIncidentIds = new HashSet<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "incident_excluded_technicians", joinColumns = @JoinColumn(name = "incident_id"))
+    @Column(name = "technician_id", length = 64)
+    private Set<String> excludedTechnicianIds = new HashSet<>();
 
     // SLA Tracker embedded/one-to-one
     @OneToOne(mappedBy = "incident", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -193,6 +201,14 @@ public class IncidentJpaEntity {
         if (feedback != null) {
             feedback.setIncident(this);
         }
+    }
+
+    public boolean isNeedsTriage() { return needsTriage; }
+    public void setNeedsTriage(boolean needsTriage) { this.needsTriage = needsTriage; }
+
+    public Set<String> getExcludedTechnicianIds() { return excludedTechnicianIds; }
+    public void setExcludedTechnicianIds(Set<String> excludedTechnicianIds) {
+        this.excludedTechnicianIds = (excludedTechnicianIds != null) ? excludedTechnicianIds : new HashSet<>();
     }
 }
 

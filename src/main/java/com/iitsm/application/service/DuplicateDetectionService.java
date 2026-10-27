@@ -70,7 +70,7 @@ public class DuplicateDetectionService {
         } else if (newIncident.getCategory() != null) {
             candidateIncidents = incidentRepository.findByCategory(newIncident.getCategory());
         } else {
-            candidateIncidents = incidentRepository.findAll();
+            candidateIncidents = incidentRepository.findOpenIncidentsSince(cutoff);
         }
 
         Incident bestParent = null;

@@ -42,6 +42,10 @@ public final class IncidentMapper {
         }
         incident.setReopenCount(entity.getReopenCount());
         incident.setVersion(entity.getVersion());
+        incident.setNeedsTriage(entity.isNeedsTriage());
+        if (entity.getExcludedTechnicianIds() != null) {
+            entity.getExcludedTechnicianIds().forEach(incident::addExcludedTechnician);
+        }
 
         // Classification & Priority
         if (entity.getCategory() != null && entity.getPriority() != null) {
@@ -128,7 +132,9 @@ public final class IncidentMapper {
         entity.setReopenCount(domain.getReopenCount());
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setVersion(domain.getVersion());
+        entity.setNeedsTriage(domain.isNeedsTriage());
         entity.setLinkedIncidentIds(new HashSet<>(domain.getLinkedIncidentIds()));
+        entity.setExcludedTechnicianIds(new HashSet<>(domain.getExcludedTechnicianIds()));
 
         if (domain.getPriorityDecision() != null) {
             PriorityDecision pd = domain.getPriorityDecision();

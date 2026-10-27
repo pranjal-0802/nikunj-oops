@@ -3,6 +3,7 @@ package com.iitsm.domain.repository;
 import com.iitsm.domain.model.Incident;
 import com.iitsm.domain.model.IncidentCategory;
 import com.iitsm.domain.model.IncidentStatus;
+import com.iitsm.domain.model.Priority;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +29,18 @@ public interface IncidentRepository {
     List<Incident> findOpenIncidentsByServiceAndCategorySince(
             String serviceId, IncidentCategory category, Instant since);
 
+    List<Incident> findOpenIncidentsSince(Instant since);
+
+    List<Incident> findActiveIncidents();
+
+    List<Incident> findByNeedsTriageTrue();
+
     List<Incident> findAll();
 
     long count();
+
+    long countByStatusIn(List<IncidentStatus> statuses);
+
+    long countByPriority(Priority priority);
 }
 

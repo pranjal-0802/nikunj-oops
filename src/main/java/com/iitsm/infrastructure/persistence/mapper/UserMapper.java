@@ -99,6 +99,8 @@ public final class UserMapper {
         }
         user.setFailedLoginAttempts(entity.getFailedLoginAttempts());
         user.setLocked(entity.isLocked());
+        user.setTokenVersion(entity.getTokenVersion());
+        user.setLockedUntil(entity.getLockedUntil());
         user.setVersion(entity.getVersion());
     }
 
@@ -114,6 +116,8 @@ public final class UserMapper {
         entity.setActive(domain.isActive());
         entity.setFailedLoginAttempts(domain.getFailedLoginAttempts());
         entity.setLocked(domain.isLocked());
+        entity.setTokenVersion(domain.getTokenVersion());
+        entity.setLockedUntil(domain.getLockedUntil());
         entity.setVersion(domain.getVersion());
 
         if (domain instanceof Employee emp) {

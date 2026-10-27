@@ -13,7 +13,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 COPY --from=builder /workspace/target/i-itsm-1.0.0-SNAPSHOT.jar app.jar
 
 USER appuser
-EXPOSE 8080
+EXPOSE 8085
 
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
 

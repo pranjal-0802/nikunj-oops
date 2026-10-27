@@ -53,21 +53,33 @@
       </div>
 
       <!-- Demo Accounts Section (Populated only when /api/public/config reports demoMode=true) -->
-      <div id="demo-accounts-container" class="demo-pills hidden">
-        <span class="text-xs font-semibold text-muted w-full" style="display: block; margin-bottom: 0.25rem;">
-          Quick Demo Evaluation Accounts:
-        </span>
-        <button type="button" class="demo-pill" data-email="employee@nimbusfinserve.com" data-role="Employee">
-          <span>👤 Employee</span>
+      <div id="demo-accounts-container" class="demo-pills hidden" style="margin-top: 1.25rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+        <div class="w-full flex items-center justify-between" style="margin-bottom: 0.5rem;">
+          <span class="text-xs font-bold text-white uppercase font-mono">Simulated Company Personas</span>
+          <span class="badge badge-status-assigned">Nimbus FinServe</span>
+        </div>
+        <p class="text-xs text-muted w-full" style="margin-bottom: 0.75rem;">
+          Click any persona below for instantaneous evaluation sign-in:
+        </p>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="employee@nimbusfinserve.com" data-role="Employee" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>👔 Vikram Malhotra <span class="text-dim text-xs">(Trading Analyst - Retail Banking)</span></span>
+          <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">EMPLOYEE</span>
         </button>
-        <button type="button" class="demo-pill" data-email="tech.network@nimbusfinserve.com" data-role="Technician">
-          <span>🛠️ Technician</span>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.network@nimbusfinserve.com" data-role="Technician" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>🌐 David Kim <span class="text-dim text-xs">(Network &amp; Communications Specialist)</span></span>
+          <span class="badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8;">TECH (NET)</span>
         </button>
-        <button type="button" class="demo-pill" data-email="lead.network@nimbusfinserve.com" data-role="Team Lead">
-          <span>👥 Team Lead</span>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.database@nimbusfinserve.com" data-role="Technician" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>🗄️ Priya Patel <span class="text-dim text-xs">(Core Banking &amp; Database Systems)</span></span>
+          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">TECH (DB)</span>
         </button>
-        <button type="button" class="demo-pill" data-email="admin@nimbusfinserve.com" data-role="System Admin">
-          <span>⚡ System Admin</span>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="lead.network@nimbusfinserve.com" data-role="Team Lead" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>👥 Sarah Jenkins <span class="text-dim text-xs">(Network Support Team Lead)</span></span>
+          <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">TEAM LEAD</span>
+        </button>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="admin@nimbusfinserve.com" data-role="System Admin" style="padding: 0.5rem 0.75rem;">
+          <span>⚡ Alexander Vance <span class="text-dim text-xs">(Chief IT Infrastructure Admin)</span></span>
+          <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">ADMIN</span>
         </button>
       </div>
     </div>
@@ -313,6 +325,9 @@
             <span class="kpi-subtext">Completed requests</span>
           </div>
         </div>
+
+        <!-- Evaluation Prompt Banner (Shown after logging a ticket) -->
+        <div id="emp-callout-container"></div>
 
         <div class="grid-cols-2">
           

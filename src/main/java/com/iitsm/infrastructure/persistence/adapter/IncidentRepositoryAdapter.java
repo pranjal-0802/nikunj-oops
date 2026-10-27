@@ -113,6 +113,39 @@ public class IncidentRepositoryAdapter implements IncidentRepository {
     }
 
     @Override
+    public List<Incident> findOpenIncidentsSince(Instant since) {
+        try {
+            return springDataRepository.findOpenIncidentsSince(since).stream()
+                    .map(IncidentMapper::toDomain)
+                    .collect(Collectors.toList());
+        } catch (DataAccessException ex) {
+            throw new PersistenceFailureException("Failed to query open incidents since " + since, ex);
+        }
+    }
+
+    @Override
+    public List<Incident> findActiveIncidents() {
+        try {
+            return springDataRepository.findActiveIncidents().stream()
+                    .map(IncidentMapper::toDomain)
+                    .collect(Collectors.toList());
+        } catch (DataAccessException ex) {
+            throw new PersistenceFailureException("Failed to query active incidents", ex);
+        }
+    }
+
+    @Override
+    public List<Incident> findByNeedsTriageTrue() {
+        try {
+            return springDataRepository.findByNeedsTriageTrue().stream()
+                    .map(IncidentMapper::toDomain)
+                    .collect(Collectors.toList());
+        } catch (DataAccessException ex) {
+            throw new PersistenceFailureException("Failed to retrieve triage incidents", ex);
+        }
+    }
+
+    @Override
     public List<Incident> findAll() {
         try {
             return springDataRepository.findAll().stream()
@@ -129,6 +162,24 @@ public class IncidentRepositoryAdapter implements IncidentRepository {
             return springDataRepository.count();
         } catch (DataAccessException ex) {
             throw new PersistenceFailureException("Failed to count incidents", ex);
+        }
+    }
+
+    @Override
+    public long countByStatusIn(List<IncidentStatus> statuses) {
+        try {
+            return springDataRepository.countByStatusIn(statuses);
+        } catch (DataAccessException ex) {
+            throw new PersistenceFailureException("Failed to count incidents by status in: " + statuses, ex);
+        }
+    }
+
+    @Override
+    public long countByPriority(com.iitsm.domain.model.Priority priority) {
+        try {
+            return springDataRepository.countByPriority(priority);
+        } catch (DataAccessException ex) {
+            throw new PersistenceFailureException("Failed to count incidents by priority: " + priority, ex);
         }
     }
 }

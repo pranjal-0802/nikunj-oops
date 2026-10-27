@@ -57,6 +57,16 @@ public class TechnicianController {
         return ResponseEntity.ok(views);
     }
 
+    @GetMapping("/team-queue")
+    public ResponseEntity<List<TechnicianIncidentView>> getTeamQueue(Authentication authentication) {
+        String actorId = authentication.getName();
+        List<Incident> queue = incidentService.getTeamQueue(actorId);
+        List<TechnicianIncidentView> views = queue.stream()
+                .map(this::mapToTechnicianView)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(views);
+    }
+
     @GetMapping("/dashboard")
     public ResponseEntity<IncidentService.TechnicianDashboardData> getDashboard(Authentication authentication) {
         String technicianId = authentication.getName();

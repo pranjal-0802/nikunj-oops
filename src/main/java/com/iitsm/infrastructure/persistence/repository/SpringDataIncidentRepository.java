@@ -2,6 +2,7 @@ package com.iitsm.infrastructure.persistence.repository;
 
 import com.iitsm.domain.model.IncidentCategory;
 import com.iitsm.domain.model.IncidentStatus;
+import com.iitsm.domain.model.Priority;
 import com.iitsm.infrastructure.persistence.entity.IncidentJpaEntity;
 import java.time.Instant;
 import java.util.List;
@@ -23,10 +24,22 @@ public interface SpringDataIncidentRepository
 
     List<IncidentJpaEntity> findByCategory(IncidentCategory category);
 
+    List<IncidentJpaEntity> findByNeedsTriageTrue();
+
     @Query("SELECT i FROM IncidentJpaEntity i WHERE i.serviceId = :serviceId AND i.category = :category AND i.createdAt >= :since AND i.status NOT IN ('RESOLVED', 'VERIFIED', 'CLOSED')")
     List<IncidentJpaEntity> findOpenIncidentsByServiceAndCategorySince(
             @Param("serviceId") String serviceId,
             @Param("category") IncidentCategory category,
             @Param("since") Instant since);
+
+    @Query("SELECT i FROM IncidentJpaEntity i WHERE i.createdAt >= :since AND i.status NOT IN ('RESOLVED', 'VERIFIED', 'CLOSED')")
+    List<IncidentJpaEntity> findOpenIncidentsSince(@Param("since") Instant since);
+
+    @Query("SELECT i FROM IncidentJpaEntity i WHERE i.status NOT IN ('VERIFIED', 'CLOSED')")
+    List<IncidentJpaEntity> findActiveIncidents();
+
+    long countByStatusIn(List<IncidentStatus> statuses);
+
+    long countByPriority(Priority priority);
 }
 

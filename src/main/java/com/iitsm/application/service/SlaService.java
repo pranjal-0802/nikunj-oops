@@ -60,15 +60,11 @@ public class SlaService {
      * Evaluates all active (unresolved/unclosed) incidents in the system.
      */
     public List<SlaEvaluationResult> evaluateAllActiveIncidents() {
-        List<Incident> all = incidentRepository.findAll();
-        Instant now = clock.instant();
+        List<Incident> activeIncidents = incidentRepository.findActiveIncidents();
         List<SlaEvaluationResult> results = new ArrayList<>();
 
-        for (Incident inc : all) {
-            // Only evaluate active, non-terminal incidents
-            if (inc.getStatus() != IncidentStatus.VERIFIED && inc.getStatus() != IncidentStatus.CLOSED) {
-                results.add(evaluateIncidentInternal(inc));
-            }
+        for (Incident inc : activeIncidents) {
+            results.add(evaluateIncidentInternal(inc));
         }
 
         return results;

@@ -48,6 +48,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         return;
                     }
 
+                    if (userDetails instanceof IitsmUserDetails customDetails) {
+                        int tokenVersion = tokenProvider.getTokenVersionFromToken(jwt);
+                        if (customDetails.getTokenVersion() != tokenVersion) {
+                            SecurityContextHolder.clearContext();
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"errorCode\":\"ERR_UNAUTHORIZED\",\"message\":\"Session revoked or expired\"}");
+                            return;
+                        }
+                    }
+
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

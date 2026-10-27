@@ -48,17 +48,28 @@ public class JwtTokenProvider implements TokenPort {
     public String generateToken(User user) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
+        int version = (user != null) ? user.getTokenVersion() : 1;
 
         return Jwts.builder()
                 .subject(user.getEmail().value())
                 .claim("userId", user.getId())
                 .claim("role", user.getRole().name())
                 .claim("name", user.getName())
-                .claim("tokenVersion", 1)
+                .claim("tokenVersion", version)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key)
                 .compact();
+    }
+
+    public int getTokenVersionFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        Integer v = claims.get("tokenVersion", Integer.class);
+        return (v != null) ? v : 1;
     }
 
     public String getEmailFromToken(String token) {
