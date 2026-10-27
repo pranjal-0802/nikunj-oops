@@ -73,3 +73,4 @@ An evaluator who greps for any of these will find them in a minute.
 3. **N4** (half a day): delete the stale README section, correct `batch-5.md`, add the missing ArchUnit rule for the domain, regenerate the traceability matrix honestly.
 4. Then N5, N8, N6.
 5. **UI decision:** with about 26 days left, do not rewrite in React unless one teammate owns it end to end. The cheaper path is to modularise `app.js` into ES modules per persona, add Playwright E2E for the three workflows plus an `axe` check, and spend time on visual polish and empty/loading/error states.
+

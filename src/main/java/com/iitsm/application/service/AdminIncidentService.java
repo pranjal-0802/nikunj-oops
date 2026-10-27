@@ -372,3 +372,4 @@ public class AdminIncidentService {
                 .orElseThrow(() -> new ServiceNotFoundException("Incident not found: " + incidentId));
     }
 }
+

@@ -223,17 +223,45 @@ function updateNavTabsForRole(role) {
 }
 
 async function loginUser(email, password, switchDefaultTab = true) {
+  const errorAlert = document.getElementById('login-error-alert');
+  if (errorAlert) {
+    errorAlert.classList.add('hidden');
+    errorAlert.innerHTML = '';
+  }
+
+  const submitBtn = document.getElementById('btn-login-submit');
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>Signing in...</span>`;
+  }
+
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.trim(), password: password })
+      body: JSON.stringify({ email: (email || '').trim(), password: password || '' })
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: 'Invalid credentials or account locked' }));
-      throw new Error(err.message || 'Login failed');
+      let message = 'Invalid corporate email or password.';
+      try {
+        const err = await res.json();
+        message = err.message || err.error || message;
+      } catch (e) {
+        if (res.status === 401 || res.status === 403) {
+          message = 'Invalid corporate email or password. Please verify and retry.';
+        } else if (res.status === 429) {
+          message = 'Account temporarily locked due to excessive failed attempts. Please wait 15 minutes or contact IT Admin.';
+        } else {
+          message = `Server returned status ${res.status}. Please check backend logs.`;
+        }
+      }
+      throw new Error(message);
     }
     const data = await res.json();
+    if (errorAlert) {
+      errorAlert.classList.add('hidden');
+    }
     setAuthenticatedUser({
       token: data.token,
       id: data.id,
@@ -242,7 +270,30 @@ async function loginUser(email, password, switchDefaultTab = true) {
       role: data.role
     }, switchDefaultTab);
   } catch (err) {
-    showToast(err.message || 'Authentication error', 'error');
+    const errorMsg = err.message || 'Invalid corporate email or password';
+    if (errorAlert) {
+      errorAlert.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon text-red" style="flex-shrink:0; margin-top: 0.1rem;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div>
+          <div style="font-weight: 700; color: #fff; margin-bottom: 0.2rem;">Sign-in Failed</div>
+          <div style="color: #fca5a5;">${escapeHtml(errorMsg)}</div>
+        </div>
+      `;
+      errorAlert.classList.remove('hidden');
+    }
+    const pwdInput = document.getElementById('login-password');
+    if (pwdInput) {
+      pwdInput.focus();
+      pwdInput.select();
+    }
+    showToast(errorMsg, 'error');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+    }
   }
 }
 
@@ -271,11 +322,6 @@ async function switchTab(targetId) {
     } else {
       panel.classList.remove('active');
     }
-  });
-
-  STATE.activeTab = targetId;
-  refreshActiveTab();
-}
   });
 
   STATE.activeTab = targetId;
@@ -1535,11 +1581,23 @@ function setupEventListeners() {
     });
   }
 
+  const clearLoginAlert = () => {
+    const el = document.getElementById('login-error-alert');
+    if (el) el.classList.add('hidden');
+  };
+  const emailInput = document.getElementById('login-email');
+  if (emailInput) emailInput.addEventListener('input', clearLoginAlert);
+  const pwdInput = document.getElementById('login-password');
+  if (pwdInput) pwdInput.addEventListener('input', clearLoginAlert);
+
   // Register form
   const regForm = document.getElementById('form-register');
   if (regForm) {
     regForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const regAlert = document.getElementById('register-error-alert');
+      if (regAlert) regAlert.classList.add('hidden');
+
       const name = document.getElementById('reg-name').value.trim();
       const email = document.getElementById('reg-email').value.trim();
       const pwd = document.getElementById('reg-password').value;
@@ -1553,7 +1611,7 @@ function setupEventListeners() {
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({ message: 'Registration failed' }));
-          throw new Error(err.message);
+          throw new Error(err.message || 'Registration failed');
         }
         const data = await res.json();
         showToast('Registration successful! Signing in...', 'success');
@@ -1565,6 +1623,18 @@ function setupEventListeners() {
           role: data.role
         });
       } catch (err) {
+        if (regAlert) {
+          regAlert.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon text-red" style="flex-shrink:0; margin-top: 0.1rem;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+              <div style="font-weight: 700; color: #fff; margin-bottom: 0.2rem;">Registration Failed</div>
+              <div style="color: #fca5a5;">${escapeHtml(err.message)}</div>
+            </div>
+          `;
+          regAlert.classList.remove('hidden');
+        }
         showToast(err.message, 'error');
       }
     });
@@ -1572,10 +1642,13 @@ function setupEventListeners() {
 
   // Toggle Login/Register
   document.getElementById('btn-toggle-register').addEventListener('click', () => {
+    clearLoginAlert();
     document.getElementById('login-card').classList.add('hidden');
     document.getElementById('register-card').classList.remove('hidden');
   });
   document.getElementById('btn-toggle-login').addEventListener('click', () => {
+    const regAlert = document.getElementById('register-error-alert');
+    if (regAlert) regAlert.classList.add('hidden');
     document.getElementById('register-card').classList.add('hidden');
     document.getElementById('login-card').classList.remove('hidden');
   });

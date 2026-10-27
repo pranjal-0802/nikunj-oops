@@ -236,3 +236,4 @@ public class IncidentIntakePipeline {
                 .orElseThrow(() -> new ValidationException("userId", "User not found with ID: " + userIdOrEmail));
     }
 }
+

@@ -361,3 +361,4 @@ public class IncidentLifecycleService {
                 .orElseThrow(() -> new ServiceNotFoundException("Incident not found: " + incidentId));
     }
 }
+

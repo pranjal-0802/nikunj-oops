@@ -90,3 +90,4 @@ Playwright suite, axe, Lighthouse notes, `docs/dev/DEMO_SCRIPT.md` (minute-by-mi
 - No default or committed secrets anywhere (code, YAML, compose, JS).
 - README, security doc, architecture doc and batch reports contain only claims backed by a command you ran; the self-grade is gone.
 - The UI is modular, accessible, consistent across personas, covered by Playwright and axe, and the three workflows run from `docker compose up` in one take.
+

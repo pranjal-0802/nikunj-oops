@@ -34,3 +34,4 @@ Decomposed the monolithic 800-line `IncidentService` into three cohesive, focuse
 - **JaCoCo Instruction Coverage**: **85%** (23,855 of 27,866 instructions covered)
 - **JaCoCo Branch Coverage**: **64%** (1,265 of 1,974 branches covered)
 - **Total Classes Analyzed**: **251 classes**
+

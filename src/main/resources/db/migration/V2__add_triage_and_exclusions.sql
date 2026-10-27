@@ -17,3 +17,4 @@ CREATE INDEX idx_incident_excluded_techs_incident ON incident_excluded_technicia
 -- 3. Add token_version and locked_until to users table for revocation & time-based lockout
 ALTER TABLE users ADD COLUMN token_version INT NOT NULL DEFAULT 1;
 ALTER TABLE users ADD COLUMN locked_until TIMESTAMP WITH TIME ZONE;
+

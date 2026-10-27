@@ -23,3 +23,4 @@ public record TriageQueueItemDto(
 ) {
     public record CategorySuggestionDto(String category, double confidence) {}
 }
+

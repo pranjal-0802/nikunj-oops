@@ -32,7 +32,7 @@ spring:
 iitsm:
   classification:
     min-confidence: ${MIN_CONFIDENCE:0.60}
-  demo-mode: false
+  demo-mode: ${DEMO_MODE:true}
   security:
     jwt:
       secret: ${JWT_SECRET:local-dev-and-demo-fallback-secret-key-at-least-32-bytes!}

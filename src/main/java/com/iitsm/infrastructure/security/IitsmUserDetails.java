@@ -35,3 +35,4 @@ public class IitsmUserDetails extends org.springframework.security.core.userdeta
         return tokenVersion;
     }
 }
+
