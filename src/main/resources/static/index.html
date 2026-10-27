@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nimbus FinServe :: Intelligent IT Service Management (I-ITSM)</title>
   <!-- Self-Contained Modern Stylesheet (Zero CDN Dependencies, CSP script-src 'self' compliant) -->
-  <link rel="stylesheet" href="/styles.css?v=2.5">
+  <link rel="stylesheet" href="/styles.css?v=3.0">
 </head>
 <body>
 
@@ -23,7 +23,7 @@
           </svg>
         </div>
         <div>
-          <h2 style="font-size: 1.25rem; font-weight: 800; color: #fff;">Nimbus FinServe</h2>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Nimbus FinServe</h2>
           <span class="text-xs text-muted">Intelligent IT Service Management (I-ITSM)</span>
         </div>
       </div>
@@ -58,7 +58,7 @@
       <!-- Demo Accounts Section (Default visible for evaluation; controlled by /api/public/config) -->
       <div id="demo-accounts-container" class="demo-pills" style="margin-top: 1.25rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
         <div class="w-full flex items-center justify-between" style="margin-bottom: 0.5rem;">
-          <span class="text-xs font-bold text-white uppercase font-mono">Nimbus FinServe Corporate Structure</span>
+          <span class="text-xs font-bold text-main uppercase font-mono">Nimbus FinServe Corporate Structure</span>
           <span class="badge badge-status-assigned">Simulated Org</span>
         </div>
         <p class="text-xs text-muted w-full" style="margin-bottom: 0.75rem;">
@@ -69,44 +69,44 @@
         <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-bottom: 0.25rem;">Executive &amp; Operations</div>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="ceo@nimbusfinserve.com" data-role="CEO" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>👑 Victoria Sterling <span class="text-dim text-xs">(Chief Executive Officer - VP/C-Level)</span></span>
-          <span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #fde047;">CEO</span>
+          <span class="badge" style="background: var(--warning-subtle); color: var(--warning-text); border: 1px solid var(--warning-border);">CEO</span>
         </button>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="admin@nimbusfinserve.com" data-role="System Admin" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>⚡ Alexander Vance <span class="text-dim text-xs">(Chief IT Infrastructure Admin)</span></span>
-          <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">ADMIN</span>
+          <span class="badge" style="background: var(--danger-subtle); color: var(--danger-text); border: 1px solid var(--danger-border);">ADMIN</span>
         </button>
 
         <!-- Employee -->
         <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-top: 0.5rem; margin-bottom: 0.25rem;">Staff Reporter</div>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="employee@nimbusfinserve.com" data-role="Employee" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>👤 Vikram Malhotra <span class="text-dim text-xs">(Trading Analyst - Retail Banking)</span></span>
-          <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">EMPLOYEE</span>
+          <span class="badge" style="background: var(--primary-subtle); color: var(--primary); border: 1px solid var(--primary-border);">EMPLOYEE</span>
         </button>
 
         <!-- Domain Expert Technicians -->
         <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-top: 0.5rem; margin-bottom: 0.25rem;">Domain Expert Technicians</div>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.net2@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>🌐 Elena Rostova <span class="text-dim text-xs">(Network &bull; <strong>VPN Gateways &amp; DNS Expert</strong>)</span></span>
-          <span class="badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8;">TECH (VPN)</span>
+          <span class="badge" style="background: var(--primary-subtle); color: var(--primary); border: 1px solid var(--primary-border);">TECH (VPN)</span>
         </button>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.network@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>🛡️ David Kim <span class="text-dim text-xs">(Network &bull; <strong>Cisco BGP &amp; Firewalls Expert</strong>)</span></span>
-          <span class="badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8;">TECH (NET)</span>
+          <span class="badge" style="background: var(--primary-subtle); color: var(--primary); border: 1px solid var(--primary-border);">TECH (NET)</span>
         </button>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.db1@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>🗄️ Priya Patel <span class="text-dim text-xs">(Database &bull; <strong>PostgreSQL &amp; Oracle RAC Expert</strong>)</span></span>
-          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">TECH (DB)</span>
+          <span class="badge" style="background: var(--warning-subtle); color: var(--warning-text); border: 1px solid var(--warning-border);">TECH (DB)</span>
         </button>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.sec1@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>🔒 Carlos Mendez <span class="text-dim text-xs">(Security &bull; <strong>Active Directory &amp; MFA Expert</strong>)</span></span>
-          <span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">TECH (SEC)</span>
+          <span class="badge" style="background: var(--primary-subtle); color: var(--primary); border: 1px solid var(--primary-border);">TECH (SEC)</span>
         </button>
 
         <!-- Team Lead -->
         <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-top: 0.5rem; margin-bottom: 0.25rem;">Team Leadership</div>
         <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="lead.network@nimbusfinserve.com" data-role="Team Lead" style="padding: 0.45rem 0.75rem;">
           <span>👥 Sarah Jenkins <span class="text-dim text-xs">(Network Operations Team Lead)</span></span>
-          <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">TEAM LEAD</span>
+          <span class="badge" style="background: var(--primary-subtle); color: var(--primary-hover); border: 1px solid var(--primary-border);">TEAM LEAD</span>
         </button>
       </div>
     </div>
@@ -120,7 +120,7 @@
           </svg>
         </div>
         <div>
-          <h2 style="font-size: 1.25rem; font-weight: 800; color: #fff;">Employee Self-Service</h2>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Employee Self-Service</h2>
           <span class="text-xs text-muted">Create corporate incident reporting account</span>
         </div>
       </div>
@@ -221,7 +221,7 @@
           <div class="user-badge">
             <div id="user-avatar-badge" class="user-avatar">U</div>
             <div>
-              <div id="user-display-name" class="font-bold text-white text-xs">User</div>
+              <div id="user-display-name" class="font-bold text-main text-xs">User</div>
               <div id="user-display-role" class="font-mono text-dim" style="font-size: 0.65rem;">ROLE</div>
             </div>
           </div>
@@ -316,15 +316,15 @@
       <section id="console-employee" class="tab-panel active space-y-6">
         
         <!-- Privacy Guarantee Banner -->
-        <div class="card" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.3);">
+        <div class="card" style="background: var(--primary-subtle); border-color: var(--primary-border);">
           <div class="flex items-start gap-3">
-            <div style="padding: 0.4rem; border-radius: var(--radius-sm); background: var(--primary-subtle); color: var(--primary);">
+            <div style="padding: 0.4rem; border-radius: var(--radius-sm); background: #ffffff; color: var(--primary); box-shadow: var(--shadow-sm);">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
               </svg>
             </div>
             <div>
-              <h4 style="font-size: 0.875rem; font-weight: 700; color: #fff;">Employee Self-Service Privacy Protection</h4>
+              <h4 style="font-size: 0.875rem; font-weight: 700; color: var(--text-main);">Employee Self-Service Privacy Protection</h4>
               <p class="text-xs text-muted" style="margin-top: 0.15rem;">
                 Internal priority ranks (P1–P4), SLA resolution timers, and private engineering notes are strictly masked from this portal in compliance with corporate privacy policy.
               </p>
@@ -405,8 +405,8 @@
               </div>
 
               <!-- AI Classification Preview -->
-              <div id="emp-ai-preview" class="card" style="background: rgba(11, 19, 36, 0.8); padding: 0.75rem;">
-                <div class="flex items-center gap-1.5 text-indigo font-bold text-xs" style="margin-bottom: 0.4rem;">
+              <div id="emp-ai-preview" class="card" style="background: #f8fafc; border: 1px solid var(--border); padding: 0.75rem;">
+                <div class="flex items-center gap-1.5 font-bold text-xs" style="color: var(--primary); margin-bottom: 0.4rem;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sm">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                   </svg>
@@ -414,7 +414,7 @@
                 </div>
                 <div class="flex items-center justify-between text-xs text-muted" style="margin-bottom: 0.2rem;">
                   <span>Detected Domain:</span>
-                  <span id="preview-category" class="font-mono font-bold text-white">GENERAL</span>
+                  <span id="preview-category" class="font-mono font-bold text-main">GENERAL</span>
                 </div>
                 <div class="flex items-center justify-between text-xs text-muted">
                   <span>Routing Service:</span>
@@ -464,7 +464,7 @@
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
               <span class="text-xs text-muted font-bold uppercase tracking-wider">Assigned Capacity &amp; Workload</span>
-              <h3 id="tech-capacity-text" class="text-lg font-bold text-white font-mono" style="margin-top: 0.15rem;">0 / 7 Active Tickets (0%)</h3>
+              <h3 id="tech-capacity-text" class="text-lg font-bold text-main font-mono" style="margin-top: 0.15rem;">0 / 7 Active Tickets (0%)</h3>
             </div>
             <div id="tech-capacity-status" class="badge badge-status-resolved">Available</div>
           </div>
@@ -778,12 +778,12 @@
             </div>
 
             <!-- S1 -->
-            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+            <div class="card" style="padding: 0.85rem; background: #ffffff; border: 1px solid var(--border);">
               <div class="flex items-center justify-between gap-2">
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="badge badge-status-resolved font-mono">SCENARIO S1</span>
-                    <span class="font-bold text-white text-xs">Happy Path Full Lifecycle</span>
+                    <span class="font-bold text-main text-xs">Happy Path Full Lifecycle</span>
                   </div>
                   <p class="text-xs text-muted" style="margin-top: 0.2rem;">Creation &rarr; Acknowledge &rarr; Investigate &rarr; Resolve &rarr; Verify &rarr; 5-Star Close.</p>
                 </div>
@@ -792,12 +792,12 @@
             </div>
 
             <!-- S2 -->
-            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+            <div class="card" style="padding: 0.85rem; background: #ffffff; border: 1px solid var(--border);">
               <div class="flex items-center justify-between gap-2">
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="badge badge-p1 font-mono">SCENARIO S2</span>
-                    <span class="font-bold text-white text-xs">P1 Outage &amp; Multi-Tier Escalations</span>
+                    <span class="font-bold text-main text-xs">P1 Outage &amp; Multi-Tier Escalations</span>
                   </div>
                   <p class="text-xs text-muted" style="margin-top: 0.2rem;">75% warning, 93% warning, hard breach &rarr; Tier 1–4 escalations to Team Lead &amp; Manager.</p>
                 </div>
@@ -806,12 +806,12 @@
             </div>
 
             <!-- S3 -->
-            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+            <div class="card" style="padding: 0.85rem; background: #ffffff; border: 1px solid var(--border);">
               <div class="flex items-center justify-between gap-2">
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="badge badge-p2 font-mono">SCENARIO S3</span>
-                    <span class="font-bold text-white text-xs">Wrong-Domain Triage &amp; Reassignment</span>
+                    <span class="font-bold text-main text-xs">Wrong-Domain Triage &amp; Reassignment</span>
                   </div>
                   <p class="text-xs text-muted" style="margin-top: 0.2rem;">Network tech flags ticket out-of-scope &rarr; Admin reclassifies to DATABASE and reassigns.</p>
                 </div>
@@ -820,12 +820,12 @@
             </div>
 
             <!-- S4 -->
-            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+            <div class="card" style="padding: 0.85rem; background: #ffffff; border: 1px solid var(--border);">
               <div class="flex items-center justify-between gap-2">
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="badge badge-p3 font-mono">SCENARIO S4</span>
-                    <span class="font-bold text-white text-xs">Duplicate Avalanche Storm Escalation</span>
+                    <span class="font-bold text-main text-xs">Duplicate Avalanche Storm Escalation</span>
                   </div>
                   <p class="text-xs text-muted" style="margin-top: 0.2rem;">5 duplicate VPN tickets correlate via TF-IDF &rarr; cluster elevates parent priority to P1.</p>
                 </div>
@@ -834,12 +834,12 @@
             </div>
 
             <!-- S5 -->
-            <div class="card" style="padding: 0.85rem; background: rgba(11, 19, 36, 0.7);">
+            <div class="card" style="padding: 0.85rem; background: #ffffff; border: 1px solid var(--border);">
               <div class="flex items-center justify-between gap-2">
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="badge badge-status-in-progress font-mono">SCENARIO S5</span>
-                    <span class="font-bold text-white text-xs">Rejection Loop &amp; SLA Clock Pausing</span>
+                    <span class="font-bold text-main text-xs">Rejection Loop &amp; SLA Clock Pausing</span>
                   </div>
                   <p class="text-xs text-muted" style="margin-top: 0.2rem;">Pending user info pauses SLA clock; resumes with calculated deadline extension.</p>
                 </div>
@@ -855,7 +855,7 @@
               <div class="card-header">
                 <div>
                   <h3 class="card-title">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #06b6d4; display: inline-block;"></span>
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #0284c7; display: inline-block;"></span>
                     <span>Execution Audit Terminal</span>
                   </h3>
                   <p class="card-subtitle">Real-time state transitions, event spine dispatches, and SLA changes</p>
@@ -992,6 +992,6 @@
   <div id="toast-container"></div>
 
   <!-- Application Logic (Self-Contained Vanilla ES6, CSP Compliant) -->
-  <script src="/app.js?v=2.5"></script>
+  <script src="/app.js?v=3.0"></script>
 </body>
 </html>

@@ -287,8 +287,8 @@ async function loginUser(email, password, switchDefaultTab = true) {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
         <div>
-          <div style="font-weight: 700; color: #fff; margin-bottom: 0.2rem;">Sign-in Failed</div>
-          <div style="color: #fca5a5;">${escapeHtml(errorMsg)}</div>
+          <div style="font-weight: 700; color: var(--danger-text); margin-bottom: 0.2rem;">Sign-in Failed</div>
+          <div style="color: var(--danger-text); font-size: 0.8125rem;">${escapeHtml(errorMsg)}</div>
         </div>
       `;
       errorAlert.classList.remove('hidden');
@@ -443,30 +443,30 @@ function displayTicketCreatedCallout(created) {
 
   if (isAssigned) {
     container.innerHTML = `
-      <div class="card" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
+      <div class="card" style="background: var(--primary-subtle); border: 1px solid var(--primary-border); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
         <div class="flex items-start gap-3">
           <div style="font-size: 1.5rem; line-height: 1;">🎫</div>
           <div class="w-full">
             <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.35rem;">
-              <h4 class="font-bold text-white text-sm">
+              <h4 class="font-bold text-main text-sm">
                 Support Ticket Logged: <span class="font-mono text-cyan">${escapeHtml(created.id)}</span>
               </h4>
               <span class="badge badge-status-assigned">ROUTED &amp; ASSIGNED</span>
             </div>
             <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">
               Automated intelligence classified and assigned this incident to domain specialist: 
-              <strong class="text-white">${escapeHtml(created.assigneeName)}</strong>
+              <strong class="text-main">${escapeHtml(created.assigneeName)}</strong>
             </p>
-            <div style="background: rgba(15, 23, 42, 0.85); border-radius: 6px; padding: 0.85rem; border-left: 3px solid #10b981;">
+            <div style="background: #ffffff; border-radius: 6px; padding: 0.85rem; border-left: 4px solid var(--primary); border: 1px solid #cbd5e1; border-left-width: 4px; border-left-color: var(--primary);">
               <div class="flex items-center gap-1.5" style="margin-bottom: 0.25rem;">
-                <span class="font-semibold text-xs" style="color: #34d399;">🎬 Live Evaluation Walkthrough Step:</span>
+                <span class="font-semibold text-xs text-blue">🎬 Live Evaluation Walkthrough Step:</span>
               </div>
-              <p class="text-xs text-dim" style="line-height: 1.4;">
-                This ticket is now assigned to domain specialist <strong>${escapeHtml(created.assigneeName)}</strong>.
+              <p class="text-xs text-muted" style="line-height: 1.4;">
+                This ticket is now assigned to domain specialist <strong class="text-main">${escapeHtml(created.assigneeName)}</strong>.
                 To investigate, acknowledge, add technical notes, and resolve this ticket from the technician console, sign in as:
               </p>
               <div class="flex items-center gap-2 flex-wrap" style="margin-top: 0.5rem;">
-                <code class="text-cyan font-mono text-xs" style="background: rgba(0,0,0,0.4); padding: 0.25rem 0.5rem; border-radius: 4px;">${escapeHtml(targetEmail)}</code>
+                <code class="text-blue font-mono text-xs" style="background: var(--primary-subtle); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--primary-border);">${escapeHtml(targetEmail)}</code>
                 <button type="button" class="btn btn-xs btn-primary btn-demo-quick-switch" data-email="${escapeHtml(targetEmail)}">
                   Sign Out &amp; Login as Specialist &rarr;
                 </button>
@@ -479,28 +479,28 @@ function displayTicketCreatedCallout(created) {
   } else {
     // Ticket requires administrator triage / classification review
     container.innerHTML = `
-      <div class="card" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.35); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
+      <div class="card" style="background: var(--warning-subtle); border: 1px solid var(--warning-border); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
         <div class="flex items-start gap-3">
           <div style="font-size: 1.5rem; line-height: 1;">📋</div>
           <div class="w-full">
             <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.35rem;">
-              <h4 class="font-bold text-white text-sm">
+              <h4 class="font-bold text-main text-sm">
                 Support Ticket Logged: <span class="font-mono text-amber">${escapeHtml(created.id)}</span>
               </h4>
-              <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">AWAITING ADMIN TRIAGE</span>
+              <span class="badge" style="background: var(--warning-subtle); color: var(--warning-text); border: 1px solid var(--warning-border);">AWAITING ADMIN TRIAGE</span>
             </div>
             <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">
               NLP classification confidence was below auto-assignment threshold. This ticket has been placed into the <strong>Unified Triage Queue</strong>.
             </p>
-            <div style="background: rgba(15, 23, 42, 0.85); border-radius: 6px; padding: 0.85rem; border-left: 3px solid #f59e0b;">
+            <div style="background: #ffffff; border-radius: 6px; padding: 0.85rem; border: 1px solid #cbd5e1; border-left: 4px solid var(--warning); border-left-width: 4px; border-left-color: var(--warning);">
               <div class="flex items-center gap-1.5" style="margin-bottom: 0.25rem;">
-                <span class="font-semibold text-xs" style="color: #fbbf24;">🎬 Evaluation Walkthrough Step (Human-in-the-Loop Triage):</span>
+                <span class="font-semibold text-xs text-amber">🎬 Evaluation Walkthrough Step (Human-in-the-Loop Triage):</span>
               </div>
-              <p class="text-xs text-dim" style="line-height: 1.4;">
+              <p class="text-xs text-muted" style="line-height: 1.4;">
                 To inspect, accept AI suggestions, or assign this ticket to a domain specialist, sign in as Chief Administrator:
               </p>
               <div class="flex items-center gap-2 flex-wrap" style="margin-top: 0.5rem;">
-                <code class="text-amber font-mono text-xs" style="background: rgba(0,0,0,0.4); padding: 0.25rem 0.5rem; border-radius: 4px;">admin@nimbusfinserve.com</code>
+                <code class="text-amber font-mono text-xs" style="background: var(--warning-subtle); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--warning-border);">admin@nimbusfinserve.com</code>
                 <button type="button" class="btn btn-xs btn-primary btn-demo-quick-switch" data-email="admin@nimbusfinserve.com">
                   Sign Out &amp; Login as Administrator &rarr;
                 </button>
@@ -558,7 +558,7 @@ function renderEmployeeTickets(tickets) {
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-xl text-dim" style="margin-bottom: 0.5rem;">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        <p class="font-semibold text-white">No tickets reported yet</p>
+        <p class="font-semibold text-main">No tickets reported yet</p>
         <p class="text-xs text-muted" style="margin-top: 0.25rem;">Use the form on the left to submit an IT support request.</p>
       </div>`;
     return;
@@ -576,17 +576,17 @@ function renderEmployeeTickets(tickets) {
     const statusBadgeClass = `badge-status-${t.status.toLowerCase().replace('_', '-')}`;
 
     return `
-      <div class="card" style="padding: 1rem; background: rgba(15, 23, 42, 0.7);">
+      <div class="card" style="padding: 1rem; background: #ffffff; border: 1px solid var(--border);">
         <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.5rem;">
           <div class="flex items-center gap-2">
             <span class="font-mono font-bold text-cyan text-xs">${escapeHtml(t.id)}</span>
             <span class="badge ${statusBadgeClass}">${escapeHtml(t.status)}</span>
-            <span class="badge" style="background: var(--bg-card); color: #cbd5e1;">${escapeHtml(t.category || 'GENERAL')}</span>
+            <span class="badge" style="background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border);">${escapeHtml(t.category || 'GENERAL')}</span>
           </div>
           <span class="text-xs text-dim font-mono">${formatDate(t.createdAt)}</span>
         </div>
 
-        <h4 class="font-bold text-white text-sm" style="margin-bottom: 0.35rem;">${escapeHtml(t.title)}</h4>
+        <h4 class="font-bold text-main text-sm" style="margin-bottom: 0.35rem;">${escapeHtml(t.title)}</h4>
         <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">${escapeHtml(t.description)}</p>
 
         <!-- 5-Stage Visual Stepper -->
@@ -617,7 +617,7 @@ function renderEmployeeTickets(tickets) {
         <div class="flex items-center justify-between flex-wrap gap-2" style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);">
           <div class="text-xs text-muted">
             <span>Specialist: </span>
-            <span class="text-white font-semibold">${escapeHtml(t.assigneeName || 'Routing Queue')}</span>
+            <span class="text-main font-semibold">${escapeHtml(t.assigneeName || 'Routing Queue')}</span>
           </div>
           <div class="flex items-center gap-1.5">
             ${t.status === 'PENDING_INFO' ? `
@@ -719,7 +719,7 @@ function renderTechnicianQueue(queue, isTeamMode = false) {
       : 'No active incidents currently assigned to your queue.';
     container.innerHTML = `
       <div class="text-center text-muted" style="padding: 3rem 1rem;">
-        <p class="font-semibold text-white">Work queue is empty</p>
+        <p class="font-semibold text-main">Work queue is empty</p>
         <p class="text-xs text-muted" style="margin-top: 0.25rem;">${emptyMsg}</p>
       </div>`;
     return;
@@ -758,14 +758,14 @@ function renderTechnicianQueue(queue, isTeamMode = false) {
     const targetDeadline = t.resolutionDueAt || t.responseDueAt;
 
     return `
-      <div class="card" style="padding: 1rem; background: rgba(15, 23, 42, 0.7);">
+      <div class="card" style="padding: 1rem; background: #ffffff; border: 1px solid var(--border);">
         <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.5rem;">
           <div class="flex items-center gap-2">
             <span class="font-mono font-bold text-cyan text-xs">${escapeHtml(t.id)}</span>
             <span class="badge ${pBadge}">${escapeHtml(t.priority || 'P3')}</span>
             <span class="badge ${sBadge}">${escapeHtml(t.status)}</span>
-            <span class="badge" style="background: var(--bg-card); color: #cbd5e1;">${escapeHtml(t.category || 'GENERAL')}</span>
-            ${isTeamMode ? `<span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc;">Assignee: ${escapeHtml(t.assigneeName || (t.assigneeId ? t.assigneeId : 'Unassigned / Triage'))}</span>` : ''}
+            <span class="badge" style="background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border);">${escapeHtml(t.category || 'GENERAL')}</span>
+            ${isTeamMode ? `<span class="badge" style="background: var(--primary-subtle); color: var(--primary); border: 1px solid var(--primary-border);">Assignee: ${escapeHtml(t.assigneeName || (t.assigneeId ? t.assigneeId : 'Unassigned / Triage'))}</span>` : ''}
           </div>
           <div class="flex items-center gap-2">
             <span class="sla-timer-pill ${slaClass}">SLA: ${slaText}</span>
@@ -773,11 +773,11 @@ function renderTechnicianQueue(queue, isTeamMode = false) {
           </div>
         </div>
 
-        <h4 class="font-bold text-white text-sm" style="margin-bottom: 0.25rem;">${escapeHtml(t.title)}</h4>
+        <h4 class="font-bold text-main text-sm" style="margin-bottom: 0.25rem;">${escapeHtml(t.title)}</h4>
         <p class="text-xs text-muted" style="margin-bottom: 0.5rem;">${escapeHtml(t.description)}</p>
 
         <div class="flex items-center justify-between flex-wrap gap-2 text-xs text-dim" style="margin-bottom: 0.75rem;">
-          <span>Reporter: <strong class="text-white">${escapeHtml(t.reporterName || t.reporterId)}</strong> (${escapeHtml(t.reporterDepartment || 'General')})</span>
+          <span>Reporter: <strong class="text-main">${escapeHtml(t.reporterName || t.reporterId)}</strong> (${escapeHtml(t.reporterDepartment || 'General')})</span>
           <span>Target Deadline: <strong class="text-cyan font-mono">${formatDate(targetDeadline)}</strong></span>
         </div>
 
@@ -891,12 +891,12 @@ function renderTeamLeadQueues(teamQueue) {
         </div>`;
     } else {
       unassignedContainer.innerHTML = unassigned.map(t => `
-        <div class="card flex items-center justify-between gap-3" style="padding: 0.75rem 1rem; background: rgba(15, 23, 42, 0.6);">
+        <div class="card flex items-center justify-between gap-3" style="padding: 0.75rem 1rem; background: #ffffff; border: 1px solid var(--border);">
           <div>
             <div class="flex items-center gap-2">
               <span class="font-mono text-cyan text-xs font-bold">${escapeHtml(t.id)}</span>
               <span class="badge badge-status-new">${escapeHtml(t.status)}</span>
-              <span class="font-semibold text-white text-xs">${escapeHtml(t.title)}</span>
+              <span class="font-semibold text-main text-xs">${escapeHtml(t.title)}</span>
             </div>
             <p class="text-xs text-muted" style="margin-top: 0.2rem;">Reporter: ${escapeHtml(t.reporterName || t.reporterId)} &middot; Created: ${formatDate(t.createdAt)}</p>
           </div>
@@ -924,15 +924,15 @@ function renderTeamLeadQueues(teamQueue) {
       escalationContainer.innerHTML = escalations.map(t => {
         const slaClass = t.slaStatus === 'BREACHED' ? 'sla-breached' : 'sla-warning';
         return `
-          <div class="card flex items-center justify-between gap-3" style="padding: 0.75rem 1rem; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3);">
+          <div class="card flex items-center justify-between gap-3" style="padding: 0.75rem 1rem; background: var(--danger-subtle); border: 1px solid var(--danger-border);">
             <div>
               <div class="flex items-center gap-2">
                 <span class="font-mono text-red text-xs font-bold">${escapeHtml(t.id)}</span>
                 <span class="badge badge-p1">${escapeHtml(t.priority || 'P1')}</span>
                 <span class="sla-timer-pill ${slaClass}">SLA: ${escapeHtml(t.slaStatus)}</span>
-                <span class="font-semibold text-white text-xs">${escapeHtml(t.title)}</span>
+                <span class="font-semibold text-main text-xs">${escapeHtml(t.title)}</span>
               </div>
-              <p class="text-xs text-dim" style="margin-top: 0.2rem;">Assigned: <strong class="text-white">${escapeHtml(t.assigneeName || 'Unassigned')}</strong> &middot; Target: ${formatDate(t.resolutionDueAt || t.responseDueAt)}</p>
+              <p class="text-xs text-dim" style="margin-top: 0.2rem;">Assigned: <strong class="text-main">${escapeHtml(t.assigneeName || 'Unassigned')}</strong> &middot; Target: ${formatDate(t.resolutionDueAt || t.responseDueAt)}</p>
             </div>
             <button type="button" class="btn btn-xs btn-danger btn-teamlead-intervene" data-id="${t.id}">Inspect Escalation</button>
           </div>
@@ -964,20 +964,20 @@ function renderTeamRoster(technicians) {
     const pct = Math.min(100, Math.round((active / max) * 100));
 
     return `
-      <div class="card" style="padding: 1rem; background: rgba(15, 23, 42, 0.7);">
+      <div class="card" style="padding: 1rem; background: #ffffff; border: 1px solid var(--border);">
         <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
-          <h4 class="font-bold text-white text-sm">${escapeHtml(tech.name)}</h4>
+          <h4 class="font-bold text-main text-sm">${escapeHtml(tech.name)}</h4>
           <span class="badge ${pct > 75 ? 'badge-p1' : 'badge-status-resolved'}">${pct}% Load</span>
         </div>
         <div class="text-xs text-muted" style="margin-bottom: 0.4rem;">
           <span>Domain: <strong class="text-cyan">${escapeHtml(tech.domain || 'Engineering')}</strong></span> &middot;
-          <span>Tier: <strong class="text-white">${escapeHtml(tech.designation || 'L2')}</strong></span>
+          <span>Tier: <strong class="text-main">${escapeHtml(tech.designation || 'L2')}</strong></span>
         </div>
         <div class="capacity-bar">
           <div class="capacity-fill ${pct > 75 ? 'high' : ''}" style="width: ${pct}%;"></div>
         </div>
         <div class="flex justify-between items-center text-xs text-dim" style="margin-top: 0.4rem;">
-          <span>Active Tickets: <strong class="text-white">${active}</strong> / ${max}</span>
+          <span>Active Tickets: <strong class="text-main">${active}</strong> / ${max}</span>
           <span class="font-mono text-cyan">${escapeHtml(tech.id)}</span>
         </div>
       </div>
@@ -1050,8 +1050,8 @@ function renderAdminIncidents(incidents) {
     return `
       <tr>
         <td class="font-mono font-bold text-cyan text-xs">${escapeHtml(t.id)}</td>
-        <td class="font-semibold text-white">${escapeHtml(t.title)}</td>
-        <td><span class="badge" style="background: var(--bg-card); color: #cbd5e1;">${escapeHtml(t.category || 'GENERAL')}</span></td>
+        <td class="font-semibold text-main">${escapeHtml(t.title)}</td>
+        <td><span class="badge" style="background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border);">${escapeHtml(t.category || 'GENERAL')}</span></td>
         <td><span class="badge ${pBadge}">${escapeHtml(t.priority || 'P3')}</span></td>
         <td><span class="badge ${sBadge}">${escapeHtml(t.status)}</span></td>
         <td>${escapeHtml(t.assigneeName || 'Unassigned')}</td>
@@ -1085,7 +1085,7 @@ async function loadAdminTriageQueue() {
     }
 
     container.innerHTML = triage.map(item => `
-      <div class="card" style="padding: 1rem; background: rgba(15, 23, 42, 0.7); border-color: rgba(245, 158, 11, 0.3);">
+      <div class="card" style="padding: 1rem; background: #ffffff; border: 1px solid var(--warning-border);">
         <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.35rem;">
           <div class="flex items-center gap-2">
             <span class="font-mono font-bold text-cyan text-xs">${escapeHtml(item.incidentId)}</span>
@@ -1093,9 +1093,9 @@ async function loadAdminTriageQueue() {
           </div>
           <span class="text-xs text-dim font-mono">${formatDate(item.createdAt)}</span>
         </div>
-        <p class="text-xs text-white" style="margin-bottom: 0.4rem;">Reason: <em>"${escapeHtml(item.reason)}"</em></p>
+        <p class="text-xs text-main" style="margin-bottom: 0.4rem;">Reason: <em>"${escapeHtml(item.reason)}"</em></p>
         <div class="text-xs text-muted flex items-center justify-between" style="border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; margin-top: 0.5rem;">
-          <span>Requesting Tech: <strong class="text-white">${escapeHtml(item.requestingTechnicianId)}</strong></span>
+          <span>Requesting Tech: <strong class="text-main">${escapeHtml(item.requestingTechnicianId)}</strong></span>
           <button type="button" class="btn btn-xs btn-primary btn-triage-resolve" data-id="${item.incidentId}">
             <span>Reclassify &amp; Reassign</span>
           </button>
@@ -1121,10 +1121,10 @@ async function loadAssignmentStrategies() {
     if (!strategies) return;
 
     container.innerHTML = strategies.map(s => `
-      <div class="card flex flex-col justify-between" style="padding: 1.25rem; background: rgba(15, 23, 42, 0.7); border-color: ${s.active ? 'var(--primary)' : 'var(--border)'};">
+      <div class="card flex flex-col justify-between" style="padding: 1.25rem; background: #ffffff; border: 1px solid ${s.active ? 'var(--primary)' : 'var(--border)'};">
         <div>
           <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
-            <h4 class="font-mono font-bold text-white text-sm">${escapeHtml(s.name)}</h4>
+            <h4 class="font-mono font-bold text-main text-sm">${escapeHtml(s.name)}</h4>
             ${s.active ? '<span class="badge badge-status-resolved">ACTIVE</span>' : ''}
           </div>
           <p class="text-xs text-muted" style="margin-bottom: 1rem;">${escapeHtml(s.description)}</p>
@@ -1219,7 +1219,7 @@ async function loadExecutiveReports() {
     if (workload && workload.teamWorkloads && workloadContainer) {
       workloadContainer.innerHTML = workload.teamWorkloads.map(w => `
         <div class="flex items-center justify-between text-xs" style="padding: 0.4rem 0; border-bottom: 1px solid var(--border-subtle);">
-          <span class="font-semibold text-white">${escapeHtml(w.teamName)}</span>
+          <span class="font-semibold text-main">${escapeHtml(w.teamName)}</span>
           <span class="font-mono text-cyan">${w.activeTickets} active (${w.resolvedTickets} resolved)</span>
         </div>
       `).join('');
@@ -1231,7 +1231,7 @@ async function loadExecutiveReports() {
       escContainer.innerHTML = escalations.escalations.map(e => `
         <div class="text-xs" style="padding: 0.35rem 0; border-bottom: 1px solid var(--border-subtle);">
           <span class="badge badge-p1 font-mono">${escapeHtml(e.tier || 'TIER-1')}</span>
-          <span class="text-white">${escapeHtml(e.incidentId)}</span> &middot;
+          <span class="text-main">${escapeHtml(e.incidentId)}</span> &middot;
           <span class="text-muted">${escapeHtml(e.reason)}</span>
         </div>
       `).join('');
@@ -1684,7 +1684,7 @@ function openEmployeeDetailsModal(incidentId) {
     const auditHtml = (incident.auditRecords || []).map(r => `
       <div class="text-xs" style="padding: 0.25rem 0; border-bottom: 1px solid var(--border-subtle);">
         <span class="font-mono text-cyan">${formatDate(r.timestamp)}</span> &middot;
-        <span class="text-white">${escapeHtml(r.action)}</span>
+        <span class="text-main">${escapeHtml(r.action)}</span>
       </div>
     `).join('') || '<div class="text-xs text-dim">No historical updates recorded.</div>';
 
@@ -1696,18 +1696,18 @@ function openEmployeeDetailsModal(incidentId) {
       <div class="space-y-3">
         <div>
           <span class="text-xs text-muted">Title:</span>
-          <p class="font-bold text-white text-sm">${escapeHtml(incident.title)}</p>
+          <p class="font-bold text-main text-sm">${escapeHtml(incident.title)}</p>
         </div>
         <div>
           <span class="text-xs text-muted">Description:</span>
-          <p class="text-xs text-white">${escapeHtml(incident.description)}</p>
+          <p class="text-xs text-main">${escapeHtml(incident.description)}</p>
         </div>
         <div class="flex items-center gap-2">
           <span class="badge badge-status-${incident.status.toLowerCase().replace('_', '-')}">${escapeHtml(incident.status)}</span>
-          <span class="text-xs text-muted">Specialist: <strong class="text-white">${escapeHtml(incident.assigneeName || 'Routing Queue')}</strong></span>
+          <span class="text-xs text-muted">Specialist: <strong class="text-main">${escapeHtml(incident.assigneeName || 'Routing Queue')}</strong></span>
         </div>
         <div style="border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;">
-          <h4 class="font-bold text-white text-xs" style="margin-bottom: 0.35rem;">Progress Timeline</h4>
+          <h4 class="font-bold text-main text-xs" style="margin-bottom: 0.35rem;">Progress Timeline</h4>
           <div class="space-y-1 max-h-40 overflow-y-auto">${auditHtml}</div>
         </div>
       </div>
@@ -1781,8 +1781,8 @@ function setupEventListeners() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
             <div>
-              <div style="font-weight: 700; color: #fff; margin-bottom: 0.2rem;">Registration Failed</div>
-              <div style="color: #fca5a5;">${escapeHtml(err.message)}</div>
+              <div style="font-weight: 700; color: var(--danger-text); margin-bottom: 0.2rem;">Registration Failed</div>
+              <div style="color: var(--danger-text); font-size: 0.8125rem;">${escapeHtml(err.message)}</div>
             </div>
           `;
           regAlert.classList.remove('hidden');
@@ -2037,12 +2037,12 @@ function setupEventListeners() {
         }
 
         container.innerHTML = notifs.map(n => `
-          <div class="card" style="padding: 0.65rem; background: rgba(15, 23, 42, 0.7); border-color: ${n.read ? 'var(--border)' : 'var(--primary)'};">
+          <div class="card" style="padding: 0.65rem; background: #ffffff; border: 1px solid ${n.read ? 'var(--border)' : 'var(--primary)'};">
             <div class="flex items-center justify-between" style="margin-bottom: 0.2rem;">
               <span class="badge ${n.channel === 'EMAIL' ? 'badge-p3' : 'badge-status-in-progress'}">${escapeHtml(n.channel)}</span>
               <span class="text-xs text-dim font-mono">${formatDate(n.createdAt)}</span>
             </div>
-            <p class="text-xs text-white" style="margin-top: 0.2rem;">${escapeHtml(n.message)}</p>
+            <p class="text-xs text-main" style="margin-top: 0.2rem;">${escapeHtml(n.message)}</p>
           </div>
         `).join('');
       } catch (err) {
