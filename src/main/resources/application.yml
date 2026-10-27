@@ -1,6 +1,15 @@
 server:
   port: ${PORT:8085}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    mail:
+      enabled: false
+
 spring:
   application:
     name: i-itsm
