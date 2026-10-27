@@ -210,16 +210,26 @@ public class CompanySeeder implements CommandLineRunner {
         seedService("SRV-GEN-001", "General IT / Unclassified", deskTeam.getId(), BusinessCriticality.TIER_1_INTERNAL_SUPPORT, 500,
                 Set.of("general", "unclassified", "helpdesk", "other"));
 
-        // 5. Seed Primary Demo Employee
+        // 5. Seed Primary Demo Employee & CEO (Executive Leadership)
         Employee demoEmployee = userFactory.createEmployee(
                 "EMP-DEMO-01",
-                "Demo Employee",
+                "Vikram Malhotra",
                 "employee@nimbusfinserve.com",
                 defaultHash,
                 Designation.SENIOR_ASSOCIATE,
                 "Engineering",
                 4);
         userRepository.save(demoEmployee);
+
+        Employee ceo = userFactory.createEmployee(
+                "EMP-CEO-01",
+                "Victoria Sterling",
+                "ceo@nimbusfinserve.com",
+                defaultHash,
+                Designation.VP_C_LEVEL,
+                "Executive",
+                20);
+        userRepository.save(ceo);
 
         // 6. Seed ~300 Employees across 8 departments (Section 7.1)
         String[] departments = {"Engineering", "Finance", "HR", "Sales", "Operations", "Customer Support", "Legal", "Executive"};

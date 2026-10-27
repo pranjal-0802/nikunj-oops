@@ -42,72 +42,113 @@
 ## 2. Simulated Company Infrastructure: Nimbus FinServe Inc.
 
 ### 2.1 Corporate Purpose & Infrastructure Overview
-**Nimbus FinServe Inc.** is an institutional financial services firm operating low-latency algorithmic trading infrastructure, core digital banking ledgers, risk analytics pipelines, and wealth management services. 
+**Nimbus FinServe Inc.** is an institutional financial technology and digital banking institution operating high-frequency algorithmic trade execution, core banking settlement ledgers, real-time risk modeling, and institutional wealth management portals.
 
-Because minute-by-minute system availability directly prevents market capital loss and regulatory non-compliance, **incident priority is strictly derived from the criticality of the impacted IT service to the company's financial infrastructure**.
+In financial services, minute-by-minute system downtime translates directly to financial transaction losses, liquidity risks, regulatory fines (SEC, FINRA, RBI), and institutional reputation damage. Therefore, **incident priority is mathematically calculated based on the business criticality of the affected IT infrastructure**, combined with reporter designation hierarchy, service outage heuristics, and duplicate storm clustering.
 
 ### 2.2 Corporate Hierarchy & Specialist Teams
 ```
-                            Julian Thorne
-                      (Chief Executive Officer)
-                                 │
-                           Elena Rostova
-                    (Chief Technology Officer)
-                                 │
-                          Alexander Vance
-                   (Chief IT Infrastructure Admin)
-                                 │
-     ┌───────────────────┬───────┴───────────┬───────────────────┐
-     │                   │                   │                   │
+                            Victoria Sterling
+                        (Chief Executive Officer)
+                                   │
+                           Alexander Vance
+                    (Chief IT Infrastructure Admin)
+                                   │
+      ┌───────────────────┬────────┴──────────┬───────────────────┐
+      │                   │                   │                   │
 Network Operations  Core Banking DB    Cybersecurity      Workplace & Floor
-  (TEAM-NET)          (TEAM-DB)          (TEAM-SEC)          (TEAM-DESK)
-     │                   │                   │                   │
-Lead: Sarah Jenkins  Priya Patel        Marcus Brody        Carlos Ramirez
-Tech: David Kim     (Lead DBA)         (SecOps Engineer)   (Floor Specialist)
+   (TEAM-NET)          (TEAM-DB)          (TEAM-SEC)          (TEAM-DESK)
+      │                   │                   │                   │
+Lead: Sarah Jenkins  Michael Chang      Hannah Fischer      Amanda Brooks
+Tech: Elena Rostova  Priya Patel        Carlos Mendez       Jordan Bell
+      (VPN Specialist) (Lead DBA)       (SecOps Engineer)   (Floor Specialist)
+Tech: David Kim
+      (Firewalls/BGP)
 ```
 
-| Persona & Name | Corporate Title & Domain Expertise | Pre-seeded Email |
+| Persona & Name | Corporate Role & Domain Specialization | Pre-seeded Email |
 | :--- | :--- | :--- |
-| **Vikram Malhotra** | Quantitative Trading Analyst (Retail & Equity Derivatives) | `employee@nimbusfinserve.com` |
-| **David Kim** | Senior Network Engineer (Low-latency fiber, BGP routers, FIX tunnels) | `tech.network@nimbusfinserve.com` |
-| **Priya Patel** | Lead Database Administrator (Oracle RAC, PostgreSQL, Liquibase pipelines) | `tech.database@nimbusfinserve.com` |
-| **Sarah Jenkins** | Network Operations Team Lead (Escalation handling & queue management) | `lead.network@nimbusfinserve.com` |
-| **Alexander Vance** | Chief IT Infrastructure Administrator (Unified triage, policy overrides, audit) | `admin@nimbusfinserve.com` |
+| **Victoria Sterling** | Chief Executive Officer (VP / C-Level Executive) | `ceo@nimbusfinserve.com` |
+| **Vikram Malhotra** | Senior Quantitative Trading Analyst (Staff Reporter) | `employee@nimbusfinserve.com` |
+| **Elena Rostova** | Senior Network Specialist (**VPN Gateways, WireGuard, DNS**) | `tech.net2@nimbusfinserve.com` |
+| **David Kim** | Senior Network Specialist (**Cisco BGP Routing, Perimeter Firewalls**) | `tech.network@nimbusfinserve.com` |
+| **Priya Patel** | Lead Database Administrator (**PostgreSQL Tuning, Oracle RAC Clusters**) | `tech.db1@nimbusfinserve.com` *(or `tech.database@...`)* |
+| **Carlos Mendez** | Cybersecurity Engineer (**Active Directory, SAML SSO, MFA**) | `tech.sec1@nimbusfinserve.com` |
+| **Sarah Jenkins** | Network Support Team Lead (Escalation oversight & team queue) | `lead.network@nimbusfinserve.com` |
+| **Alexander Vance** | Chief IT Infrastructure Administrator (Unified triage & policy controls) | `admin@nimbusfinserve.com` |
 
-*Default password for all seeded evaluation accounts:* `Password123!`
+*Default password for all seeded accounts:* `Password123!`
 
 ### 2.3 IT Service Catalog & Infrastructure Criticality Tiers
 
-Ticket priority (P1–P4) is computed dynamically based on the IT service's criticality tier, reporter designation weight, and historical failure frequency:
+Ticket priority (P1–P4) is derived dynamically from the IT service's criticality tier, reporter designation weight, and historical failure frequency:
 
-| Tier | Criticality Level | Service Key & Description | Baseline Priority & Target SLA | Financial / Operational Impact Rationale |
+| Criticality Tier | Impact Level | IT Service & Key Description | Default Priority & SLA Target | Financial & Infrastructure Impact Rationale |
 | :---: | :---: | :--- | :---: | :--- |
-| **Tier 1** | **Mission Critical** | `SRV-TRD-001` FIX Protocol Gateway<br>`SRV-DB-001` Core Banking Ledger<br>`SRV-NET-001` Optical Exchange Backplane | **P1 (Critical)**<br>• Response: 5 min<br>• Resolve: 30 min | **Direct Financial Outage**: Halts equity trading and transactions. Carries exchange penalties and severe financial liability. |
-| **Tier 2** | **High Criticality** | `SRV-AUTH-001` Active Directory & SSO<br>`SRV-RISK-001` Quantitative Risk Engine<br>`SRV-VPN-001` Global Trading Tunnel | **P2 (High)**<br>• Response: 15 min<br>• Resolve: 2 hours | **Business Impairment**: Blocks remote trading teams and intraday portfolio risk/margin valuation. |
-| **Tier 3** | **Standard** | `SRV-MAIL-001` Corporate Exchange Email<br>`SRV-REP-001` Regulatory Reporting Portal<br>`SRV-CRM-001` Wealth Management CRM | **P3 (Moderate)**<br>• Response: 1 hour<br>• Resolve: 8 hours | **Operational Degradation**: Non-real-time business workflows with redundant backup processes. |
-| **Tier 4** | **Low / Departmental**| `SRV-WKP-001` Trading Floor Workstation & Print<br>`SRV-GEN-001` General IT Support | **P4 (Minor)**<br>• Response: 4 hours<br>• Resolve: 24 hours | **Routine Requests**: Localized peripheral or cosmetic issues without market impact. |
+| **Tier 4** | **Mission Critical** | `SVC-PAYMENT` Payment Gateway<br>`SVC-CORE-DB` Core Banking DB<br>`SVC-SSO` SSO & Identity Provider | **P1 (Critical)**<br>• Response: 15 min<br>• Resolve: 1 hour | **Direct Financial Outage**: Halts credit card settlements and ledger transactions. Revenue loss: up to \$200,000/hr. Triggers instant SMS + Email escalation. |
+| **Tier 3** | **Business Operational** | `SVC-VPN` Corporate VPN Gateways<br>`SVC-CRM` Customer Support CRM<br>`SVC-EMAIL` Corporate Email & Calendar<br>`SVC-DWH` Data Warehouse Analytics | **P2 (High)**<br>• Response: 30 min<br>• Resolve: 4 hours | **Business Impairment**: Blocks remote trading desks and intraday risk/compliance pipelines. |
+| **Tier 2** | **Departmental** | `SVC-WIFI` Office HQ Wi-Fi<br>`SVC-CICD` CI/CD Engineering Pipeline<br>`SVC-HRMS` HR & Payroll Portal | **P3 (Moderate)**<br>• Response: 1 hour<br>• Resolve: 8 hours | **Operational Degradation**: Internal productivity degradation with manual operational workarounds. |
+| **Tier 1** | **Internal Support** | `SVC-PRINT` Office Printing<br>`SVC-HARDWARE` Laptop & Peripherals<br>`SVC-WIKI` Intranet Confluence Wiki<br>`SRV-GEN-001` General IT / Helpdesk | **P4 (Minor)**<br>• Response: 4 hours<br>• Resolve: 24 hours | **Routine Requests**: Localized peripheral issues without enterprise infrastructure risk. |
 
 ---
 
-## 3. Evaluation Demo Protocol (Role-Isolated Experience)
+## 3. Evaluation Demonstration Protocol (Role-Isolated Experience)
 
 To demonstrate the real-world operational separation of duties:
 
 1. **Step 1: Employee Incident Intake**
-   - Open [http://localhost:8085/](http://localhost:8085/) and sign in as **Vikram Malhotra** (`employee@nimbusfinserve.com`).
-   - Notice that **only** the Employee Self-Service Portal is visible.
-   - Click template **"🌐 VPN Disconnected"** or submit: *"VPN tunnel drops during institutional block trade"*.
-   - The ticket is immediately classified into `NETWORK` and assigned to specialist **David Kim (Network Operations)**.
-   - An on-screen evaluation prompt appears instructing the evaluator to sign out and log in as David Kim.
+   - Open [http://localhost:8085/](http://localhost:8085/) and click **Vikram Malhotra** (`employee@nimbusfinserve.com`) or **Victoria Sterling** (`ceo@nimbusfinserve.com`).
+   - Notice that **only** the Employee Self-Service Portal is visible in the top navigation.
+   - Click template **"🌐 VPN Outage &rarr; Elena Rostova"** (or submit: *"VPN tunnel drops during institutional block trade"*).
+   - The NLP classifier identifies `NETWORK` category and routes to domain specialist **Elena Rostova** (VPN Gateways).
+   - An on-screen prompt displays the assigned domain specialist and provides a one-click button: **[Sign Out & Switch to Elena Rostova]**.
 2. **Step 2: Specialist Technical Handling**
-   - Click **Exit / Sign Out** in the top-right navbar.
-   - On the sign-in card, click the quick evaluation pill for **David Kim** (`tech.network@nimbusfinserve.com`).
-   - Notice that David sees **only** the Technician Console with his real-time workload capacity.
-   - Click the assigned ticket $\rightarrow$ Click **Acknowledge** $\rightarrow$ Click **Start Investigation** $\rightarrow$ Click **Add Technical Note** (internal diagnostics) $\rightarrow$ Click **Resolve** and enter the structured fix (*"BGP tunnel re-keyed and MTU resized"*).
+   - Sign in as **Elena Rostova** (`tech.net2@nimbusfinserve.com`).
+   - Notice that Elena sees **only** the Technician Console with her personal workload queue and capacity meter.
+   - Click **Acknowledge** (state moves to `ACKNOWLEDGED`, recording response SLA) &rarr; Click **Start Investigation** (moves to `IN_PROGRESS`) &rarr; Click **Add Note** (internal diagnostics) &rarr; Click **Resolve** and submit the structured resolution (*Root cause: Stale route table; Steps: Flushed routing daemon*).
+   - A walkthrough prompt confirms: *"Incident resolved! Next step: Sign out & sign in as Employee to verify."*
 3. **Step 3: Verification & Formal Closure**
-   - Click **Exit / Sign Out** and log back in as **Vikram Malhotra** (`employee@nimbusfinserve.com`).
-   - The ticket progress stepper now reflects **Resolved**.
-   - Vikram clicks **Verify & Rate Resolution**, submits a 5-star rating, and the ticket formally transitions to `CLOSED`.
+   - Sign out and sign back in as **Vikram Malhotra** (`employee@nimbusfinserve.com`).
+   - The ticket stepper shows **RESOLVED**.
+   - Click **Verify & Close Ticket**, provide a 5-star rating, and the ticket formally transitions to `CLOSED`.
+
+---
+
+## 4. How to Test the Emailing Feature
+
+I-ITSM provides a multi-channel notification observer (`EmailChannel`, `InAppChannel`, `SmsSimulatorChannel`).
+
+### Option A: Send Notifications to a REAL Personal/Work Email Address (Recommended)
+Since `@nimbusfinserve.com` is a simulated corporate domain, public SMTP servers (like Gmail) would bounce emails sent to fake domains. The platform provides a built-in `REAL_EMAIL_OVERRIDE` feature: every notification generated by the platform is safely delivered to your personal mailbox with the target simulated recipient indicated in the subject line!
+
+To route all platform emails to your real inbox using Gmail SMTP:
+1. In your Google Account, generate an **App Password** (Security &rarr; 2-Step Verification &rarr; App passwords).
+2. Set the environment variables in PowerShell and launch the app:
+```powershell
+$env:SPRING_MAIL_HOST = "smtp.gmail.com"
+$env:SPRING_MAIL_PORT = "587"
+$env:SPRING_MAIL_USERNAME = "your-email@gmail.com"
+$env:SPRING_MAIL_PASSWORD = "your-16-char-app-password"
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH = "true"
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE = "true"
+$env:REAL_EMAIL_OVERRIDE = "your-email@gmail.com"
+
+$env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.12.101-hotspot"
+.\mvnw.cmd spring-boot:run
+```
+Whenever an incident is logged, assigned, acknowledged, escalated, or resolved, you will receive a real email in your Gmail inbox!
+
+### Option B: Local Mailpit (Docker or Standalone Binary)
+If Docker is installed:
+```powershell
+docker compose up mailpit -d
+```
+Open Mailpit Web UI at [http://localhost:8025/](http://localhost:8025/) to view all outgoing emails sent to `*@nimbusfinserve.com` with zero real email credentials required.
+
+### Option C: 100% Offline (In-App Notification Bell & SMS Simulator)
+If no mail server is running, the application **never fails or crashes**: the `NotificationRouter` isolates the channel failure with a warning, while simultaneously delivering notifications to:
+1. The **In-App Notification Bell** in the top navbar (click the bell to view live real-time notifications).
+2. The **SMS Simulator** logged to the application console (`[SMS-SIMULATOR] Sent SMS to EMP-0001: ...`).
 
 ---
 

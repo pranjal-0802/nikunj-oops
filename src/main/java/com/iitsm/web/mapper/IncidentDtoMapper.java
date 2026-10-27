@@ -80,6 +80,10 @@ public final class IncidentDtoMapper {
     }
 
     public static TechnicianIncidentView toTechnicianView(Incident incident, User reporter) {
+        return toTechnicianView(incident, reporter, incident != null ? incident.getAssigneeId() : null, null);
+    }
+
+    public static TechnicianIncidentView toTechnicianView(Incident incident, User reporter, String assigneeId, String assigneeName) {
         if (incident == null) return null;
 
         String reporterName = (reporter != null) ? reporter.getName() : "Unknown";
@@ -117,6 +121,8 @@ public final class IncidentDtoMapper {
                 incident.getReporterId(),
                 reporterName,
                 reporterDept,
+                assigneeId,
+                assigneeName,
                 incident.getCategory(),
                 incident.getServiceId(),
                 incident.getStatus(),

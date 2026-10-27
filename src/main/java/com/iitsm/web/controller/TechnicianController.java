@@ -153,6 +153,12 @@ public class TechnicianController {
 
     private TechnicianIncidentView mapToTechnicianView(Incident incident) {
         User reporter = userService.findById(incident.getReporterId()).orElse(null);
-        return IncidentDtoMapper.toTechnicianView(incident, reporter);
+        String assigneeName = null;
+        if (incident.getAssigneeId() != null) {
+            assigneeName = userService.findById(incident.getAssigneeId())
+                    .map(User::getName)
+                    .orElse(incident.getAssigneeId());
+        }
+        return IncidentDtoMapper.toTechnicianView(incident, reporter, incident.getAssigneeId(), assigneeName);
     }
 }

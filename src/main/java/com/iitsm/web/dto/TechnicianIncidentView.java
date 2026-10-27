@@ -19,6 +19,8 @@ public record TechnicianIncidentView(
         String reporterId,
         String reporterName,
         String reporterDepartment,
+        String assigneeId,
+        String assigneeName,
         IncidentCategory category,
         String serviceId,
         IncidentStatus status,

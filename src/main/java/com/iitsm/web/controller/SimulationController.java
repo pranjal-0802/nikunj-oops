@@ -29,7 +29,7 @@ public class SimulationController {
     }
 
     @GetMapping("/status")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SimulationStatusDto> getStatus() {
         return ResponseEntity.ok(simulationService.getClockStatus());
     }

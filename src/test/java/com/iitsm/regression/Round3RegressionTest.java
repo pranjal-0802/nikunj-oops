@@ -382,4 +382,44 @@ public class Round3RegressionTest {
         List<Incident> teamQueue = incidentService.getTeamQueue("tech.network@nimbusfinserve.com");
         assertThat(teamQueue).extracting(Incident::getId).contains(inc.getId());
     }
+
+    @Test
+    @DisplayName("CEO Victoria Sterling can log in, create an incident, and have VP_C_LEVEL designation boost priority")
+    void testCeoIncidentCreationAndPriorityWeighting() throws Exception {
+        User ceo = userRepository.findByEmail(new Email("ceo@nimbusfinserve.com")).orElseThrow();
+        assertThat(ceo).isInstanceOf(Employee.class);
+        Employee ceoEmp = (Employee) ceo;
+        assertThat(ceoEmp.getDesignation()).isEqualTo(Designation.VP_C_LEVEL);
+
+        Incident ceoTicket = incidentService.createIncident(
+                "ceo@nimbusfinserve.com",
+                "Executive settlement dashboard failing to pull London trade records",
+                "CEO workstation lost connection to analytics reporting cluster during quarterly SEC board review. Query response exceeds threshold."
+        );
+
+        assertThat(ceoTicket).isNotNull();
+        assertThat(ceoTicket.getPriorityDecision()).isNotNull();
+        // Priority must be P1 or P2 due to C-Level designation (1.00 weight)
+        assertThat(ceoTicket.getPriorityDecision().priority()).isIn(Priority.P1, Priority.P2);
+    }
+
+    @Test
+    @DisplayName("Technician queue endpoint provides assigneeId and assigneeName in TechnicianIncidentView")
+    void testTechnicianQueueEndpointProvidesAssigneeMetadata() throws Exception {
+        Incident inc = incidentService.createIncident(
+                "EMP-0001",
+                "Cisco firewall drops outbound traffic to market data",
+                "Perimeter firewall is dropping outbound TCP traffic on port 443 to Bloomberg market feeds. Packet inspection shows block."
+        );
+        assertThat(inc.getAssigneeId()).isNotNull();
+
+        User assignee = userRepository.findById(inc.getAssigneeId()).orElseThrow();
+        String techToken = tokenProvider.generateToken(assignee);
+
+        mockMvc.perform(get("/api/technician/queue")
+                        .header("Authorization", "Bearer " + techToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == '" + inc.getId() + "')].assigneeId").value(inc.getAssigneeId()))
+                .andExpect(jsonPath("$[?(@.id == '" + inc.getId() + "')].assigneeName").value(assignee.getName()));
+    }
 }

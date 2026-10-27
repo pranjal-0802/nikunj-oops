@@ -216,6 +216,15 @@ function updateNavTabsForRole(role) {
     }
   });
 
+  // Discrete advance buttons (+15m, +1h, +24h) require ROLE_ADMIN
+  const simHud = document.querySelector('.sim-hud');
+  if (simHud) {
+    const simBtns = simHud.querySelectorAll('.sim-ff-btn');
+    simBtns.forEach(btn => {
+      btn.style.display = (role === 'ROLE_ADMIN') ? 'inline-block' : 'none';
+    });
+  }
+
   const personaBar = document.getElementById('persona-switcher-bar');
   if (personaBar) {
     personaBar.classList.add('hidden');
@@ -371,6 +380,9 @@ function stopBackgroundPolling() {
 }
 
 async function updateSimulationClock() {
+  if (!STATE.currentUser || STATE.currentUser.role !== 'ROLE_ADMIN') {
+    return;
+  }
   try {
     const res = await fetch('/api/simulation/status', {
       headers: STATE.currentUser && STATE.currentUser.token ? { 'Authorization': `Bearer ${STATE.currentUser.token}` } : {}
@@ -717,18 +729,33 @@ function renderTechnicianQueue(queue, isTeamMode = false) {
     const pBadge = `badge-${t.priority ? t.priority.toLowerCase() : 'p3'}`;
     const sBadge = `badge-status-${t.status.toLowerCase().replace('_', '-')}`;
 
-    // SLA risk indicator
+    // SLA compliance indicator (reads SlaStatus enum from backend)
     let slaClass = 'sla-safe';
     let slaText = 'Within Target';
-    if (t.slaBreached) {
+    if (t.slaStatus === 'BREACHED') {
       slaClass = 'sla-breached';
       slaText = 'BREACHED';
-    } else if (t.slaWarningTriggered) {
+    } else if (t.slaStatus === 'AT_RISK' || t.slaStatus === 'WARNING') {
       slaClass = 'sla-warning';
-      slaText = 'Warning > 75%';
+      slaText = 'AT RISK > 75%';
+    } else if (t.slaStatus === 'MET') {
+      slaClass = 'sla-safe';
+      slaText = 'MET';
     }
 
-    const isAssignedToMe = (t.assigneeId === (STATE.currentUser && STATE.currentUser.id));
+    const myId = STATE.currentUser ? STATE.currentUser.id : null;
+    const isAssignedToMe = (!isTeamMode) || (t.assigneeId && t.assigneeId === myId);
+    const isTeamLead = (STATE.currentUser && STATE.currentUser.role === 'ROLE_TEAM_LEAD');
+    const canAct = isAssignedToMe || isTeamLead;
+    const actions = t.allowedActions || [];
+
+    const canAck = canAct && (t.status === 'ASSIGNED' || actions.includes('acknowledge'));
+    const canInvestigate = canAct && (t.status === 'ACKNOWLEDGED' || actions.includes('startInvestigation'));
+    const canResolve = canAct && (t.status === 'IN_PROGRESS' || t.status === 'ACKNOWLEDGED' || actions.includes('resolve'));
+    const isPendingInfo = (t.status === 'PENDING_INFO');
+    const isResolved = (t.status === 'RESOLVED' || t.status === 'VERIFIED' || t.status === 'CLOSED');
+
+    const targetDeadline = t.resolutionDueAt || t.responseDueAt;
 
     return `
       <div class="card" style="padding: 1rem; background: rgba(15, 23, 42, 0.7);">
@@ -751,23 +778,31 @@ function renderTechnicianQueue(queue, isTeamMode = false) {
 
         <div class="flex items-center justify-between flex-wrap gap-2 text-xs text-dim" style="margin-bottom: 0.75rem;">
           <span>Reporter: <strong class="text-white">${escapeHtml(t.reporterName || t.reporterId)}</strong> (${escapeHtml(t.reporterDepartment || 'General')})</span>
-          <span>Target Deadline: <strong class="text-cyan font-mono">${formatDate(t.slaDeadline)}</strong></span>
+          <span>Target Deadline: <strong class="text-cyan font-mono">${formatDate(targetDeadline)}</strong></span>
         </div>
 
-        <!-- Action Buttons -->
+        <!-- State-Driven Action Buttons (State Pattern Invariant) -->
         <div class="flex items-center gap-1.5 flex-wrap" style="padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);">
-          ${isAssignedToMe && t.status === 'ASSIGNED' ? `
+          ${canAck ? `
             <button type="button" class="btn btn-xs btn-primary btn-tech-ack" data-id="${t.id}">Acknowledge</button>` : ''}
-          ${isAssignedToMe && (t.status === 'ASSIGNED' || t.status === 'IN_PROGRESS') ? `
+          ${canInvestigate ? `
             <button type="button" class="btn btn-xs btn-secondary btn-tech-investigate" data-id="${t.id}">Start Investigation</button>` : ''}
-          ${isAssignedToMe ? `
+          ${canResolve ? `
             <button type="button" class="btn btn-xs btn-secondary btn-tech-note" data-id="${t.id}">Add Note</button>
             <button type="button" class="btn btn-xs btn-warning btn-tech-reqinfo" data-id="${t.id}">Request Info (Pause SLA)</button>
             <button type="button" class="btn btn-xs btn-danger btn-tech-wrongdomain" data-id="${t.id}">Flag Out-of-Scope</button>
             <button type="button" class="btn btn-xs btn-success btn-tech-resolve" data-id="${t.id}">Resolve</button>
-          ` : `
+          ` : ''}
+          ${isPendingInfo ? `
+            <span class="badge badge-warning" style="margin-right: 0.5rem;">Clock Paused - Waiting on User Response</span>
+            <button type="button" class="btn btn-xs btn-secondary btn-tech-note" data-id="${t.id}">Add Note</button>
+          ` : ''}
+          ${isResolved ? `
+            <span class="badge badge-status-resolved">Resolved (Awaiting Reporter Verification)</span>
+          ` : ''}
+          ${!canAct ? `
             <span class="text-xs text-dim italic">Assigned to team member (${escapeHtml(t.assigneeName || 'Queued')})</span>
-          `}
+          ` : ''}
         </div>
       </div>
     `;
@@ -821,14 +856,96 @@ async function technicianStartInvestigation(id) {
 // ============================================================================
 async function loadTeamLeadView() {
   const grid = document.getElementById('teamlead-roster-grid');
-  if (!grid) return;
-  grid.innerHTML = '<div class="text-center text-muted" style="padding: 2rem; grid-column: 1 / -1;">Loading team roster...</div>';
+  const unassignedContainer = document.getElementById('teamlead-unassigned-container');
+  const escalationContainer = document.getElementById('teamlead-escalation-container');
+
+  if (grid) grid.innerHTML = '<div class="text-center text-muted" style="padding: 2rem; grid-column: 1 / -1;">Loading team roster...</div>';
+  if (unassignedContainer) unassignedContainer.innerHTML = '<div class="text-center text-muted" style="padding: 1.5rem;">Checking unassigned queue...</div>';
+  if (escalationContainer) escalationContainer.innerHTML = '<div class="text-center text-muted" style="padding: 1.5rem;">Checking team escalations...</div>';
 
   try {
     const technicians = await apiCall('/api/admin/technicians');
     renderTeamRoster(technicians || []);
+
+    const teamQueue = await apiCall('/api/technician/team-queue');
+    if (Array.isArray(teamQueue)) {
+      renderTeamLeadQueues(teamQueue);
+    }
   } catch (err) {
-    grid.innerHTML = `<div class="text-center text-red" style="padding: 2rem; grid-column: 1 / -1;">Error: ${escapeHtml(err.message)}</div>`;
+    if (grid) grid.innerHTML = `<div class="text-center text-red" style="padding: 2rem; grid-column: 1 / -1;">Error: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderTeamLeadQueues(teamQueue) {
+  const unassignedContainer = document.getElementById('teamlead-unassigned-container');
+  const escalationContainer = document.getElementById('teamlead-escalation-container');
+
+  const unassigned = teamQueue.filter(t => !t.assigneeId || t.status === 'CLASSIFIED');
+  const escalations = teamQueue.filter(t => t.slaStatus === 'BREACHED' || t.slaStatus === 'AT_RISK' || t.slaStatus === 'WARNING' || t.priority === 'P1');
+
+  if (unassignedContainer) {
+    if (unassigned.length === 0) {
+      unassignedContainer.innerHTML = `
+        <div class="text-center text-muted" style="padding: 2rem;">
+          <p class="text-xs text-emerald font-semibold">✓ All team tickets currently assigned to active specialists.</p>
+        </div>`;
+    } else {
+      unassignedContainer.innerHTML = unassigned.map(t => `
+        <div class="card flex items-center justify-between gap-3" style="padding: 0.75rem 1rem; background: rgba(15, 23, 42, 0.6);">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-cyan text-xs font-bold">${escapeHtml(t.id)}</span>
+              <span class="badge badge-status-new">${escapeHtml(t.status)}</span>
+              <span class="font-semibold text-white text-xs">${escapeHtml(t.title)}</span>
+            </div>
+            <p class="text-xs text-muted" style="margin-top: 0.2rem;">Reporter: ${escapeHtml(t.reporterName || t.reporterId)} &middot; Created: ${formatDate(t.createdAt)}</p>
+          </div>
+          <button type="button" class="btn btn-xs btn-primary btn-teamlead-claim" data-id="${t.id}">Acknowledge &amp; Handle</button>
+        </div>
+      `).join('');
+
+      unassignedContainer.querySelectorAll('.btn-teamlead-claim').forEach(b => {
+        b.addEventListener('click', async () => {
+          const id = b.getAttribute('data-id');
+          await technicianAcknowledge(id);
+          loadTeamLeadView();
+        });
+      });
+    }
+  }
+
+  if (escalationContainer) {
+    if (escalations.length === 0) {
+      escalationContainer.innerHTML = `
+        <div class="text-center text-muted" style="padding: 2rem;">
+          <p class="text-xs text-cyan font-semibold">✓ Zero active SLA breaches or P1 escalations on team queue.</p>
+        </div>`;
+    } else {
+      escalationContainer.innerHTML = escalations.map(t => {
+        const slaClass = t.slaStatus === 'BREACHED' ? 'sla-breached' : 'sla-warning';
+        return `
+          <div class="card flex items-center justify-between gap-3" style="padding: 0.75rem 1rem; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3);">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-red text-xs font-bold">${escapeHtml(t.id)}</span>
+                <span class="badge badge-p1">${escapeHtml(t.priority || 'P1')}</span>
+                <span class="sla-timer-pill ${slaClass}">SLA: ${escapeHtml(t.slaStatus)}</span>
+                <span class="font-semibold text-white text-xs">${escapeHtml(t.title)}</span>
+              </div>
+              <p class="text-xs text-dim" style="margin-top: 0.2rem;">Assigned: <strong class="text-white">${escapeHtml(t.assigneeName || 'Unassigned')}</strong> &middot; Target: ${formatDate(t.resolutionDueAt || t.responseDueAt)}</p>
+            </div>
+            <button type="button" class="btn btn-xs btn-danger btn-teamlead-intervene" data-id="${t.id}">Inspect Escalation</button>
+          </div>
+        `;
+      }).join('');
+
+      escalationContainer.querySelectorAll('.btn-teamlead-intervene').forEach(b => {
+        b.addEventListener('click', () => {
+          STATE.techQueueMode = 'team';
+          switchTab('console-technician');
+        });
+      });
+    }
   }
 }
 
@@ -1421,7 +1538,7 @@ function openResolveModal(incidentId) {
         body: JSON.stringify({ rootCause, stepsTaken, confirmedCategory })
       });
       closeModal();
-      showToast('Incident resolved! Awaiting user verification.', 'success');
+      showToast('Incident resolved! Next step: Sign out & sign in as Employee to verify and close with a 5-star rating.', 'success', 6000);
       loadTechnicianQueue();
       loadTechnicianDashboard();
     } catch (err) {
@@ -1775,16 +1892,22 @@ function setupEventListeners() {
 
       if (type === 'vpn') {
         titleEl.value = 'VPN tunnel disconnects during wire transfer';
-        descEl.value = 'Workstation lost connection to corporate VPN while executing SWIFT batch transfer. Gateway 10.24.1.1 unreachable with TLS handshake timeout.';
+        descEl.value = 'Workstation lost connection to corporate London VPN gateway while executing SWIFT batch transfer. Gateway 10.24.1.1 unreachable with TLS handshake timeout.';
+      } else if (type === 'firewall') {
+        titleEl.value = 'Cisco perimeter firewall blocking market data feed port 443';
+        descEl.value = 'Perimeter firewall is dropping outbound TCP traffic on port 443 to Bloomberg market feeds. Packet inspection shows false-positive block on interface gig0/1.';
+      } else if (type === 'db') {
+        titleEl.value = 'PostgreSQL deadlock timeout on Core Banking DB transaction pool';
+        descEl.value = 'HikariCP connection pool exhausted with multiple deadlock errors during high volume trade execution batch on core database cluster.';
       } else if (type === 'payment') {
-        titleEl.value = 'Payment Gateway 502 Bad Gateway';
-        descEl.value = 'Customer checkout portal throwing HTTP 502 Bad Gateway errors on credit card processing endpoint /api/v1/payments/charge.';
-      } else if (type === 'display') {
-        titleEl.value = 'Laptop Display Flickering and Artifacts';
-        descEl.value = 'External monitor connected via Thunderbolt dock flickering continuously with horizontal line artifacts after OS update.';
+        titleEl.value = 'Payment Gateway 502 Bad Gateway during settlement';
+        descEl.value = 'High-frequency payment gateway cluster returning HTTP 502 Bad Gateway errors for Visa/MasterCard card settlements. Immediate outage impacting customers.';
       } else if (type === 'sso') {
         titleEl.value = 'SSO Active Directory Account Locked';
         descEl.value = 'Active Directory domain controller reports user account locked out after password expiration policy triggered this morning.';
+      } else if (type === 'display') {
+        titleEl.value = 'Laptop Display Flickering and Artifacts';
+        descEl.value = 'External monitor connected via Thunderbolt dock flickering continuously with horizontal line artifacts after OS update.';
       }
       descEl.dispatchEvent(new Event('input'));
     });
@@ -1939,23 +2062,26 @@ function setupEventListeners() {
 function updateAiPreview(title, desc) {
   const text = `${title} ${desc}`.toLowerCase();
   let cat = 'APPLICATION';
-  let srv = 'SVC-INTRANET';
+  let srv = 'SVC-WIKI (Intranet Wiki)';
 
-  if (text.includes('vpn') || text.includes('tunnel') || text.includes('wifi') || text.includes('network') || text.includes('ipsec') || text.includes('dns')) {
+  if (text.includes('vpn') || text.includes('tunnel') || text.includes('wireguard') || text.includes('openvpn')) {
     cat = 'NETWORK';
-    srv = 'SVC-VPN (Corporate VPN)';
-  } else if (text.includes('database') || text.includes('sql') || text.includes('postgres') || text.includes('oracle') || text.includes('deadlock')) {
+    srv = 'SVC-VPN (Corporate VPN - Specialist: Elena Rostova)';
+  } else if (text.includes('firewall') || text.includes('cisco') || text.includes('bgp') || text.includes('routing') || text.includes('port 443')) {
+    cat = 'NETWORK';
+    srv = 'SVC-VPN (Network Perimeter - Specialist: David Kim)';
+  } else if (text.includes('database') || text.includes('sql') || text.includes('postgres') || text.includes('oracle') || text.includes('deadlock') || text.includes('query')) {
     cat = 'DATABASE';
-    srv = 'SVC-DB (Core Database)';
-  } else if (text.includes('screen') || text.includes('display') || text.includes('laptop') || text.includes('keyboard') || text.includes('dock')) {
+    srv = 'SVC-CORE-DB (Core Banking DB - Specialist: Priya Patel)';
+  } else if (text.includes('screen') || text.includes('display') || text.includes('laptop') || text.includes('keyboard') || text.includes('dock') || text.includes('monitor')) {
     cat = 'HARDWARE';
-    srv = 'SVC-WORKSTATION';
-  } else if (text.includes('password') || text.includes('sso') || text.includes('locked') || text.includes('mfa')) {
-    cat = 'ACCESS';
-    srv = 'SVC-IAM (Identity Management)';
-  } else if (text.includes('payment') || text.includes('swift') || text.includes('wire') || text.includes('checkout')) {
-    cat = 'APPLICATION';
-    srv = 'SVC-PAYMENTS';
+    srv = 'SVC-HARDWARE (Laptop & Peripherals - Specialist: Jordan Bell)';
+  } else if (text.includes('password') || text.includes('sso') || text.includes('locked') || text.includes('mfa') || text.includes('active directory') || text.includes('saml')) {
+    cat = 'SECURITY';
+    srv = 'SVC-SSO (SSO & Identity Provider - Specialist: Carlos Mendez)';
+  } else if (text.includes('payment') || text.includes('swift') || text.includes('wire') || text.includes('checkout') || text.includes('stripe') || text.includes('visa')) {
+    cat = 'CLOUD';
+    srv = 'SVC-PAYMENT (Payment Gateway - Tier 4 Mission Critical)';
   }
 
   document.getElementById('preview-category').textContent = cat;

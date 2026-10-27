@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nimbus FinServe :: Intelligent IT Service Management (I-ITSM)</title>
   <!-- Self-Contained Modern Stylesheet (Zero CDN Dependencies, CSP script-src 'self' compliant) -->
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=2.5">
 </head>
 <body>
 
@@ -55,34 +55,58 @@
         <button type="button" id="btn-toggle-register" class="btn btn-xs btn-secondary">Self-Register</button>
       </div>
 
-      <!-- Demo Accounts Section (Populated only when /api/public/config reports demoMode=true) -->
-      <div id="demo-accounts-container" class="demo-pills hidden" style="margin-top: 1.25rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+      <!-- Demo Accounts Section (Default visible for evaluation; controlled by /api/public/config) -->
+      <div id="demo-accounts-container" class="demo-pills" style="margin-top: 1.25rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
         <div class="w-full flex items-center justify-between" style="margin-bottom: 0.5rem;">
-          <span class="text-xs font-bold text-white uppercase font-mono">Simulated Company Personas</span>
-          <span class="badge badge-status-assigned">Nimbus FinServe</span>
+          <span class="text-xs font-bold text-white uppercase font-mono">Nimbus FinServe Corporate Structure</span>
+          <span class="badge badge-status-assigned">Simulated Org</span>
         </div>
         <p class="text-xs text-muted w-full" style="margin-bottom: 0.75rem;">
-          Click any persona below for instantaneous evaluation sign-in:
+          Select any persona to auto-fill credentials and sign in:
         </p>
-        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="employee@nimbusfinserve.com" data-role="Employee" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
-          <span>👔 Vikram Malhotra <span class="text-dim text-xs">(Trading Analyst - Retail Banking)</span></span>
-          <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">EMPLOYEE</span>
+
+        <!-- Executive Leadership -->
+        <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-bottom: 0.25rem;">Executive &amp; Operations</div>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="ceo@nimbusfinserve.com" data-role="CEO" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>👑 Victoria Sterling <span class="text-dim text-xs">(Chief Executive Officer - VP/C-Level)</span></span>
+          <span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #fde047;">CEO</span>
         </button>
-        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.network@nimbusfinserve.com" data-role="Technician" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
-          <span>🌐 David Kim <span class="text-dim text-xs">(Network &amp; Communications Specialist)</span></span>
-          <span class="badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8;">TECH (NET)</span>
-        </button>
-        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.database@nimbusfinserve.com" data-role="Technician" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
-          <span>🗄️ Priya Patel <span class="text-dim text-xs">(Core Banking &amp; Database Systems)</span></span>
-          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">TECH (DB)</span>
-        </button>
-        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="lead.network@nimbusfinserve.com" data-role="Team Lead" style="padding: 0.5rem 0.75rem; margin-bottom: 0.35rem;">
-          <span>👥 Sarah Jenkins <span class="text-dim text-xs">(Network Support Team Lead)</span></span>
-          <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">TEAM LEAD</span>
-        </button>
-        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="admin@nimbusfinserve.com" data-role="System Admin" style="padding: 0.5rem 0.75rem;">
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="admin@nimbusfinserve.com" data-role="System Admin" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
           <span>⚡ Alexander Vance <span class="text-dim text-xs">(Chief IT Infrastructure Admin)</span></span>
           <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">ADMIN</span>
+        </button>
+
+        <!-- Employee -->
+        <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-top: 0.5rem; margin-bottom: 0.25rem;">Staff Reporter</div>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="employee@nimbusfinserve.com" data-role="Employee" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>👤 Vikram Malhotra <span class="text-dim text-xs">(Trading Analyst - Retail Banking)</span></span>
+          <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">EMPLOYEE</span>
+        </button>
+
+        <!-- Domain Expert Technicians -->
+        <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-top: 0.5rem; margin-bottom: 0.25rem;">Domain Expert Technicians</div>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.net2@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>🌐 Elena Rostova <span class="text-dim text-xs">(Network &bull; <strong>VPN Gateways &amp; DNS Expert</strong>)</span></span>
+          <span class="badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8;">TECH (VPN)</span>
+        </button>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.network@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>🛡️ David Kim <span class="text-dim text-xs">(Network &bull; <strong>Cisco BGP &amp; Firewalls Expert</strong>)</span></span>
+          <span class="badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8;">TECH (NET)</span>
+        </button>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.db1@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>🗄️ Priya Patel <span class="text-dim text-xs">(Database &bull; <strong>PostgreSQL &amp; Oracle RAC Expert</strong>)</span></span>
+          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">TECH (DB)</span>
+        </button>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="tech.sec1@nimbusfinserve.com" data-role="Technician" style="padding: 0.45rem 0.75rem; margin-bottom: 0.35rem;">
+          <span>🔒 Carlos Mendez <span class="text-dim text-xs">(Security &bull; <strong>Active Directory &amp; MFA Expert</strong>)</span></span>
+          <span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">TECH (SEC)</span>
+        </button>
+
+        <!-- Team Lead -->
+        <div class="text-xs font-semibold text-muted uppercase font-mono" style="margin-top: 0.5rem; margin-bottom: 0.25rem;">Team Leadership</div>
+        <button type="button" class="demo-pill w-full flex items-center justify-between" data-email="lead.network@nimbusfinserve.com" data-role="Team Lead" style="padding: 0.45rem 0.75rem;">
+          <span>👥 Sarah Jenkins <span class="text-dim text-xs">(Network Operations Team Lead)</span></span>
+          <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">TEAM LEAD</span>
         </button>
       </div>
     </div>
@@ -354,12 +378,14 @@
 
             <!-- Quick Fill Templates -->
             <div class="form-group">
-              <label class="form-label">Quick Fill Templates:</label>
+              <label class="form-label">Demonstration Quick-Fill Templates (Routes to Domain Specialists):</label>
               <div class="flex flex-wrap gap-1">
-                <button type="button" class="template-chip" data-template="vpn">🌐 VPN Disconnected</button>
-                <button type="button" class="template-chip" data-template="payment">💳 Payment Gateway 502</button>
-                <button type="button" class="template-chip" data-template="display">💻 Display Flickering</button>
-                <button type="button" class="template-chip" data-template="sso">🔑 SSO Locked</button>
+                <button type="button" class="template-chip" data-template="vpn" title="Routes to Elena Rostova (VPN Gateways)">🌐 VPN Outage &rarr; Elena Rostova</button>
+                <button type="button" class="template-chip" data-template="firewall" title="Routes to David Kim (Firewalls & BGP)">🛡️ Firewall Block &rarr; David Kim</button>
+                <button type="button" class="template-chip" data-template="db" title="Routes to Priya Patel (Core Banking DB)">🗄️ DB Deadlock &rarr; Priya Patel</button>
+                <button type="button" class="template-chip" data-template="payment" title="Tier 4 Mission Critical Gateway">💳 Payment Gateway (Tier 4)</button>
+                <button type="button" class="template-chip" data-template="sso" title="Routes to Carlos Mendez (Security & MFA)">🔒 SSO/MFA Lockout &rarr; Carlos Mendez</button>
+                <button type="button" class="template-chip" data-template="display" title="Routes to Jordan Bell (Service Desk)">💻 Laptop Display &rarr; Jordan Bell</button>
               </div>
             </div>
 
@@ -485,7 +511,8 @@
               </div>
               <select id="tech-queue-filter" class="form-select" style="width: auto; padding: 0.35rem 0.65rem; font-size: 0.75rem;">
                 <option value="ALL">All Active Tickets</option>
-                <option value="ASSIGNED">Assigned (Unacknowledged)</option>
+                <option value="ASSIGNED">Assigned (New)</option>
+                <option value="ACKNOWLEDGED">Acknowledged</option>
                 <option value="IN_PROGRESS">In Progress</option>
                 <option value="PENDING_INFO">Waiting on User</option>
               </select>
@@ -965,6 +992,6 @@
   <div id="toast-container"></div>
 
   <!-- Application Logic (Self-Contained Vanilla ES6, CSP Compliant) -->
-  <script src="/app.js"></script>
+  <script src="/app.js?v=2.5"></script>
 </body>
 </html>

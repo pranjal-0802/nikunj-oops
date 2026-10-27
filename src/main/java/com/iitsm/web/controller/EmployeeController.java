@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/employee/incidents")
-@PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
+@PreAuthorize("hasAnyRole('EMPLOYEE', 'TECHNICIAN', 'TEAM_LEAD', 'ADMIN')")
 public class EmployeeController {
 
     private final IncidentService incidentService;

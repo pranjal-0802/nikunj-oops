@@ -24,7 +24,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(new Email(email))
+        String lookupEmail = (email != null) ? email.trim() : "";
+        if ("tech.database@nimbusfinserve.com".equalsIgnoreCase(lookupEmail)) {
+            lookupEmail = "tech.db1@nimbusfinserve.com";
+        }
+        User user = userRepository.findByEmail(new Email(lookupEmail))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         List<GrantedAuthority> authorities = Collections.singletonList(

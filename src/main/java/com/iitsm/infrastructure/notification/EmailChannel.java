@@ -23,12 +23,22 @@ public class EmailChannel implements NotificationChannel {
 
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final String fromAddress;
+    private final String overrideRecipient;
 
     public EmailChannel(
             ObjectProvider<JavaMailSender> mailSenderProvider,
             @Value("${iitsm.mail.from:no-reply@nimbusfinserve.com}") String fromAddress) {
+        this(mailSenderProvider, fromAddress, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public EmailChannel(
+            ObjectProvider<JavaMailSender> mailSenderProvider,
+            @Value("${iitsm.mail.from:no-reply@nimbusfinserve.com}") String fromAddress,
+            @Value("${iitsm.mail.override-recipient:${REAL_EMAIL_OVERRIDE:}}") String overrideRecipient) {
         this.mailSenderProvider = mailSenderProvider;
         this.fromAddress = fromAddress;
+        this.overrideRecipient = overrideRecipient;
     }
 
     @Override
@@ -45,14 +55,22 @@ public class EmailChannel implements NotificationChannel {
         }
 
         try {
+            String targetEmail = (overrideRecipient != null && !overrideRecipient.trim().isEmpty())
+                    ? overrideRecipient.trim()
+                    : recipientEmail;
+            String formattedSubject = (overrideRecipient != null && !overrideRecipient.trim().isEmpty())
+                    ? String.format("[I-ITSM -> %s] %s", recipientEmail, subject)
+                    : subject;
+
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setFrom(fromAddress);
-            mailMessage.setTo(recipientEmail);
-            mailMessage.setSubject(subject);
+            mailMessage.setTo(targetEmail);
+            mailMessage.setSubject(formattedSubject);
             mailMessage.setText(message);
 
             mailSender.send(mailMessage);
-            log.info("Email notification sent to '{}' with subject: {}", recipientEmail, subject);
+            log.info("Email notification delivered to '{}' (target: '{}') with subject: {}",
+                    targetEmail, recipientEmail, formattedSubject);
         } catch (MailException ex) {
             log.warn("Failed to deliver email to '{}': {}", recipientEmail, ex.getMessage());
             throw new NotificationFailureException(CHANNEL_NAME, recipientEmail, ex.getMessage(), ex);

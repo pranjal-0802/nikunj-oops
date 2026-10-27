@@ -163,6 +163,7 @@ public class AdminController {
     }
 
     @GetMapping("/technicians")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEAM_LEAD')")
     public ResponseEntity<List<TechnicianSummaryDto>> getTechnicianRoster() {
         List<TechnicianSummaryDto> roster = userService.getAllTechnicians().stream()
                 .map(TechnicianSummaryDto::fromDomain)
