@@ -30,6 +30,14 @@ public final class IncidentDtoMapper {
             Incident incident,
             String assigneeName,
             List<AuditRecord> auditRecords) {
+        return toEmployeeView(incident, assigneeName, null, auditRecords);
+    }
+
+    public static EmployeeIncidentView toEmployeeView(
+            Incident incident,
+            String assigneeName,
+            String assigneeEmail,
+            List<AuditRecord> auditRecords) {
         if (incident == null) return null;
 
         String publicStatus = PublicStatusMapper.toPublicStatus(incident.getStatus()).name();
@@ -63,6 +71,7 @@ public final class IncidentDtoMapper {
                 incident.getDescription(),
                 publicStatus,
                 assigneeName,
+                assigneeEmail,
                 incident.getCreatedAt(),
                 resolutionText,
                 safeAuditTrail,

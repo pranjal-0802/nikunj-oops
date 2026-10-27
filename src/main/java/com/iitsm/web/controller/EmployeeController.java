@@ -126,12 +126,17 @@ public class EmployeeController {
 
     private EmployeeIncidentView mapToEmployeeView(Incident incident) {
         String assigneeName = null;
+        String assigneeEmail = null;
         if (incident.getAssigneeId() != null) {
-            assigneeName = userService.findById(incident.getAssigneeId())
-                    .map(User::getName)
-                    .orElse("Assigned Support");
+            User assignee = userService.findById(incident.getAssigneeId()).orElse(null);
+            if (assignee != null) {
+                assigneeName = assignee.getName();
+                assigneeEmail = (assignee.getEmail() != null) ? assignee.getEmail().value() : null;
+            } else {
+                assigneeName = "Assigned Support";
+            }
         }
         List<AuditRecord> auditRecords = auditService.getAuditTrailForIncident(incident.getId());
-        return IncidentDtoMapper.toEmployeeView(incident, assigneeName, auditRecords);
+        return IncidentDtoMapper.toEmployeeView(incident, assigneeName, assigneeEmail, auditRecords);
     }
 }

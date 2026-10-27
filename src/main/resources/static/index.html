@@ -479,6 +479,10 @@
               <p class="card-subtitle">Prioritized by Urgency and SLA Deadline Risk</p>
             </div>
             <div class="flex items-center gap-2">
+              <div style="display: flex; gap: 0.25rem;">
+                <button type="button" id="btn-tech-mode-my" class="btn btn-xs btn-primary">👤 Assigned to Me</button>
+                <button type="button" id="btn-tech-mode-team" class="btn btn-xs btn-secondary">👥 Team Queue</button>
+              </div>
               <select id="tech-queue-filter" class="form-select" style="width: auto; padding: 0.35rem 0.65rem; font-size: 0.75rem;">
                 <option value="ALL">All Active Tickets</option>
                 <option value="ASSIGNED">Assigned (Unacknowledged)</option>

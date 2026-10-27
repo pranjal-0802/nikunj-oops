@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/simulation")
-@PreAuthorize("hasRole('ADMIN')")
 public class SimulationController {
 
     private final SimulationService simulationService;
@@ -30,29 +29,34 @@ public class SimulationController {
     }
 
     @GetMapping("/status")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<SimulationStatusDto> getStatus() {
         return ResponseEntity.ok(simulationService.getClockStatus());
     }
 
     @PostMapping("/speed")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SimulationStatusDto> setSpeed(@RequestParam(name = "multiplier", defaultValue = "1") long multiplier) {
         simulationService.setSpeedMultiplier(multiplier);
         return ResponseEntity.ok(simulationService.getClockStatus());
     }
 
     @PostMapping("/advance")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SimulationStatusDto> advanceTime(@RequestParam(name = "minutes", defaultValue = "15") long minutes) {
         simulationService.advanceClock(Duration.ofMinutes(minutes));
         return ResponseEntity.ok(simulationService.getClockStatus());
     }
 
     @PostMapping("/reset")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SimulationStatusDto> resetClock() {
         simulationService.resetClock();
         return ResponseEntity.ok(simulationService.getClockStatus());
     }
 
     @PostMapping("/run/{scenarioId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SimulationResult> runScenario(@PathVariable("scenarioId") String scenarioId) {
         SimulationResult result = simulationService.runScenario(scenarioId);
         return ResponseEntity.ok(result);

@@ -15,6 +15,7 @@ public record EmployeeIncidentView(
         String description,
         String status, // Public 5-step stepper value: NEW, ASSIGNED, IN PROGRESS, RESOLVED, CLOSED
         String assigneeName,
+        String assigneeEmail,
         Instant createdTime,
         String resolutionText,
         List<EmployeeAuditRecordView> auditTrail,

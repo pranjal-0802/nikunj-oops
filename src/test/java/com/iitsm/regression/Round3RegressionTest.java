@@ -361,4 +361,25 @@ public class Round3RegressionTest {
         assertThat(updated.isNeedsTriage()).isFalse();
         assertThat(updated.getAssigneeId()).isNotNull();
     }
+
+    @Test
+    @DisplayName("VPN incident created by employee auto-assigns to network specialist and appears in technician queue and team queue")
+    void testVpnIncidentCreationAndTechnicianQueue() {
+        Incident inc = incidentService.createIncident(
+                "EMP-0001",
+                "VPN tunnel disconnects during wire transfer",
+                "Workstation lost connection to corporate VPN while executing SWIFT batch transfer. Gateway 10.24.1.1 unreachable with TLS handshake timeout."
+        );
+        assertThat(inc.getStatus()).isEqualTo(IncidentStatus.ASSIGNED);
+        assertThat(inc.getCategory()).isEqualTo(IncidentCategory.NETWORK);
+        assertThat(inc.getAssigneeId()).isIn("TECH-NET-1", "TECH-NET-2");
+
+        // The ticket appears in the assigned technician's personal queue
+        List<Incident> techQueue = incidentService.getTechnicianQueue(inc.getAssigneeId());
+        assertThat(techQueue).extracting(Incident::getId).contains(inc.getId());
+
+        // The ticket also appears in the team queue for any network technician
+        List<Incident> teamQueue = incidentService.getTeamQueue("tech.network@nimbusfinserve.com");
+        assertThat(teamQueue).extracting(Incident::getId).contains(inc.getId());
+    }
 }

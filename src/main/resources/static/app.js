@@ -13,6 +13,7 @@ const STATE = {
   demoPassword: 'Password123!',
   activeTab: 'console-employee',
   activeAdminSubtab: 'admin-catalog-panel',
+  techQueueMode: 'my', // 'my' or 'team'
   simulation: {
     virtualTime: null,
     speedMultiplier: 1
@@ -424,57 +425,80 @@ function displayTicketCreatedCallout(created) {
   const container = document.getElementById('emp-callout-container');
   if (!container || !created) return;
 
-  let techEmail = 'tech.network@nimbusfinserve.com';
-  let techRole = 'David Kim (Senior Network Engineer)';
-  if (created.assigneeName) {
-    const nameLower = created.assigneeName.toLowerCase();
-    if (nameLower.includes('priya') || nameLower.includes('database')) {
-      techEmail = 'tech.database@nimbusfinserve.com';
-      techRole = `${created.assigneeName} (Core Banking & Database Systems)`;
-    } else if (nameLower.includes('sarah')) {
-      techEmail = 'lead.network@nimbusfinserve.com';
-      techRole = `${created.assigneeName} (Network Team Lead)`;
-    } else {
-      techEmail = 'tech.network@nimbusfinserve.com';
-      techRole = `${created.assigneeName} (Network & Infrastructure Specialist)`;
-    }
-  }
+  const isAssigned = !!(created.assigneeName && created.assigneeName !== 'Routing Queue');
+  const targetEmail = created.assigneeEmail || (isAssigned ? 'tech.network@nimbusfinserve.com' : 'admin@nimbusfinserve.com');
+  const targetRole = isAssigned ? `${created.assigneeName} (Assigned Specialist)` : 'Alexander Vance (Chief IT Administrator)';
 
-  container.innerHTML = `
-    <div class="card" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
-      <div class="flex items-start gap-3">
-        <div style="font-size: 1.5rem; line-height: 1;">🎫</div>
-        <div class="w-full">
-          <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.35rem;">
-            <h4 class="font-bold text-white text-sm">
-              Support Ticket Logged: <span class="font-mono text-cyan">${escapeHtml(created.id)}</span>
-            </h4>
-            <span class="badge badge-status-assigned">ROUTED &amp; ASSIGNED</span>
-          </div>
-          <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">
-            Automated intelligence classified and assigned this incident to domain specialist: 
-            <strong class="text-white">${escapeHtml(created.assigneeName || 'Routing Queue')}</strong>
-          </p>
-          <div style="background: rgba(15, 23, 42, 0.85); border-radius: 6px; padding: 0.85rem; border-left: 3px solid #10b981;">
-            <div class="flex items-center gap-1.5" style="margin-bottom: 0.25rem;">
-              <span class="font-semibold text-xs" style="color: #34d399;">🎬 Live Evaluation Walkthrough Step:</span>
+  if (isAssigned) {
+    container.innerHTML = `
+      <div class="card" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
+        <div class="flex items-start gap-3">
+          <div style="font-size: 1.5rem; line-height: 1;">🎫</div>
+          <div class="w-full">
+            <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.35rem;">
+              <h4 class="font-bold text-white text-sm">
+                Support Ticket Logged: <span class="font-mono text-cyan">${escapeHtml(created.id)}</span>
+              </h4>
+              <span class="badge badge-status-assigned">ROUTED &amp; ASSIGNED</span>
             </div>
-            <p class="text-xs text-dim" style="line-height: 1.4;">
-              This ticket is now assigned to domain expert <strong>${escapeHtml(techRole)}</strong>.
-              To investigate, acknowledge, add technical notes, and resolve this ticket from the technician console, click 
-              <strong class="text-white">Exit / Sign Out</strong> in the top-right and sign in as:
+            <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">
+              Automated intelligence classified and assigned this incident to domain specialist: 
+              <strong class="text-white">${escapeHtml(created.assigneeName)}</strong>
             </p>
-            <div class="flex items-center gap-2 flex-wrap" style="margin-top: 0.5rem;">
-              <code class="text-cyan font-mono text-xs" style="background: rgba(0,0,0,0.4); padding: 0.25rem 0.5rem; border-radius: 4px;">${escapeHtml(techEmail)}</code>
-              <button type="button" class="btn btn-xs btn-primary btn-demo-quick-switch" data-email="${escapeHtml(techEmail)}">
-                Sign Out &amp; Login as Specialist &rarr;
-              </button>
+            <div style="background: rgba(15, 23, 42, 0.85); border-radius: 6px; padding: 0.85rem; border-left: 3px solid #10b981;">
+              <div class="flex items-center gap-1.5" style="margin-bottom: 0.25rem;">
+                <span class="font-semibold text-xs" style="color: #34d399;">🎬 Live Evaluation Walkthrough Step:</span>
+              </div>
+              <p class="text-xs text-dim" style="line-height: 1.4;">
+                This ticket is now assigned to domain specialist <strong>${escapeHtml(created.assigneeName)}</strong>.
+                To investigate, acknowledge, add technical notes, and resolve this ticket from the technician console, sign in as:
+              </p>
+              <div class="flex items-center gap-2 flex-wrap" style="margin-top: 0.5rem;">
+                <code class="text-cyan font-mono text-xs" style="background: rgba(0,0,0,0.4); padding: 0.25rem 0.5rem; border-radius: 4px;">${escapeHtml(targetEmail)}</code>
+                <button type="button" class="btn btn-xs btn-primary btn-demo-quick-switch" data-email="${escapeHtml(targetEmail)}">
+                  Sign Out &amp; Login as Specialist &rarr;
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  `;
+    `;
+  } else {
+    // Ticket requires administrator triage / classification review
+    container.innerHTML = `
+      <div class="card" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.35); padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeIn 0.3s ease;">
+        <div class="flex items-start gap-3">
+          <div style="font-size: 1.5rem; line-height: 1;">📋</div>
+          <div class="w-full">
+            <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.35rem;">
+              <h4 class="font-bold text-white text-sm">
+                Support Ticket Logged: <span class="font-mono text-amber">${escapeHtml(created.id)}</span>
+              </h4>
+              <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">AWAITING ADMIN TRIAGE</span>
+            </div>
+            <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">
+              NLP classification confidence was below auto-assignment threshold. This ticket has been placed into the <strong>Unified Triage Queue</strong>.
+            </p>
+            <div style="background: rgba(15, 23, 42, 0.85); border-radius: 6px; padding: 0.85rem; border-left: 3px solid #f59e0b;">
+              <div class="flex items-center gap-1.5" style="margin-bottom: 0.25rem;">
+                <span class="font-semibold text-xs" style="color: #fbbf24;">🎬 Evaluation Walkthrough Step (Human-in-the-Loop Triage):</span>
+              </div>
+              <p class="text-xs text-dim" style="line-height: 1.4;">
+                To inspect, accept AI suggestions, or assign this ticket to a domain specialist, sign in as Chief Administrator:
+              </p>
+              <div class="flex items-center gap-2 flex-wrap" style="margin-top: 0.5rem;">
+                <code class="text-amber font-mono text-xs" style="background: rgba(0,0,0,0.4); padding: 0.25rem 0.5rem; border-radius: 4px;">admin@nimbusfinserve.com</code>
+                <button type="button" class="btn btn-xs btn-primary btn-demo-quick-switch" data-email="admin@nimbusfinserve.com">
+                  Sign Out &amp; Login as Administrator &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   const switchBtn = container.querySelector('.btn-demo-quick-switch');
   if (switchBtn) {
@@ -663,24 +687,28 @@ async function loadTechnicianQueue() {
   container.innerHTML = '<div class="text-center text-muted" style="padding: 2rem;">Loading technician queue...</div>';
 
   try {
-    const queue = await apiCall('/api/technician/queue');
+    const endpoint = (STATE.techQueueMode === 'team') ? '/api/technician/team-queue' : '/api/technician/queue';
+    const queue = await apiCall(endpoint);
     const filter = document.getElementById('tech-queue-filter').value;
     const filtered = (filter === 'ALL') ? queue : queue.filter(q => q.status === filter);
-    renderTechnicianQueue(filtered || []);
+    renderTechnicianQueue(filtered || [], STATE.techQueueMode === 'team');
   } catch (err) {
     container.innerHTML = `<div class="text-center text-red" style="padding: 2rem;">Error: ${escapeHtml(err.message)}</div>`;
   }
 }
 
-function renderTechnicianQueue(queue) {
+function renderTechnicianQueue(queue, isTeamMode = false) {
   const container = document.getElementById('tech-queue-container');
   if (!container) return;
 
   if (queue.length === 0) {
+    const emptyMsg = isTeamMode
+      ? 'No active incidents currently in your support team queue.'
+      : 'No active incidents currently assigned to your queue.';
     container.innerHTML = `
       <div class="text-center text-muted" style="padding: 3rem 1rem;">
         <p class="font-semibold text-white">Work queue is empty</p>
-        <p class="text-xs text-muted" style="margin-top: 0.25rem;">No active incidents currently assigned to your queue.</p>
+        <p class="text-xs text-muted" style="margin-top: 0.25rem;">${emptyMsg}</p>
       </div>`;
     return;
   }
@@ -700,6 +728,8 @@ function renderTechnicianQueue(queue) {
       slaText = 'Warning > 75%';
     }
 
+    const isAssignedToMe = (t.assigneeId === (STATE.currentUser && STATE.currentUser.id));
+
     return `
       <div class="card" style="padding: 1rem; background: rgba(15, 23, 42, 0.7);">
         <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.5rem;">
@@ -708,6 +738,7 @@ function renderTechnicianQueue(queue) {
             <span class="badge ${pBadge}">${escapeHtml(t.priority || 'P3')}</span>
             <span class="badge ${sBadge}">${escapeHtml(t.status)}</span>
             <span class="badge" style="background: var(--bg-card); color: #cbd5e1;">${escapeHtml(t.category || 'GENERAL')}</span>
+            ${isTeamMode ? `<span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc;">Assignee: ${escapeHtml(t.assigneeName || (t.assigneeId ? t.assigneeId : 'Unassigned / Triage'))}</span>` : ''}
           </div>
           <div class="flex items-center gap-2">
             <span class="sla-timer-pill ${slaClass}">SLA: ${slaText}</span>
@@ -725,14 +756,18 @@ function renderTechnicianQueue(queue) {
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-1.5 flex-wrap" style="padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);">
-          ${t.status === 'ASSIGNED' ? `
+          ${isAssignedToMe && t.status === 'ASSIGNED' ? `
             <button type="button" class="btn btn-xs btn-primary btn-tech-ack" data-id="${t.id}">Acknowledge</button>` : ''}
-          ${t.status === 'ASSIGNED' || t.status === 'IN_PROGRESS' ? `
+          ${isAssignedToMe && (t.status === 'ASSIGNED' || t.status === 'IN_PROGRESS') ? `
             <button type="button" class="btn btn-xs btn-secondary btn-tech-investigate" data-id="${t.id}">Start Investigation</button>` : ''}
-          <button type="button" class="btn btn-xs btn-secondary btn-tech-note" data-id="${t.id}">Add Note</button>
-          <button type="button" class="btn btn-xs btn-warning btn-tech-reqinfo" data-id="${t.id}">Request Info (Pause SLA)</button>
-          <button type="button" class="btn btn-xs btn-danger btn-tech-wrongdomain" data-id="${t.id}">Flag Out-of-Scope</button>
-          <button type="button" class="btn btn-xs btn-success btn-tech-resolve" data-id="${t.id}">Resolve</button>
+          ${isAssignedToMe ? `
+            <button type="button" class="btn btn-xs btn-secondary btn-tech-note" data-id="${t.id}">Add Note</button>
+            <button type="button" class="btn btn-xs btn-warning btn-tech-reqinfo" data-id="${t.id}">Request Info (Pause SLA)</button>
+            <button type="button" class="btn btn-xs btn-danger btn-tech-wrongdomain" data-id="${t.id}">Flag Out-of-Scope</button>
+            <button type="button" class="btn btn-xs btn-success btn-tech-resolve" data-id="${t.id}">Resolve</button>
+          ` : `
+            <span class="text-xs text-dim italic">Assigned to team member (${escapeHtml(t.assigneeName || 'Queued')})</span>
+          `}
         </div>
       </div>
     `;
@@ -1764,6 +1799,23 @@ function setupEventListeners() {
     loadTechnicianQueue();
     loadTechnicianDashboard();
   });
+
+  const btnTechMy = document.getElementById('btn-tech-mode-my');
+  const btnTechTeam = document.getElementById('btn-tech-mode-team');
+  if (btnTechMy && btnTechTeam) {
+    btnTechMy.addEventListener('click', () => {
+      STATE.techQueueMode = 'my';
+      btnTechMy.className = 'btn btn-xs btn-primary';
+      btnTechTeam.className = 'btn btn-xs btn-secondary';
+      loadTechnicianQueue();
+    });
+    btnTechTeam.addEventListener('click', () => {
+      STATE.techQueueMode = 'team';
+      btnTechTeam.className = 'btn btn-xs btn-primary';
+      btnTechMy.className = 'btn btn-xs btn-secondary';
+      loadTechnicianQueue();
+    });
+  }
 
   const refTeam = document.getElementById('btn-refresh-teamlead');
   if (refTeam) refTeam.addEventListener('click', loadTeamLeadView);
